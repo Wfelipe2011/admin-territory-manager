@@ -1,4 +1,6 @@
-import { LineChart } from "@/components/ui/LineChart";
+import { LineChart } from "@/components/LineChart";
+import { MetricChart } from "@/components/MetricChart";
+import { Building2, Home as HomeIcon, Map, Store } from "lucide-react"
 
 const data = [
   { date: "2024-01-01", residential: 10, commercial: 15 },
@@ -30,6 +32,28 @@ export default function Home() {
           label: "Casas marcadas"
         }}
       />
+      <div className="w-full flex gap-4 mt-4">
+        <MetricChart
+          title="Total de Casas"
+          value={20000}
+          Icon={<HomeIcon className="h-5 w-5 text-muted-foreground" />}
+        />
+        <MetricChart
+          title="Território Residencial"
+          value={23}
+          Icon={<Map className="h-5 w-5 text-muted-foreground" />}
+        />
+        <MetricChart
+          title="Território Comercial"
+          value={15}
+          Icon={<Store className="h-5 w-5 text-muted-foreground" />}
+        />
+        <MetricChart
+          title="Território Predial"
+          value={5}
+          Icon={<Building2 className="h-5 w-5 text-muted-foreground" />}
+        />
+      </div>
     </div>
   );
 }
