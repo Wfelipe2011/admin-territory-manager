@@ -1,56 +1,67 @@
 import { LineChart } from "@/components/LineChart";
 import { MetricChart } from "@/components/MetricChart";
-import { Building2, Home as HomeIcon, Map, Store } from "lucide-react"
-
-const data = [
-  { date: "2024-01-01", residential: 10, commercial: 15 },
-  { date: "2024-02-01", residential: 20, commercial: 10 },
-  { date: "2024-03-01", residential: 30, commercial: 5 },
-  { date: "2024-04-01", residential: 10, commercial: 15 },
-  { date: "2024-05-01", residential: 20, commercial: 10 },
-  { date: "2024-06-01", residential: 30, commercial: 15 },
-  { date: "2024-07-01", residential: 10, commercial: 15 },
-  { date: "2024-08-01", residential: 20, commercial: 5 },
-  { date: "2024-09-01", residential: 30, commercial: 15 },
-  { date: "2024-10-01", residential: 10, commercial: 5 },
-  { date: "2024-11-01", residential: 20, commercial: 10 },
-  { date: "2024-12-01", residential: 30, commercial: 5 },
-]
+import { Building2, Home as HomeIcon, Map, Store } from "lucide-react";
+import axios from 'axios';
 
 const config = {
   residential: { label: "Residencial", color: "#7AAD58" },
   commercial: { label: "Comercial", color: "#5B98AB" },
+};
+
+async function fetchData() {
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImEyMTI3MDhhLTU0MDUtNGI2Mi1hYmMwLTU5MTdkZTYwM2QxYiIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJXaWxzb24gRmVsaXBlIiwicm9sZXMiOlsiYWRtaW4iXSwidGVuYW50SWQiOjIsImlhdCI6MTczMTA5NTM1NiwiZXhwIjoxNzMxMTgxNzU2fQ.4xPzPWZ6pMgM6yFdvgo5tB92XA8oU_FCH6I0YIvu0c0';
+
+  const [territoryDetailsResponse, markedHousesResponse] = await Promise.all([
+    axios.get('https://api-hmg.territory-manager.com.br/V1/dashboard/territory-details', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }),
+    axios.get('https://api-hmg.territory-manager.com.br/V1/dashboard/marked-houses', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }),
+  ]);
+
+  return {
+    territoryDetails: territoryDetailsResponse.data,
+    markedHouses: markedHousesResponse.data,
+  };
 }
-export default function Home() {
+
+export default async function Home() {
+  const { territoryDetails, markedHouses } = await fetchData();
+  console.log(territoryDetails);
   return (
     <div className="mt-10">
       <LineChart
-        data={data}
+        data={markedHouses}
         config={config}
         yAxisConfig={{
           dataKey: "residential",
-          label: "Casas marcadas"
+          label: "Casas marcadas",
         }}
       />
       <div className="w-full flex gap-4 mt-4">
         <MetricChart
           title="Total de Casas"
-          value={20000}
+          value={territoryDetails.total}
           Icon={<HomeIcon className="h-5 w-5 text-muted-foreground" />}
         />
         <MetricChart
           title="Território Residencial"
-          value={23}
+          value={territoryDetails.residential}
           Icon={<Map className="h-5 w-5 text-muted-foreground" />}
         />
         <MetricChart
           title="Território Comercial"
-          value={15}
+          value={territoryDetails.commercial}
           Icon={<Store className="h-5 w-5 text-muted-foreground" />}
         />
         <MetricChart
           title="Território Predial"
-          value={5}
+          value={territoryDetails.building}
           Icon={<Building2 className="h-5 w-5 text-muted-foreground" />}
         />
       </div>
