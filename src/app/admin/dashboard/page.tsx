@@ -2,6 +2,7 @@ import { LineChart } from "@/components/LineChart";
 import { MetricChart } from "@/components/MetricChart";
 import { Building2, Home as HomeIcon, Map, Store } from "lucide-react";
 import axios from 'axios';
+import { Metadata } from "next";
 
 const config = {
   residential: { label: "Residencial", color: "#7AAD58" },
@@ -30,7 +31,12 @@ async function fetchData() {
   };
 }
 
-const Dashboard = async () => {
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Dashboard principal com informações do território",
+};
+
+const DashboardPage = async () => {
   const { territoryDetails, markedHouses } = await fetchData();
   return (
     <div className="mt-10">
@@ -68,4 +74,4 @@ const Dashboard = async () => {
   );
 };
 
-export default Dashboard;
+export default DashboardPage;
