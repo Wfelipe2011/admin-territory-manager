@@ -2,7 +2,7 @@ import { TerritoryChart } from "@/components/TerritoryChart";
 
 const GestaoPage = () => {
   return (
-    <div>
+    <div className="flex flex-wrap justify-center gap-4 m-4 p-4 border">
       <TerritoryChart
         data={[
           { name: "Concluído", value: 60 },

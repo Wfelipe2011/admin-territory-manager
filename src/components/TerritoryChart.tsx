@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/tooltip"
 import { useState } from "react"
 
-// Define o tipo das props
 interface TerritoryChartProps {
   data: { name: string; value: number }[]
   colors: string[]
@@ -32,11 +31,11 @@ export function TerritoryChart({
 
   return (
     <Card className="w-full max-w-sm">
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
+      <CardHeader className="flex flex-row items-center justify-between p-4">
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
-        <Eye className="h-6 w-6 text-muted-foreground" />
+        <Eye className="h-6 w-6 text-muted-foreground" style={{ fill: colors[0] || "#ccc", color: 'white' }} />
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <TooltipProvider>
             <Tooltip open={activeIndex !== null}>
@@ -103,7 +102,9 @@ export function TerritoryChart({
               </div>
             ))}
           </div>
-          <Trash2 className="h-6 w-6 text-muted-foreground" />
+          <Trash2 className="h-6 w-6 text-muted-foreground"
+            style={{ fill: colors[0] || "#ccc", color: 'white' }}
+          />
         </div>
       </CardContent>
     </Card>
