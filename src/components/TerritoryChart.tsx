@@ -14,14 +14,16 @@ import { useState } from "react"
 interface TerritoryChartProps {
   data: { name: string; value: number }[]
   colors: string[]
-  date: string
-  title?: string
+  start_date: string;
+  end_date: string | null;
+  title: string
 }
 
 export function TerritoryChart({
   data,
   colors,
-  date,
+  start_date,
+  end_date,
   title = "Cartas",
 }: TerritoryChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -80,11 +82,12 @@ export function TerritoryChart({
           <div className="flex flex-col w-1/2 text-md text-muted-foreground py-2 px-4">
             <div className="flex flex-col w-full mb-2">
               <span className="font-medium text-lg">Inicio</span>
-              <span className="font-medium text-lg border px-3 py-1 rounded-md" style={{ backgroundColor: colors[1] || "#ccc" }}>{date}</span>
+              <span className="font-medium text-lg border px-3 py-1 rounded-md text-center" style={{ backgroundColor: colors[1] || "#ccc" }}>{start_date}</span>
             </div>
             <div className="flex flex-col w-full mb-2">
               <span className="font-medium text-lg">Fim</span>
-              <span className="font-medium text-lg border px-3 py-1 rounded-md" style={{ backgroundColor: colors[1] || "#ccc" }}>{date}</span>
+              {end_date === null ? <span className="font-medium text-lg border px-3 py-1 rounded-md text-center" style={{ backgroundColor: colors[1] || "#ccc" }}>  /  /  </span> :
+                <span className="font-medium text-lg border px-3 py-1 rounded-md text-center" style={{ backgroundColor: colors[1] || "#ccc" }}>{end_date}</span>}
             </div>
           </div>
         </div>

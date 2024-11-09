@@ -1,27 +1,56 @@
 import { TerritoryChart } from "@/components/TerritoryChart";
+import axios from "axios";
 
-const GestaoPage = () => {
+async function fetchData() {
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjBmMDczYWM2LTM0ZTItNDRkZS04ZDA3LWEwN2I3MThjZmUyZCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJXaWxzb24gRmVsaXBlIiwicm9sZXMiOlsiYWRtaW4iXSwidGVuYW50SWQiOjIsImlhdCI6MTczMTE4MzM2NiwiZXhwIjoxNzMxMjY5NzY2fQ.1w0ZignKnT9mnJDDKV_jY-GD_DlBZwoIH-cRZeUUGN4';
+  const response = await axios.get('https://api-hmg.territory-manager.com.br/V1/rounds/info', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  return response.data as Round[];
+}
+
+type Round = {
+  id: number;
+  round_number: number;
+  name: string;
+  theme: string;
+  tenant_id: number;
+  color_primary: string;
+  color_secondary: string;
+  start_date: string;
+  end_date: string | null;
+  completed: number;
+  not_completed: number;
+}
+
+const GestaoPage = async () => {
+  const data = await fetchData();
   return (
     <div className="flex flex-wrap justify-center gap-4 m-4 p-4 border">
-      <TerritoryChart
-        data={[
-          { name: "Concluído", value: 60 },
-          { name: "A fazer", value: 40 },
-        ]}
-        colors={["#E29D4F", "#F7E9D9"]}
-        date="15/08/2024"
-        title="Cartas"
-      />
-      <br />
-      <TerritoryChart
-        data={[
-          { name: "Concluído", value: 60 },
-          { name: "A fazer", value: 40 },
-        ]}
-        colors={["#E29D4F", "#F7E9D9"]}
-        date="15/08/2024"
-        title="Residencial"
-      />
+      {data.map((round) => (
+        <TerritoryChart
+          key={round.id}
+          data={[
+            { name: "Concluído", value: round.completed },
+            { name: "A fazer", value: round.not_completed },
+          ]}
+          colors={[round.color_primary, round.color_secondary]}
+          start_date={new Date(round.start_date).toLocaleDateString("pt-BR", {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })}
+          end_date={round.end_date === null ? null : new Date(round.end_date).toLocaleDateString("pt-BR", {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })}
+          title={round.name}
+        />
+      ))
+      }
     </div>
   );
 }
