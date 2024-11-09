@@ -6,6 +6,7 @@ export default async function Home() {
     <div className="mt-10">
       {/* link para /dashboard */}
       <Link href="/admin/dashboard">Dashboard</Link>
+      <Link href="/admin/gestao">Gestao</Link>
     </div>
   );
 }
