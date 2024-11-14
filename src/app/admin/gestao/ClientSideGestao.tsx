@@ -66,16 +66,15 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
     };
 
     return (
-
         <div className="border px-6">
             <SearchInterface
                 searchValue={searchValue} // Valor do input
                 onSearchChange={handleSearchChange} // Evento de mudança
                 onButtonClick={handleButtonClick} // Evento de clique
-                buttonLabel="Adicionar Novo" // Rótulo personalizado do botão
+                buttonLabel="Criar Novo" // Rótulo personalizado do botão
             />
 
-            <div className="flex flex-wrap justify-between gap-4 pt-8">
+            <div className="flex flex-wrap justify-center gap-4 pt-8">
                 {filteredRounds.map((round) => (
                     <TerritoryChart
                         key={round.id}
