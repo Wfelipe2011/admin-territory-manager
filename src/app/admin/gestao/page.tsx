@@ -1,5 +1,5 @@
-import { TerritoryChart } from "@/components/TerritoryChart";
 import axios from "axios";
+import ClientSideGestao from "./ClientSideGestao";
 
 async function fetchData() {
   const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlkY2IzYzk4LWMwZWQtNDExOS05YzllLWY5ZTgzODJkZDNlYiIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJXaWxzb24gRmVsaXBlIiwicm9sZXMiOlsiYWRtaW4iXSwidGVuYW50SWQiOjIsImlhdCI6MTczMTU4NTM4OCwiZXhwIjoxNzMxNjcxNzg4fQ.mRyRouq-GmFJT-4uvWmX6QBEp1Y02ny44ZNGYYU1sfc';
@@ -27,32 +27,8 @@ type Round = {
 
 const GestaoPage = async () => {
   const data = await fetchData();
-  return (
-    <div className="flex flex-wrap justify-center gap-4 pt-8">
-      {data.map((round) => (
-        <TerritoryChart
-          key={round.id}
-          data={[
-            { name: "Concluído", value: round.completed },
-            { name: "A fazer", value: round.not_completed },
-          ]}
-          colors={[round.color_primary, round.color_secondary]}
-          start_date={new Date(round.start_date).toLocaleDateString("pt-BR", {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })}
-          end_date={round.end_date === null ? null : new Date(round.end_date).toLocaleDateString("pt-BR", {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })}
-          title={round.name}
-        />
-      ))
-      }
-    </div>
-  );
+
+  return <ClientSideGestao rounds={data} />;
 }
 
 export default GestaoPage;
