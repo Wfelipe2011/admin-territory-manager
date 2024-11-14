@@ -71,7 +71,7 @@ export function TerritoryChart({
                 </div>
               </TooltipTrigger>
               {activeIndex !== null && (
-                <TooltipContent>
+                <TooltipContent style={{ backgroundColor: colors[0] || "#000" }}>
                   <p className="font-medium">
                     {data[activeIndex].name}: {data[activeIndex].value}
                   </p>
