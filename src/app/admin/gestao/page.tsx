@@ -28,7 +28,7 @@ type Round = {
 const GestaoPage = async () => {
   const data = await fetchData();
   return (
-    <div className="flex flex-wrap justify-center gap-4 m-4 p-4 border">
+    <div className="flex flex-wrap gap-6 p-8">
       {data.map((round) => (
         <TerritoryChart
           key={round.id}

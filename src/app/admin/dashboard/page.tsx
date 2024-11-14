@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 const DashboardPage = async () => {
   const { territoryDetails, markedHouses } = await fetchData();
   return (
-    <div className="mt-10">
+    <div className="p-8">
       <LineChart
         data={markedHouses}
         config={config}
