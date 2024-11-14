@@ -32,25 +32,25 @@ export function TerritoryChart({
   const onPieLeave = () => setActiveIndex(null)
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="flex flex-row items-center justify-between p-4">
+    <Card className="w-full max-w-sm px-2">
+      <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
         <Eye className="h-6 w-6 text-muted-foreground" style={{ fill: colors[0] || "#ccc", color: 'white' }} />
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-2">
         <div className="flex items-center justify-between">
           <TooltipProvider>
             <Tooltip open={activeIndex !== null}>
               <TooltipTrigger asChild>
-                <div className="h-40 w-1/2">
+                <div className="h-36 w-1/2">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={data}
                         cx="50%"
                         cy="50%"
-                        innerRadius={40}
-                        outerRadius={80}
+                        innerRadius={35}
+                        outerRadius={70}
                         paddingAngle={2}
                         startAngle={90}
                         endAngle={-270}
