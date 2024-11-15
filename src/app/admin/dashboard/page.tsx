@@ -10,7 +10,7 @@ const config = {
 };
 
 async function fetchData() {
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlkY2IzYzk4LWMwZWQtNDExOS05YzllLWY5ZTgzODJkZDNlYiIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJXaWxzb24gRmVsaXBlIiwicm9sZXMiOlsiYWRtaW4iXSwidGVuYW50SWQiOjIsImlhdCI6MTczMTU4NTM4OCwiZXhwIjoxNzMxNjcxNzg4fQ.mRyRouq-GmFJT-4uvWmX6QBEp1Y02ny44ZNGYYU1sfc';
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ1MDNiOGY0LTBlOTYtNDU5MC04OTdmLWFlZWMyY2I1ZTc4NyIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJXaWxzb24gRmVsaXBlIiwicm9sZXMiOlsiYWRtaW4iXSwidGVuYW50SWQiOjIsImlhdCI6MTczMTY3ODE2MCwiZXhwIjoxNzMxNzY0NTYwfQ.r2HXIh3NyZ7XTEQjv4bko2fJUfXM-YYVruLG96pfHjE';
  
   const [territoryDetailsResponse, markedHousesResponse] = await Promise.all([
     axios.get('https://api-hmg.territory-manager.com.br/V1/dashboard/territory-details', {
