@@ -48,7 +48,7 @@ const DashboardPage = async () => {
           label: "Casas marcadas",
         }}
       />
-      <div className="w-full flex gap-4 mt-4">
+      <div className="w-full flex flex-wrap gap-4 mt-4 md:flex-nowrap">
         <MetricChart
           title="Total de Casas"
           value={territoryDetails.total}
