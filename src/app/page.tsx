@@ -64,7 +64,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="desafios" aria-labelledby="desafios-heading" className="py-16">
+        <section id="desafios" aria-labelledby="desafios-heading" className="py-16 bg-gray-50">
 
           <div className="max-w-7xl mx-auto px-4">
             <h2 id="solucoes-heading" className="text-3xl font-bold text-center mb-12">Desafios</h2>
