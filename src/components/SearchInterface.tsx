@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search } from 'lucide-react'
 
-import { ChangeEventHandler } from 'react';
+import { ChangeEventHandler, useState } from 'react';
 import { RoundMenu } from "./RoundMenu";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 export function SearchInterface({
   onSearchChange,
@@ -23,6 +23,7 @@ export function SearchInterface({
   searchValue: string,
   buttonLabel?: string
 }) {
+  const [open, onOpenChange] = useState(false)
   return (
     <div className="w-full flex items-center justify-between gap-4 pt-6 ">
       <div className="relative">
@@ -35,7 +36,10 @@ export function SearchInterface({
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       </div>
-      <Dialog>
+      <Dialog
+        open={open}
+        onOpenChange={onOpenChange}
+      >
         <DialogTrigger asChild>
           <Button
             className="bg-[#6BA84F] hover:bg-[#6BA84F]/90 text-white"
@@ -45,7 +49,9 @@ export function SearchInterface({
         </DialogTrigger>
         <DialogContent>
           <RoundMenu
-            onButtonClick={onButtonClick}
+            onButtonClick={(e) => {
+              onButtonClick(e), onOpenChange(false)
+            }}
           ></RoundMenu>
         </DialogContent>
       </Dialog>

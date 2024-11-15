@@ -23,7 +23,6 @@ export function RoundMenu({
   return (
     <>
       <h2 className="text-2xl font-medium text-center">Iniciar nova rodada</h2>
-
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nome da rodada</Label>
