@@ -66,14 +66,14 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
     };
 
     return (
-        <div className="border px-6">
+        <div className="md:px-6">
             <SearchInterface
                 searchValue={searchValue}
                 onSearchChange={handleSearchChange}
                 onButtonClick={handleButtonClick}
             />
 
-            <div className="flex flex-wrap justify-center gap-4 pt-8">
+            <div className="flex flex-wrap justify-center gap-4 py-8">
                 {filteredRounds.map((round) => (
                     <TerritoryChart
                         key={round.id}

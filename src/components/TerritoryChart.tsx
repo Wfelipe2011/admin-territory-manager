@@ -32,7 +32,7 @@ export function TerritoryChart({
   const onPieLeave = () => setActiveIndex(null)
 
   return (
-    <Card className="w-full max-w-sm px-2">
+    <Card className="w-full max-w-sm px-0 md:px-2">
       <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
         <Eye className="h-6 w-6 text-muted-foreground" style={{ fill: colors[0] || "#ccc", color: 'white' }} />

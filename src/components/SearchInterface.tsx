@@ -50,7 +50,8 @@ export function SearchInterface({
         <DialogContent>
           <RoundMenu
             onButtonClick={(e) => {
-              onButtonClick(e), onOpenChange(false)
+              onButtonClick(e);
+              onOpenChange(false);
             }}
           ></RoundMenu>
         </DialogContent>
