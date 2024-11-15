@@ -79,7 +79,7 @@ export function TerritoryChart({
               )}
             </Tooltip>
           </TooltipProvider>
-          <div className="flex flex-col w-1/2 text-md text-muted-foreground py-2 px-4">
+          <div className="flex flex-col w-1/2 text-md text-muted-foreground py-2 px-2 md:px-4">
             <div className="flex flex-col w-full mb-2">
               <span className="font-medium text-lg">Inicio</span>
               <span className="font-medium text-lg border px-3 py-1 rounded-md text-center" style={{ backgroundColor: colors[1] || "#ccc" }}>{start_date}</span>
