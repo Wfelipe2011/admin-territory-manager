@@ -60,18 +60,17 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
         handleCompositeSearch(searchValue, round)
     );
 
-    // Handler para o clique do botão
-    const handleButtonClick = () => {
-        console.log("Botão 'Criar Novo' clicado!");
+
+    const handleButtonClick = (event: { name: string, type: string }) => {
+        console.log("Botão 'Criar Novo' clicado!", event);
     };
 
     return (
         <div className="border px-6">
             <SearchInterface
-                searchValue={searchValue} // Valor do input
-                onSearchChange={handleSearchChange} // Evento de mudança
-                onButtonClick={handleButtonClick} // Evento de clique
-                buttonLabel="Criar Novo" // Rótulo personalizado do botão
+                searchValue={searchValue}
+                onSearchChange={handleSearchChange}
+                onButtonClick={handleButtonClick}
             />
 
             <div className="flex flex-wrap justify-center gap-4 pt-8">
