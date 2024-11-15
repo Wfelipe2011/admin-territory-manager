@@ -2,7 +2,7 @@ import ClientSideGestao from "./ClientSideGestao";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { cookies } from "next/headers";
 
-async function fetchData(req: any) {
+async function fetchData() {
   const cookieStore = cookies();
   const token = (await cookieStore).get('token')?.value;
 
@@ -29,8 +29,8 @@ type Round = {
   not_completed: number;
 }
 
-const GestaoPage = async ({ req }: { req: Request }) => {
-  const data = await fetchData(req);
+const GestaoPage = async () => {
+  const data = await fetchData();
 
   return <ClientSideGestao rounds={data} />;
 }

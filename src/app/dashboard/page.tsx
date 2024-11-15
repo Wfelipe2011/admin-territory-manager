@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LineChart } from "@/components/LineChart";
 import { MetricChart } from "@/components/MetricChart";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
