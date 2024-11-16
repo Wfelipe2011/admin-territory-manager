@@ -4,6 +4,7 @@ import { SearchInterface } from "@/components/SearchInterface";
 import { RoundChart } from "@/components/RoundChart";
 import { useState } from "react";
 import dayjs from 'dayjs';
+import { useRouter } from "next/navigation";
 
 type Round = {
     id: number;
@@ -25,6 +26,7 @@ type ClientSideGestaoProps = {
 
 const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
     const [searchValue, setSearchValue] = useState('');
+    const router = useRouter();
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchValue(event.target.value);
@@ -94,7 +96,9 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
                         })}
                         title={round.name}
                         id={round.id}
-                        onEditClick={(e) => console.log("Botão 'Editar' clicado!", e)}
+                        onEditClick={(e) => 
+                            router.push(`/territories/${round.round_number}`)
+                        }
                         onTrashClick={(e) => console.log("Botão 'Excluir' clicado!", e)}
                     />
                 ))}
