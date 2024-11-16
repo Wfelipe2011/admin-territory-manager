@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from 'axios';
-import { parseCookies } from 'nookies';
+import axios from "axios";
+import { parseCookies } from "nookies";
 
 // export const URL_API = 'http://localhost:3001/v1';
 export const URL_API = `https://api-hmg.territory-manager.com.br/v1`;
@@ -23,39 +23,39 @@ export class AxiosAdapter {
       const { token: tokenCookie } = parseCookies();
       const tokenBearer = ctxCookie || tokenCookie;
       if (tokenBearer) {
-        config.headers['Authorization'] = `Bearer ${tokenBearer}`;
+        config.headers["Authorization"] = `Bearer ${tokenBearer}`;
       }
       return config;
     });
   }
 
   async get<T>(url: string) {
-    const httpConfig = { method: 'get' };
+    const httpConfig = { method: "get" };
     return await this.axiosConfig<T>(url, httpConfig);
   }
 
-  async post(url: string, data: any) {
-    const httpConfig = { method: 'post', data };
-    return await this.axiosConfig(url, httpConfig);
+  async post<Body = any, Response = any>(url: string, data: Body) {
+    const httpConfig = { method: "post", data };
+    return await this.axiosConfig<Response>(url, httpConfig);
   }
 
   async put(url: string, data: any) {
-    const httpConfig = { method: 'put', data };
+    const httpConfig = { method: "put", data };
     return await this.axiosConfig(url, httpConfig);
   }
 
   async patch(url: string, data?: any): Promise<any> {
-    const httpConfig = { method: 'patch', data };
+    const httpConfig = { method: "patch", data };
     return await this.axiosConfig(url, httpConfig);
   }
 
   async postFile(url: string, data: any) {
-    const httpConfig = { method: 'post', data };
+    const httpConfig = { method: "post", data };
     return await this.axiosConfigFileUpload(url, httpConfig);
   }
 
   async delete(url: string) {
-    const httpConfig = { method: 'delete' };
+    const httpConfig = { method: "delete" };
     return await this.axiosConfig(url, httpConfig);
   }
 
@@ -83,7 +83,7 @@ export class AxiosAdapter {
       const config = {
         ...httpConfig,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       };
       const response = await axios(`${URL_API}/${url}`, config);
