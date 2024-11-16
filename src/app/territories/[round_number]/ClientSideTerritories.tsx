@@ -43,7 +43,7 @@ export const ClientSideTerritories = ({ territories, round, types }: ClientSideT
                 </TabsList>
                 {
                     types.map((type) => (
-                        <TabsContent className="flex flex-wrap gap-4 items-center justify-center" value={type.name}>
+                        <TabsContent key={type.name} className="flex flex-wrap gap-4 items-center justify-center" value={type.name}>
                             {
                                 territoriesFiltered(type.id).map((territory) => (
                                     <TerritoryChart

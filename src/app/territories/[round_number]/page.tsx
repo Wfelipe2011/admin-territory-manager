@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { cookies } from "next/headers";
 import { ClientSideTerritories } from "./ClientSideTerritories";
