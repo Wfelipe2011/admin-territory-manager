@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (response.ok) {
       setCookie(null, "token", data.token, {
         maxAge: 60 * 60 * 24, // 1 dia
-        path: "/login",
+        path: "/",
       });
       setUser({ token: data.token });
       router.push("/dashboard");

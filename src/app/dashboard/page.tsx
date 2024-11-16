@@ -14,7 +14,6 @@ const config = {
 async function fetchData() {
   const cookieStore = cookies();
   const token = (await cookieStore).get('token')?.value;
-
   if (!token) {
     throw new Error('Token is missing');
   }

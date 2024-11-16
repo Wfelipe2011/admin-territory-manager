@@ -13,18 +13,20 @@ export function middleware(req: NextRequest) {
 
   const token = cookies.token;
   const isAuthRoute = req.nextUrl.pathname.startsWith("/login");
+  console.log("Rota autenticada?", isAuthRoute);
   //   const isProtectedRoute = req.nextUrl.pathname.startsWith("/dashboard");
 
   if (isAuthRoute) {
+    console.log("Rota autenticada, continuando navegação");
     return NextResponse.next();
   }
 
   if (!token) {
-    console.log("No token found");
+    console.log("Token não encontrado, redirecionando para login");
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  console.log("Token found, continuing navigation");
+  console.log("Token encontrado, continuando navegação");
 
   return NextResponse.next();
 }

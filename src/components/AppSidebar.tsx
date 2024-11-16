@@ -1,14 +1,18 @@
-import { ChartNoAxesColumn, Map, PencilLine, ScrollText } from "lucide-react"
+"use client"
+import { ChartNoAxesColumn, LogOut, Map, PencilLine, ScrollText } from "lucide-react"
 
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Button } from "./ui/button"
+import { useAuth } from "@/context/AuthContext"
 
 // Menu items.
 const items = [
@@ -35,8 +39,9 @@ const items = [
 ]
 
 export function AppSidebar() {
+    const { logout } = useAuth()
     return (
-        <Sidebar collapsible="icon" className="mt-10">
+        <Sidebar collapsible="icon" className="pt-10">
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupContent>
@@ -56,13 +61,29 @@ export function AppSidebar() {
                                             </a>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
-                            
                                 </>
                             ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                            <Button onClick={logout} variant={"ghost"} className="flex justify-start gap-3">
+                                <LogOut
+                                    style={{
+                                        width: "1.5rem",
+                                        height: "1.5rem"
+                                    }}
+                                    className="text-primary" />
+                                <span className="text-lg">Sair</span>
+                            </Button>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
         </Sidebar>
     )
 }
