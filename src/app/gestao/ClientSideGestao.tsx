@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchInterface } from "@/components/SearchInterface";
-import { TerritoryChart } from "@/components/TerritoryChart";
+import { RoundChart } from "@/components/RoundChart";
 import { useState } from "react";
 import dayjs from 'dayjs';
 
@@ -75,7 +75,7 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
 
             <div className="flex flex-wrap justify-center gap-4 py-8">
                 {filteredRounds.map((round) => (
-                    <TerritoryChart
+                    <RoundChart
                         key={round.id}
                         data={[
                             { name: "Concluído", value: round.completed },
@@ -93,6 +93,9 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
                             year: 'numeric',
                         })}
                         title={round.name}
+                        id={round.id}
+                        onEditClick={(e) => console.log("Botão 'Editar' clicado!", e)}
+                        onTrashClick={(e) => console.log("Botão 'Excluir' clicado!", e)}
                     />
                 ))}
             </div>
