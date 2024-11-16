@@ -29,7 +29,6 @@ export function RoundChart({
   start_date,
   end_date,
   title = "Cartas",
-  id,
   onEditClick,
 }: RoundChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)

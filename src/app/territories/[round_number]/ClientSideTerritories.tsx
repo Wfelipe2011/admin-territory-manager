@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { TerritoryChart } from "@/components/TerritoryChart";
 import { Round, Territories, TerritoryType } from "./page";
