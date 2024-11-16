@@ -20,18 +20,17 @@ export const ClientSideTerritories = ({ territories, round, types }: ClientSideT
     }
 
     const territoriesFiltered = (typeId: number) => {
-        console.log(typeId)
         return territories.filter((t) => t.typeId === typeId)
     }
 
     return (
-        <div className="md:p-6">
+        <div className="p-2 md:p-6">
             <RoundThemeUpdater round={round} />
             <div>
-                <h1 className="text-xl font-bold pb-4" style={{ color: round.color_primary }}>{round.name}</h1>
+                <h1 className="text-xl font-bold py-4" style={{ color: round.color_primary }}>{round.name}</h1>
             </div>
-            <Tabs defaultValue={types[0].name} className="w-full">
-                <TabsList>
+            <Tabs defaultValue={types[0].name}>
+                <TabsList className="flex flex-wrap justify-center gap-2 md:inline-flex h-full">
                     {
                         types.map((type) => (
                             <TabsTrigger key={type.id} value={type.name}>
