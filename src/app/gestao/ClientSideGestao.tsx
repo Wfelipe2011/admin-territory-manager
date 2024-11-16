@@ -96,10 +96,10 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
                         })}
                         title={round.name}
                         id={round.id}
-                        onEditClick={() => 
+                        onEditClick={() =>
                             router.push(`/territories/${round.round_number}`)
                         }
-                        onTrashClick={(e) => console.log("Botão 'Excluir' clicado!", e)}
+                        onTrashClick={() => console.log("Botão 'Excluir' clicado!", round.id)}
                     />
                 ))}
             </div>

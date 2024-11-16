@@ -15,8 +15,8 @@ import { Button } from "./ui/button"
 interface RoundChartProps {
   id: number
   title: string
-  onEditClick: (id: number) => void
-  onTrashClick: (id: number) => void
+  onEditClick: () => void
+  onTrashClick: () => void
   data: { name: string; value: number }[]
   colors: string[]
   start_date: string;
@@ -41,7 +41,7 @@ export function RoundChart({
     <Card className="w-full max-w-sm px-0 md:px-2">
       <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
-        <Button onClick={() => onEditClick(id)} variant='ghost'>
+        <Button onClick={onEditClick} variant='ghost'>
           <Eye className="scale-150 text-muted-foreground" style={{ fill: colors[0] || "#ccc", color: 'white' }} />
         </Button>
       </CardHeader>
@@ -113,7 +113,7 @@ export function RoundChart({
               </div>
             ))}
           </div>
-          <Button onClick={() => onEditClick(id)} variant='ghost'>
+          <Button onClick={onEditClick} variant='ghost'>
             <Trash2 className="scale-150 text-muted-foreground"
               style={{ fill: colors[0] || "#ccc", color: 'white' }}
             />
