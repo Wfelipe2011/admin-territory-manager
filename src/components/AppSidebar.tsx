@@ -1,5 +1,5 @@
 "use client"
-import { ChartNoAxesColumn, LogOut, Map, PencilLine, ScrollText } from "lucide-react"
+import { ChartNoAxesColumn, LogOut, Map } from "lucide-react"
 
 import {
     Sidebar,
@@ -14,27 +14,16 @@ import {
 import { Button } from "./ui/button"
 import { useAuth } from "@/context/AuthContext"
 
-// Menu items.
 const items = [
     {
         title: "Início",
-        url: "dashboard",
+        url: "/dashboard",
         icon: ChartNoAxesColumn,
     },
     {
         title: "Gestão de Territórios",
-        url: "gestao",
+        url: "/gestao",
         icon: Map,
-    },
-    {
-        title: "Cadastros",
-        url: "#",
-        icon: PencilLine,
-    },
-    {
-        title: "Relatórios",
-        url: "#",
-        icon: ScrollText,
     },
 ]
 
