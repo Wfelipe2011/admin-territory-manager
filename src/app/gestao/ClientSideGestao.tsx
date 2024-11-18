@@ -58,9 +58,9 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
         );
     };
 
-    const filteredRounds = rounds.filter((round) =>
-        handleCompositeSearch(searchValue, round)
-    );
+    const filteredRounds = rounds
+        .filter((round) => handleCompositeSearch(searchValue, round))
+        .sort((a, b) => (a.start_date < b.start_date ? 1 : (a.start_date > b.start_date ? -1 : 0)));
 
 
     const handleButtonClick = (event: { name: string, type: string }) => {

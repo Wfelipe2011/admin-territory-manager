@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useState } from "react"
 import { Button } from "./ui/button"
+import { cn } from "@/lib/utils"
 
 interface RoundChartProps {
   id: number
@@ -37,12 +38,18 @@ export function RoundChart({
   const onPieLeave = () => setActiveIndex(null)
 
   return (
-    <Card className="w-full max-w-sm px-0 md:px-2">
+    <Card className={cn("w-full max-w-sm px-0 md:px-2 relative", `${end_date && "bg-gray-100"}`)}>
+
+      {end_date &&
+        <span className={cn("absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-6xl opacity-10 z-10 pointer-events-none")}>Finalizado</span>
+      }
       <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
-        <Button onClick={onEditClick} variant='ghost'>
-          <Eye className="scale-150 text-muted-foreground" style={{ fill: colors[0] || "#ccc", color: 'white' }} />
-        </Button>
+        {end_date === null && (
+          <Button onClick={onEditClick} variant='ghost'>
+            <Eye className="scale-150 text-muted-foreground" style={{ fill: colors[0] || "#ccc", color: 'white' }} />
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="p-2">
         <div className="flex items-center justify-between">
