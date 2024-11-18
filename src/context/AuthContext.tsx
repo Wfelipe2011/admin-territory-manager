@@ -4,6 +4,7 @@ import { createContext, useState, useEffect, useContext, ReactNode } from "react
 import { useRouter } from "next/navigation";
 import { parseCookies, setCookie, destroyCookie } from "nookies";
 import { AuthContextType, User } from "@/types/auth";
+import { URL_API } from "@/infra/AxiosAdapter";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -21,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch("https://api-hmg.territory-manager.com.br/V1/login", {
+    const response = await fetch(`${URL_API}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),

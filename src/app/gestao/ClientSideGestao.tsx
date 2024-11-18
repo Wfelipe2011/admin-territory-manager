@@ -75,7 +75,7 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
                 onButtonClick={handleButtonClick}
             />
 
-            <div className="flex flex-wrap justify-center gap-4 py-8">
+            <div className="flex flex-wrap justify-center gap-6 py-8">
                 {filteredRounds.map((round) => (
                     <RoundChart
                         key={round.id}
