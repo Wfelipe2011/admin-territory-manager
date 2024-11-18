@@ -5,6 +5,7 @@ import { RoundChart } from "@/components/RoundChart";
 import { useState } from "react";
 import dayjs from 'dayjs';
 import { useRouter } from "next/navigation";
+import { DialogTextConfirm } from "@/components/DialogTextConfirm";
 
 type Round = {
     id: number;
@@ -25,6 +26,8 @@ type ClientSideGestaoProps = {
 };
 
 const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
+    const [dialogStatus, setDialogStatus] = useState(false);
+    const [dialogRound, setDialogRound] = useState(0);
     const [searchValue, setSearchValue] = useState('');
     const router = useRouter();
 
@@ -67,6 +70,12 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
         console.log("Botão 'Criar Novo' clicado!", event);
     };
 
+    const handleArchClick = () => {
+        console.log("Botão 'Arquivar' clicado!", dialogRound);
+        setDialogStatus(false);
+        setDialogRound(0);
+    }
+
     return (
         <div className="md:px-6">
             <SearchInterface
@@ -99,10 +108,27 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
                         onEditClick={() =>
                             router.push(`/territories/${round.round_number}`)
                         }
-                        onTrashClick={() => console.log("Botão 'Excluir' clicado!", round.id)}
+                        onArchClick={() => {
+                            console.log("Botão 'Arquivar' clicado!", round.round_number);
+                            setDialogStatus(true);
+                            setDialogRound(round.round_number);
+                        }}
                     />
                 ))}
             </div>
+            <DialogTextConfirm
+                status={dialogStatus}
+                onStatusChange={setDialogStatus}
+                onLeafClick={handleArchClick}
+                onRightClick={() => {
+                    console.log("Botão 'Cancelar' clicado!");
+                    setDialogStatus(false);
+                    setDialogRound(0);
+                }
+                }
+            >
+                <p className="text-lg font-medium">Desenha arquivar este território?</p>
+            </DialogTextConfirm>
         </div>
     );
 };

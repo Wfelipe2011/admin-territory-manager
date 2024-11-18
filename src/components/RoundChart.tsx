@@ -17,7 +17,7 @@ interface RoundChartProps {
   id: number
   title: string
   onEditClick: () => void
-  onTrashClick: () => void
+  onArchClick: () => void
   data: { name: string; value: number }[]
   colors: string[]
   start_date: string;
@@ -31,6 +31,7 @@ export function RoundChart({
   end_date,
   title = "Cartas",
   onEditClick,
+  onArchClick,
 }: RoundChartProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
@@ -46,7 +47,7 @@ export function RoundChart({
         <CardTitle className="text-lg font-medium">{title}</CardTitle>
         <CardTitle className="text-lg font-medium min-h-6">
           {end_date === null && (
-            <Eye onClick={onEditClick} className="scale-100 text-muted-foreground" style={{ fill: colors[0] || "#ccc", color: 'white' }} />
+            <Eye onClick={onEditClick} className="scale-100 text-muted-foreground cursor-pointer" style={{ fill: colors[0] || "#ccc", color: 'white' }} />
           )}
         </CardTitle>
       </CardHeader>
@@ -117,12 +118,11 @@ export function RoundChart({
           ))}
         </div>
         {end_date === null && (
-          <Archive onClick={onEditClick} className="scale-100 text-muted-foreground min-h-6"
+          <Archive onClick={onArchClick} className="scale-100 text-muted-foreground min-h-6 cursor-pointer"
             style={{ fill: colors[0] || "#ccc", color: 'white' }}
           />
         )
         }
-
       </CardFooter>
     </Card >
   )
