@@ -4,7 +4,7 @@ import { Share2, ShieldX, User } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Territories } from "@/app/territories/[round_number]/page";
 import dayjs from "dayjs";
@@ -26,6 +26,14 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
   const onPieLeave = () => setActiveIndex(null);
 
   const isShared = overseer !== null && expirationDate !== null;
+
+  useEffect(() => {
+    setOverseer(territory.overseer || null);
+  }, [territory.overseer])
+
+  useEffect(() => {
+    setExpirationDate(territory.signature?.expirationDate ? dayjs(territory.signature.expirationDate).format("YYYY-MM-DD") : null);
+  }, [territory.signature?.expirationDate])
 
   return (
     <Card className="w-full max-w-sm px-0 md:px-2">

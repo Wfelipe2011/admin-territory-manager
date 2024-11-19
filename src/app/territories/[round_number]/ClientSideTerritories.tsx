@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 import { navigatorShare } from "@/lib/share";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 type ClientSideTerritoriesProps = {
   territories: Territories[];
@@ -20,17 +19,12 @@ type ClientSideTerritoriesProps = {
 const axios = new AxiosAdapter();
 export const ClientSideTerritories = ({ territories, round, types }: ClientSideTerritoriesProps) => {
   const [territoriesState, setTerritoriesState] = useState(territories);
-  const router = useRouter();
 
   const TypesIcon: { [key: string]: JSX.Element } = {
     Residencial: <Home className="w-4 h-4 mr-2" style={{ color: round.color_primary }} />,
     Comercial: <Store className="w-4 h-4 mr-2" style={{ color: round.color_primary }} />,
     "Predial-Interno": <Hotel className="w-4 h-4 mr-2" style={{ color: round.color_primary }} />,
     "Predial-Externo": <Building className="w-4 h-4 mr-2" style={{ color: round.color_primary }} />,
-  };
-
-  const territoriesFiltered = (typeId: number) => {
-    return territoriesState.filter((t) => t.typeId === typeId);
   };
 
   const shareSubmit = async (territoryId: number, overseer: string, expirationDate: string) => {
@@ -75,23 +69,21 @@ export const ClientSideTerritories = ({ territories, round, types }: ClientSideT
       toast.error("Erro ao revogar a designação");
       return;
     }
+
     setTerritoriesState((prev) =>
       prev.map((t) =>
         t.territoryId === territoryId
           ? {
-              ...t,
-              signature: {
-                expirationDate: null,
-                key: null,
-              },
-              overseer: null,
-            }
+            ...t,
+            signature: {
+              expirationDate: "",
+              key: "",
+            },
+            overseer: "",
+          }
           : t
       )
     );
-
-    toast.success("Designação revogada com sucesso");
-    router.refresh();
   };
 
   return (
@@ -111,23 +103,25 @@ export const ClientSideTerritories = ({ territories, round, types }: ClientSideT
             </TabsTrigger>
           ))}
         </TabsList>
-        {types.map((type) => (
-          <TabsContent key={type.name} className="flex flex-wrap gap-4 items-center justify-center" value={type.name}>
-            {territoriesFiltered(type.id).map((territory) => (
-              <TerritoryChart
-                key={`${type.name}-${territory.territoryId}`}
-                data={[
-                  { name: "Concluído", value: territory.positiveCompleted.length },
-                  { name: "A fazer", value: territory.negativeCompleted },
-                ]}
-                colors={[round.color_primary, round.color_secondary]}
-                territory={territory}
-                onShareClick={(overseer, expirationDate) => shareSubmit(territory.territoryId, overseer, expirationDate)}
-                onRevokeClick={() => onRevokeClick(territory.territoryId)}
-              />
-            ))}
-          </TabsContent>
-        ))}
+        {types.map((type) => {
+          return (
+            <TabsContent key={type.name} className="flex flex-wrap gap-4 items-center justify-center" value={type.name}>
+              {territoriesState.filter((t) => t.typeId === type.id).map((territory) => (
+                <TerritoryChart
+                  key={`${type.name}-${territory.territoryId}`}
+                  data={[
+                    { name: "Concluído", value: territory.positiveCompleted.length },
+                    { name: "A fazer", value: territory.negativeCompleted },
+                  ]}
+                  colors={[round.color_primary, round.color_secondary]}
+                  territory={territory}
+                  onShareClick={(overseer, expirationDate) => shareSubmit(territory.territoryId, overseer, expirationDate)}
+                  onRevokeClick={() => onRevokeClick(territory.territoryId)}
+                />
+              ))}
+            </TabsContent>
+          )
+        })}
       </Tabs>
     </div>
   );
