@@ -9,15 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export function RoundMenu({
   onButtonClick
 }: {
-  onButtonClick: ({ name, type }: { name: string; type: string }) => void,
+  onButtonClick: ({ name, theme }: { name: string; theme: string }) => void,
 }) {
   const [name, setName] = useState("")
-  const [roundType, setRoundType] = useState<'padrao' | 'cartas' | 'campanha'>("padrao")
+  const [roundType, setRoundType] = useState<'default' | 'letters' | 'campaign'>("default")
 
   const colorTheme = {
-    'padrao': "#7AAD58",
-    'cartas': "#E29D4F",
-    'campanha': '#5B98AB'
+    'default': "#7AAD58",
+    'letters': "#E29D4F",
+    'campaign': '#5B98AB'
   }
 
   return (
@@ -36,14 +36,14 @@ export function RoundMenu({
 
         <div className="space-y-2">
           <Label htmlFor="game-type">Tipo de rodada</Label>
-          <Select value={roundType} onValueChange={(value: string) => setRoundType(value as 'padrao' | 'cartas' | 'campanha')}>
+          <Select value={roundType} onValueChange={(value: string) => setRoundType(value as 'default' | 'letters' | 'campaign')}>
             <SelectTrigger id="game-type">
               <SelectValue placeholder="Selecione o tipo da rodada" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="padrao">Padrão</SelectItem>
-              <SelectItem value="cartas">Cartas</SelectItem>
-              <SelectItem value="campanha">Campanha</SelectItem>
+              <SelectItem value="default">Padrão</SelectItem>
+              {/* <SelectItem value="letters">Cartas</SelectItem> */}
+              <SelectItem value="campaign">Campanha</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -58,7 +58,7 @@ export function RoundMenu({
           }
         }
         disabled={!name || !roundType}
-        onClick={() => onButtonClick({ name: name, type: roundType })}
+        onClick={() => onButtonClick({ name: name, theme: roundType })}
       >
         Iniciar rodada
       </Button>

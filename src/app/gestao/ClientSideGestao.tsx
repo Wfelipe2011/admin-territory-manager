@@ -6,6 +6,7 @@ import { useState } from "react";
 import dayjs from 'dayjs';
 import { useRouter } from "next/navigation";
 import { DialogTextConfirm } from "@/components/DialogTextConfirm";
+import { AxiosAdapter } from "@/infra/AxiosAdapter";
 
 type Round = {
     id: number;
@@ -24,7 +25,7 @@ type Round = {
 type ClientSideGestaoProps = {
     rounds: Round[];
 };
-
+const axios = new AxiosAdapter();
 const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
     const [dialogStatus, setDialogStatus] = useState(false);
     const [dialogRound, setDialogRound] = useState(0);
@@ -66,14 +67,21 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
         .sort((a, b) => (a.start_date < b.start_date ? 1 : (a.start_date > b.start_date ? -1 : 0)));
 
 
-    const handleButtonClick = (event: { name: string, type: string }) => {
-        console.log("Botão 'Criar Novo' clicado!", event);
+    const handleButtonClick = async ({ name, theme }: { name: string, theme: string }) => {
+        await axios.post(`rounds/start`, {
+            name,
+            theme
+        })
+        router.refresh();
     };
 
-    const handleArchClick = () => {
-        console.log("Botão 'Arquivar' clicado!", dialogRound);
+    const handleArchClick = async () => {
+        await axios.post(`rounds/finish`, {
+            roundNumber: dialogRound,
+        });
         setDialogStatus(false);
         setDialogRound(0);
+        router.refresh();
     }
 
     return (

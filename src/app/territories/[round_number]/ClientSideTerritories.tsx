@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { navigatorShare } from "@/lib/share";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type ClientSideTerritoriesProps = {
   territories: Territories[];
@@ -19,6 +20,7 @@ type ClientSideTerritoriesProps = {
 const axios = new AxiosAdapter();
 export const ClientSideTerritories = ({ territories, round, types }: ClientSideTerritoriesProps) => {
   const [territoriesState, setTerritoriesState] = useState(territories);
+  const router = useRouter();
 
   const TypesIcon: { [key: string]: JSX.Element } = {
     Residencial: <Home className="w-4 h-4 mr-2" style={{ color: round.color_primary }} />,
@@ -89,7 +91,7 @@ export const ClientSideTerritories = ({ territories, round, types }: ClientSideT
     );
 
     toast.success("Designação revogada com sucesso");
-    window.location.reload();
+    router.refresh();
   };
 
   return (

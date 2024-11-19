@@ -19,7 +19,7 @@ export function SearchInterface({
   buttonLabel = "Criar Novo"
 }: {
   onSearchChange: ChangeEventHandler<HTMLInputElement>,
-  onButtonClick: ({ name, type }: { name: string; type: string }) => void,
+  onButtonClick: ({ name, theme }: { name: string; theme: string }) => Promise<void>,
   searchValue: string,
   buttonLabel?: string
 }) {
@@ -49,8 +49,8 @@ export function SearchInterface({
         </DialogTrigger>
         <DialogContent>
           <RoundMenu
-            onButtonClick={(e) => {
-              onButtonClick(e);
+            onButtonClick={async (e) => {
+              await onButtonClick(e);
               onOpenChange(false);
             }}
           ></RoundMenu>
