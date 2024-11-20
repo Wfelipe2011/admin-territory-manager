@@ -94,7 +94,7 @@ export function ReportsDrawer() {
       <SheetContent className="p-2">
         <SheetHeader>
           <SheetTitle>Ocorrências</SheetTitle>
-          {reports.map(async (report) => {
+          {reports.map((report) => {
             const address = `${report.address.name} ${report.number}`
             const streetViewUrl = `https://www.google.com/maps/place/${address.replace(/ /g, '+')}`
             return (
