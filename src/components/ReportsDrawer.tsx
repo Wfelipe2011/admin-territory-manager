@@ -1,19 +1,16 @@
 "use client";
 
-import { Bell } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bell, MapPin, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { Button } from "./ui/button";
-
-enum ReportType {
-  add = "add",
-  remove = "remove",
-  update = "update",
-}
+import { Separator } from "./ui/separator";
+import { Textarea } from "./ui/textarea";
+import { Badge } from "@/components/ui/badge"
 
 type Reports = {
   id: number;
@@ -63,24 +60,11 @@ export function ReportsDrawer() {
     });
   };
 
-  const startRequestReports = () => {
+  const startRequestReports = useCallback(() => {
     requestReports()
     clearInterval(interval);
-    interval = setInterval(() => requestReports(), 1000 * 30);
-  };
-
-  const reportsTextType = (type: string) => {
-    switch (type) {
-      case ReportType.add:
-        return "Adicionar";
-      case ReportType.remove:
-        return "Remover";
-      case ReportType.update:
-        return "Atualizar";
-      default:
-        return "Desconhecido";
-    }
-  };
+    interval = setInterval(() => requestReports(), 1000 * 10);
+  }, []);
 
   const submitApprove = async (id: number) => {
     await axios.post(`reports/approve/${id}`, {});
@@ -97,7 +81,7 @@ export function ReportsDrawer() {
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [startRequestReports]);
 
   return (
     <Sheet>
@@ -109,26 +93,49 @@ export function ReportsDrawer() {
       )}
       <SheetContent className="p-2">
         <SheetHeader>
-          <SheetTitle>Reports</SheetTitle>
-          {reports.map((report) => {
+          <SheetTitle>Ocorrências</SheetTitle>
+          {reports.map(async (report) => {
+            const address = `${report.address.name} ${report.number}`
+            const streetViewUrl = `https://www.google.com/maps/place/${address.replace(/ /g, '+')}`
             return (
-              <Card key={report.id}>
-                <CardHeader>
-                  <CardTitle>{report.territory.name}</CardTitle>
-                  <CardDescription>
-                    {report.address.name} {report.number}
-                  </CardDescription>
-                  <CardDescription>{report.observations}</CardDescription>
-                  <CardDescription>{report.legend}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center">
-                  <CardDescription>{reportsTextType(report.reportType)}</CardDescription>
+              <Card key={report.id} className="w-full max-w-sm">
+                <CardContent className="space-y-4 p-4">
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg">{report.territory.name}</h3>
+                    <div className="text-sm text-muted-foreground">
+                      {address} <Badge variant="secondary">{report.legend}</Badge>
+                    </div>
+                    <div className="flex justify-between items-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className=""
+                        onClick={() => window.open(streetViewUrl, '_blank')}
+                      >
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Ver no Street View
+                      </Button>
+                      <Button variant="outline" className="" size="sm">
+                        {report.reportType === 'update' && <RefreshCw className="h-4 w-4" />}
+                        {report.reportType === 'add' && <Plus className="h-4 w-4" />}
+                        {report.reportType === 'remove' && <Trash2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <Separator />
+
+                  <div className="flex flex-wrap gap-2">
+                    <Textarea
+                      placeholder="Observações"
+                      className="min-h-[100px]"
+                      value={report.observations}
+                      disabled
+                    />
+                  </div>
                 </CardContent>
-                <CardFooter className="flex justify-center gap-4">
-                  <Button onClick={() => submitApprove(report.id)}>Aprovar</Button>
-                  <Button variant={"destructive"} onClick={() => submitCancel(report.id)}>
-                    Rejeitar
-                  </Button>
+                <CardFooter className="grid grid-cols-2 gap-2">
+                  <Button onClick={() => submitCancel(report.id)} variant="destructive">Rejeitar</Button>
+                  <Button onClick={() => submitApprove(report.id)} className="bg-primary">Aprovar</Button>
                 </CardFooter>
               </Card>
             );

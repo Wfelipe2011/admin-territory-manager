@@ -5,6 +5,7 @@ import { MouseEventHandler } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 
 export function DialogTextConfirm({
@@ -24,7 +25,8 @@ export function DialogTextConfirm({
     <Dialog
       open={status}
       onOpenChange={onStatusChange}
-      >
+    >
+      <DialogTitle></DialogTitle>
       <DialogContent className="w-auto p-8 pt-10 pb-4">
         <div className="flex flex-col items-center justify-center gap-4">
           {children}
