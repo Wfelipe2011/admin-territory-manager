@@ -1,6 +1,6 @@
 "use client";
 
-import { CopyIcon, Share2, ShieldX, User } from "lucide-react";
+import { CopyIcon, Share2, User } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
