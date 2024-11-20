@@ -128,7 +128,9 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
               </div>
             ))}
           </div>
-          <span className='absolute -bottom-8 -right-3 p-4 text-gray-500'>{getMostRecentDate(territory.positiveCompleted)}</span>
+          <div className='flex gap-1 text-gray-500'>
+            {getMostRecentDate(territory.positiveCompleted)}
+          </div>
         </div>
       </CardContent>
     </Card>
