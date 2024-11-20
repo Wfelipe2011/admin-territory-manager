@@ -64,8 +64,9 @@ export function ReportsDrawer() {
   };
 
   const startRequestReports = () => {
+    requestReports()
     clearInterval(interval);
-    interval = setInterval(() => requestReports, 1000 * 30);
+    interval = setInterval(() => requestReports(), 1000 * 30);
   };
 
   const reportsTextType = (type: string) => {
