@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { cookies } from "next/headers";
 import { ClientSideTerritory } from "./ClientSideTerritory";
@@ -46,7 +47,6 @@ async function fetchData({
   return data;
 }
 
-// @ts-ignore eslint-disable-next-line
 async function ListTerritory(ctx: any) {
   const { data: territories, ...pagination } = await fetchData(
     ctx.searchParams

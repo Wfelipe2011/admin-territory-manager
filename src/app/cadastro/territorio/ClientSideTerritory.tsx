@@ -32,7 +32,7 @@ export function ClientSideTerritory({
   territories,
   pagination,
 }: ClientSideTerritoryProps) {
-  console.log(territories);
+  console.log(pagination);
   return (
     <Table>
       <TableHeader>
