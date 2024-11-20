@@ -36,7 +36,6 @@ export function AppSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
-                                <>
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild>
                                             <a href={item.url} className="flex gap-3 my-1">
@@ -50,7 +49,6 @@ export function AppSidebar() {
                                             </a>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
-                                </>
                             ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
