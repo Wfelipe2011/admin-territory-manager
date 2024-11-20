@@ -46,6 +46,7 @@ async function fetchData({
   return data;
 }
 
+// @ts-ignore eslint-disable-next-line
 async function ListTerritory(ctx: any) {
   const { data: territories, ...pagination } = await fetchData(
     ctx.searchParams

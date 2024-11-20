@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { MapIcon } from "lucide-react";
+import Image from "next/image";
 
 interface ClientSideTerritoryProps {
   territories: Territory[];
@@ -60,7 +61,7 @@ export function ClientSideTerritory({
                       <DialogTitle>Mapa {territory.name}</DialogTitle>
                     </DialogHeader>
                     <div className="py-4">
-                      <img
+                      <Image
                         src={territory.imageUrl}
                         alt={territory.name}
                         className=" max-h-[70vh]"
