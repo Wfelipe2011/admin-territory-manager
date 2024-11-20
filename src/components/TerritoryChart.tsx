@@ -1,6 +1,6 @@
 "use client";
 
-import { Share2, ShieldX, User } from "lucide-react";
+import { CopyIcon, Share2, ShieldX, User } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Territories } from "@/app/territories/[round_number]/page";
 import dayjs from "dayjs";
+import { Button } from "./ui/button";
 
 interface TerritoryChartProps {
   data: { name: string; value: number }[];
@@ -27,6 +28,12 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
 
   const isShared = overseer !== null && expirationDate !== null;
 
+  function getMostRecentDate(dates: Array<{ date: string }>) {
+    if (!dates.length) return ""
+    const sortedDates = dates.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return `${dayjs(sortedDates[0].date).format('DD/MM/YYYY')}`
+  }
+
   useEffect(() => {
     setOverseer(territory.overseer || null);
   }, [territory.overseer])
@@ -40,7 +47,19 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
       <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
         <CardTitle className="text-lg font-medium">{territory.name}</CardTitle>
         {isShared && (
-          <Share2 className="h-5 w-5 cursor-pointer" style={{ stroke: colors[0] || "#ccc", color: "white" }} onClick={() => onShareClick(overseer, expirationDate)} />
+          territory?.signature?.key ? (
+            <CopyIcon
+              className="h-5 w-5 cursor-pointer"
+              style={{ stroke: colors[0] || "#ccc", color: "white" }}
+              onClick={() => onShareClick(overseer, expirationDate)} // Aqui você pode implementar a lógica de copiar
+            />
+          ) : (
+            <Share2
+              className="h-5 w-5 cursor-pointer"
+              style={{ stroke: colors[0] || "#ccc", color: "white" }}
+              onClick={() => onShareClick(overseer, expirationDate)}
+            />
+          )
         )}
       </CardHeader>
       <CardContent className="p-2">
@@ -93,6 +112,11 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
                 <Input type="date" placeholder="Data de início" value={expirationDate || ""} onChange={(e) => setExpirationDate(e.target.value)} className="bg-background border rounded-md" />
               </div>
             </div>
+            {territory.signature?.key && (
+              <div className="flex flex-col w-full mb-2">
+                <Button className="p-2 h-6 bg-secondary text-primary hover:bg-primary hover:text-white" variant={"destructive"} onClick={onRevokeClick}>Revogar</Button>
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between">
@@ -104,9 +128,7 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
               </div>
             ))}
           </div>
-          {territory.signature?.key && (
-            <ShieldX onClick={onRevokeClick} className="w-6 h-6 text-white fill-red-500 cursor-pointer" />
-          )}
+          <span className='absolute -bottom-8 -right-3 p-4 text-gray-500'>{getMostRecentDate(territory.positiveCompleted)}</span>
         </div>
       </CardContent>
     </Card>

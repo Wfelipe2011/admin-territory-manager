@@ -27,18 +27,26 @@ export const ClientSideTerritories = ({ territories, round, types }: ClientSideT
     "Predial-Externo": <Building className="w-4 h-4 mr-2" style={{ color: round.color_primary }} />,
   };
 
-  const shareSubmit = async (territoryId: number, overseer: string, expirationDate: string) => {
-    const { data, status } = await axios.post<any, { signature: string }>(`territories/${territoryId}/signature`, {
-      overseer,
-      expirationTime: expirationDate,
-      round: round.round_number,
-    });
+  const generateSignature = async (territoryId: number, overseer: string, expirationDate: string) => {
+    try {
+      const { data, status } = await axios.post<any, { signature: string }>(`territories/${territoryId}/signature`, {
+        overseer,
+        expirationTime: expirationDate,
+        round: round.round_number,
+      });
 
-    if (!data?.signature || status > 299) {
+      if (!data?.signature || status > 299) {
+        throw new Error("Erro ao gerar a assinatura");
+      }
+
+      return data.signature;
+    } catch (error) {
       toast.error("Erro ao compartilhar o território");
-      return;
+      throw error;
     }
+  };
 
+  const shareTerritory = async (territoryId: number, overseer: string, expirationDate: string, signature: string) => {
     const territory = territoriesState.find((t) => t.territoryId === territoryId);
     if (!territory) {
       toast.error("Território não encontrado");
@@ -46,16 +54,42 @@ export const ClientSideTerritories = ({ territories, round, types }: ClientSideT
     }
 
     const queryRound = new URLSearchParams({ round: String(round.round_number) });
-    const query = new URLSearchParams({ p: `territorio/${territoryId}?${queryRound.toString()}`, s: data.signature });
+    const query = new URLSearchParams({ p: `territorio/${territoryId}?${queryRound.toString()}`, s: signature });
     const toShare = {
       title: `*DESIGNAÇÃO DE TERRITÓRIO*`,
       url: `https://qa.territory-manager.com.br/home?${query.toString()}`,
-      text: `*DESIGNAÇÃO DE TERRITÓRIO*\n\nPrezado irmão *_${overseer}_*\nsegue o link para o território *${territory?.name}* que você irá trabalhar até ${dayjs(expirationDate).format(
+      text: `*DESIGNAÇÃO DE TERRITÓRIO*\n\nPrezado irmão *_${overseer}_*\nsegue o link para o território *${territory.name}* que você irá trabalhar até ${dayjs(expirationDate).format(
         "DD/MM/YYYY"
       )} \n\n\r`,
     };
+
     await navigatorShare(toShare);
-    setTerritoriesState((prev) => prev.map((t) => (t.territoryId === territoryId ? { ...t, signature: { expirationDate, key: data.signature }, overseer } : t)));
+
+    setTerritoriesState((prev) =>
+      prev.map((t) =>
+        t.territoryId === territoryId ? { ...t, signature: { expirationDate, key: signature }, overseer } : t
+      )
+    );
+  };
+
+  const shareSubmit = async (territoryId: number, overseer: string, expirationDate: string) => {
+    const territory = territoriesState.find((t) => t.territoryId === territoryId);
+
+    if (!territory) {
+      toast.error("Território não encontrado");
+      return;
+    }
+
+    const existingSignature = territory.signature?.key;
+    const signature = existingSignature
+      ? existingSignature // Se já existe, reutiliza a assinatura
+      : await generateSignature(territoryId, overseer, expirationDate); // Caso contrário, gera uma nova.
+
+    try {
+      await shareTerritory(territoryId, overseer, expirationDate, signature);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const onRevokeClick = async (territoryId: number) => {
