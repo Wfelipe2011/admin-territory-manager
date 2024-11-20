@@ -2,8 +2,8 @@
 import axios from "axios";
 import { parseCookies } from "nookies";
 
-// export const URL_API = 'http://localhost:3001/v1';
-export const URL_API = `https://api-hmg.territory-manager.com.br/v1`;
+// export const URL_API = "https://fe1c-187-180-188-14.ngrok-free.app";
+export const URL_API = `https://api-hmg.territory-manager.com.br`;
 
 type AxiosResponse<T> =
   | {
@@ -18,7 +18,7 @@ type AxiosResponse<T> =
     };
 
 export class AxiosAdapter {
-  constructor(ctxCookie?: string) {
+  constructor(ctxCookie?: string, private version = "v1") {
     axios.interceptors.request.use((config: any) => {
       const { token: tokenCookie } = parseCookies();
       const tokenBearer = ctxCookie || tokenCookie;
@@ -59,13 +59,16 @@ export class AxiosAdapter {
     return await this.axiosConfig(url, httpConfig);
   }
 
-  private async axiosConfig<T>(url: string, httpConfig: any): Promise<AxiosResponse<T>> {
+  private async axiosConfig<T>(
+    url: string,
+    httpConfig: any
+  ): Promise<AxiosResponse<T>> {
     try {
       const config = {
         ...httpConfig,
       };
 
-      const response = await axios(`${URL_API}/${url}`, config);
+      const response = await axios(`${URL_API}/${this.version}/${url}`, config);
       return {
         status: response.status,
         data: response.data,
@@ -86,7 +89,7 @@ export class AxiosAdapter {
           "Content-Type": "application/json",
         },
       };
-      const response = await axios(`${URL_API}/${url}`, config);
+      const response = await axios(`${URL_API}/${this.version}/${url}`, config);
       return {
         status: response?.status,
         data: response?.data,
