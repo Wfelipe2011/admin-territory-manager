@@ -7,8 +7,9 @@ import {
   TableHead,
   TableBody,
   TableCell,
+  TableCaption,
 } from "@/components/ui/table";
-import { Territory } from "./type";
+import { Territory, TerritoryTypes } from "./type";
 import { Button } from "@/components/ui/button";
 import { DialogHeader } from "@/components/ui/dialog";
 import {
@@ -17,9 +18,29 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MapIcon } from "lucide-react";
+import {
+  ChevronFirst,
+  ChevronLast,
+  CheckIcon,
+  ChevronLeft,
+  ChevronRight,
+  MapIcon,
+  PenIcon,
+} from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { AxiosAdapter } from "@/infra/AxiosAdapter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 
+const axios = new AxiosAdapter(undefined, "v2");
 interface ClientSideTerritoryProps {
   territories: Territory[];
   pagination: {
@@ -27,56 +48,297 @@ interface ClientSideTerritoryProps {
     page: number;
     total: number;
   };
+  territoryTypes: TerritoryTypes[];
 }
 export function ClientSideTerritory({
-  territories,
+  territories: territoriesRaw,
   pagination,
+  territoryTypes,
 }: ClientSideTerritoryProps) {
-  console.log(pagination);
+  const [editMode, setEditMode] = useState<number>(0);
+  const [territories, setTerritories] = useState<Territory[]>(territoriesRaw);
+  const router = useRouter();
+
+  useEffect(() => {
+    setTerritories(territoriesRaw);
+  }, [territoriesRaw]);
+
+  const handleEditMode = (value: number) => {
+    if (editMode === value) {
+      setEditMode(0);
+      return;
+    }
+    setEditMode(value);
+  };
+
+  const updateTerritoryName = (value: string, territoryId: number) => {
+    setTerritories((prev) =>
+      prev.map((item) =>
+        item.id === territoryId ? { ...item, name: value } : item
+      )
+    );
+  };
+  const updateTerritoryType = (value: number, territoryId: number) => {
+    setTerritories((prev) =>
+      prev.map((item) => {
+        if (item.id === territoryId) {
+          const newType = territoryTypes.find((type) => type.id === value);
+          if (!newType) {
+            return item;
+          }
+          return {
+            ...item,
+            typeId: value,
+            type: newType,
+          };
+        }
+        return item;
+      })
+    );
+  };
+
+  const submitUpdate = async (territoryId: number) => {
+    const territory = territories.find((item) => item.id === territoryId);
+    if (!territory) {
+      return;
+    }
+    const { status, message } = await axios.put(`territories/${territoryId}`, {
+      name: territory.name,
+      typeId: territory.typeId,
+    });
+    if (status > 299) {
+      console.error(message);
+      return;
+    }
+    setEditMode(0);
+  };
+
+  const handlePage = (page: number) => {
+    const newPage = pagination.page + page;
+    if (newPage < 1 || newPage > pagination.total) {
+      return;
+    }
+    router.push(`/cadastro/territorio?page=${newPage}`);
+  };
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[100px]">Check</TableHead>
-          <TableHead>Territorio</TableHead>
-          <TableHead>Mapa</TableHead>
-          <TableHead className="text-right">Tipo</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {territories.map((territory) => {
-          return (
-            <TableRow key={territory.id}>
-              <TableCell>{territory.id}</TableCell>
-              <TableCell>{territory.name}</TableCell>
-              <TableCell>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <MapIcon />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Mapa {territory.name}</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4">
-                      <Image
-                        src={territory.imageUrl}
-                        alt={territory.name}
-                        className=" max-h-[70vh]"
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </TableCell>
-              <TableCell className="text-right">
-                {territory.type.name}
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+    <>
+      <Table className="rounded-md shadow-md rounded-b-none bg-white">
+        <TableCaption className="w-full bg-white p-2 rounded-md rounded-t-none shadow-md mt-0.5">
+          <div className="flex justify-between">
+            <div className="flex items-center">
+              {pagination.page} de {pagination.total}
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                className="p-2 mr-1"
+                variant="outline"
+                onClick={() => router.push("/cadastro/territorio?page=1")}
+                disabled={pagination.page === 1}
+              >
+                <ChevronFirst />
+              </Button>
+              <Button
+                className="p-2"
+                variant="outline"
+                onClick={() => handlePage(-1)}
+                disabled={pagination.page === 1}
+              >
+                <ChevronLeft />
+              </Button>
+              <Button
+                className="p-2"
+                variant="outline"
+                onClick={() => handlePage(1)}
+                disabled={pagination.page === pagination.total}
+              >
+                <ChevronRight />
+              </Button>
+              <Button
+                className="p-2 ml-1"
+                variant="outline"
+                onClick={() =>
+                  router.push(`/cadastro/territorio?page=${pagination.total}`)
+                }
+                disabled={pagination.page === pagination.total}
+              >
+                <ChevronLast />
+              </Button>
+            </div>
+          </div>
+        </TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Territorio</TableHead>
+            <TableHead>Tipo</TableHead>
+            <TableHead>Mapa</TableHead>
+            <TableHead>Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {territories.map((territory) => {
+            return (
+              <TableRow key={territory.id}>
+                <CellTerritoryName
+                  isEditMode={territory.id === editMode}
+                  name={territory.name}
+                  updateName={(value) =>
+                    updateTerritoryName(value, territory.id)
+                  }
+                />
+                <CellTerritoryType
+                  isEditMode={territory.id === editMode}
+                  typeName={territory.type.name}
+                  typeId={territory.typeId}
+                  updateType={(value) =>
+                    updateTerritoryType(value, territory.id)
+                  }
+                  territoryTypes={territoryTypes}
+                />
+                <CellTerritoryImage
+                  imageUrl={territory.imageUrl}
+                  name={territory.name}
+                />
+                <CellTerritoryActions
+                  territoryId={territory.id}
+                  editMode={editMode}
+                  setEditMode={handleEditMode}
+                  submitUpdate={submitUpdate}
+                />
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
+  );
+}
+
+interface TerritoryNameProps {
+  isEditMode: boolean;
+  name: string;
+  updateName: (value: string) => void;
+}
+function CellTerritoryName({
+  isEditMode,
+  name,
+  updateName,
+}: TerritoryNameProps) {
+  if (isEditMode) {
+    return (
+      <TableCell>
+        <Input
+          type="text"
+          value={name}
+          name="name"
+          onChange={({ target }) => updateName(target.value)}
+        />
+      </TableCell>
+    );
+  }
+
+  return <TableCell>{name}</TableCell>;
+}
+
+interface TerritoryTypeProps {
+  isEditMode: boolean;
+  typeName: string;
+  typeId: number;
+  updateType: (value: number) => void;
+  territoryTypes: TerritoryTypes[];
+}
+function CellTerritoryType({
+  isEditMode,
+  typeName,
+  typeId,
+  updateType,
+  territoryTypes,
+}: TerritoryTypeProps) {
+  if (isEditMode) {
+    return (
+      <TableCell>
+        <Select
+          value={String(typeId)}
+          onValueChange={(value) => updateType(Number(value))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={typeName} />
+          </SelectTrigger>
+          <SelectContent defaultValue={String(typeId)}>
+            {territoryTypes.map((type) => (
+              <SelectItem key={type.id} value={String(type.id)}>
+                {type.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </TableCell>
+    );
+  }
+
+  return <TableCell>{typeName}</TableCell>;
+}
+
+interface CellTerritoryImageProps {
+  imageUrl: string;
+  name: string;
+}
+function CellTerritoryImage({ imageUrl, name }: CellTerritoryImageProps) {
+  return (
+    <TableCell>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline">
+            <MapIcon />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Mapa {name}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Image
+              src={imageUrl}
+              loading="lazy"
+              alt={name}
+              className=" max-h-[70vh]"
+              width={425}
+              height={425}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </TableCell>
+  );
+}
+
+interface CellTerritoryActionsProps {
+  territoryId: number;
+  editMode: number;
+  setEditMode: (value: number) => void;
+  submitUpdate: (territoryId: number) => void;
+}
+function CellTerritoryActions({
+  territoryId,
+  editMode,
+  setEditMode,
+  submitUpdate,
+}: CellTerritoryActionsProps) {
+  return (
+    <TableCell>
+      {editMode === territoryId ? (
+        <Button
+          variant="outline"
+          className="text-green-500 hover:text-green-700"
+          onClick={() => submitUpdate(territoryId)}
+        >
+          <CheckIcon />
+        </Button>
+      ) : (
+        <Button variant="outline" onClick={() => setEditMode(territoryId)}>
+          <PenIcon />
+        </Button>
+      )}
+    </TableCell>
   );
 }

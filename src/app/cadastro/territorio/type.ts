@@ -6,3 +6,9 @@ export interface Territory {
   typeId: number;
   type: { id: number; name: string; tenantId: number };
 }
+
+export interface TerritoryTypes {
+  id: number;
+  name: string;
+  tenantId: number;
+}

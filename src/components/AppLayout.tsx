@@ -7,7 +7,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <SidebarTrigger />
       <AppSidebar />
-      <main className="w-full pt-8">
+      <main className="w-full pt-8 bg-gray-100">
         <ReportsDrawer />
         {children}
       </main>
