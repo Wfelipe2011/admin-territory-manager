@@ -16,7 +16,7 @@ interface SearchParams {
   limit?: string;
   sort?: string;
 }
-async function fetchData({
+async function fetchTerritories({
   page = "1",
   limit = "10",
   sort = "-id",
@@ -47,17 +47,40 @@ async function fetchData({
   return data;
 }
 
+async function fetchTerritoryTypes() {
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("token")?.value;
+  if (!token) {
+    throw new Error("Token is missing");
+  }
+
+  const axios = new AxiosAdapter(token, "v1");
+  const { data, status, message } = await axios.get<any>("territories/types");
+  if (status > 299) {
+    throw new Error(message);
+  }
+  if (!data) {
+    throw new Error("Data is missing");
+  }
+  return data;
+}
+
 async function ListTerritory(ctx: any) {
-  const { data: territories, ...pagination } = await fetchData(
+  const { data: territories, ...pagination } = await fetchTerritories(
     ctx.searchParams
   );
+  const territoryTypes = await fetchTerritoryTypes();
 
   return (
-    <div className="w-full h-full p-4">
+    <div className="w-full m-auto md:max-w-[70vw] h-full p-4">
       <div className="flex w-full h-10 border border-red-500">
         <h1>header aqui</h1>
       </div>
-      <ClientSideTerritory territories={territories} pagination={pagination} />
+      <ClientSideTerritory
+        territories={territories}
+        pagination={pagination}
+        territoryTypes={territoryTypes}
+      />
     </div>
   );
 }
