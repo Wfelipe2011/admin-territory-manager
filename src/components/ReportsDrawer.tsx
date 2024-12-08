@@ -11,6 +11,7 @@ import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Textarea } from "./ui/textarea";
 import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "./ui/scroll-area";
 
 type Reports = {
   id: number;
@@ -77,7 +78,6 @@ export function ReportsDrawer() {
   };
 
   useEffect(() => {
-    startRequestReports();
     return () => {
       clearInterval(interval);
     };
@@ -94,52 +94,54 @@ export function ReportsDrawer() {
       <SheetContent className="p-2">
         <SheetHeader>
           <SheetTitle>Ocorrências</SheetTitle>
-          {reports.map((report) => {
-            const address = `${report.address.name} ${report.number}`
-            const streetViewUrl = `https://www.google.com/maps/place/${address.replace(/ /g, '+')}`
-            return (
-              <Card key={report.id} className="w-full max-w-sm">
-                <CardContent className="space-y-4 p-4">
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-lg">{report.territory.name}</h3>
-                    <div className="text-sm text-muted-foreground">
-                      {address} <Badge variant="secondary">{report.legend}</Badge>
+          <ScrollArea className="h-screen w-full pb-12">
+            {reports.map((report) => {
+              const address = `${report.address.name} ${report.number}`
+              const streetViewUrl = `https://www.google.com/maps/place/${address.replace(/ /g, '+')}`
+              return (
+                <Card key={report.id} className="w-full max-w-sm mb-4">
+                  <CardContent className="space-y-4 p-4">
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-lg">{report.territory.name}</h3>
+                      <div className="text-sm text-muted-foreground">
+                        {address} <Badge variant="secondary">{report.legend}</Badge>
+                      </div>
+                      <div className="flex justify-between items-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className=""
+                          onClick={() => window.open(streetViewUrl, '_blank')}
+                        >
+                          <MapPin className="mr-2 h-4 w-4" />
+                          Ver no Street View
+                        </Button>
+                        <Button variant="outline" className="" size="sm">
+                          {report.reportType === 'update' && <RefreshCw className="h-4 w-4" />}
+                          {report.reportType === 'add' && <Plus className="h-4 w-4" />}
+                          {report.reportType === 'remove' && <Trash2 className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-end">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className=""
-                        onClick={() => window.open(streetViewUrl, '_blank')}
-                      >
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Ver no Street View
-                      </Button>
-                      <Button variant="outline" className="" size="sm">
-                        {report.reportType === 'update' && <RefreshCw className="h-4 w-4" />}
-                        {report.reportType === 'add' && <Plus className="h-4 w-4" />}
-                        {report.reportType === 'remove' && <Trash2 className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-                  <Separator />
+                    <Separator />
 
-                  <div className="flex flex-wrap gap-2">
-                    <Textarea
-                      placeholder="Observações"
-                      className="min-h-[100px]"
-                      value={report.observations}
-                      disabled
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="grid grid-cols-2 gap-2">
-                  <Button onClick={() => submitCancel(report.id)} variant="destructive">Rejeitar</Button>
-                  <Button onClick={() => submitApprove(report.id)} className="bg-primary">Aprovar</Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
+                    <div className="flex flex-wrap gap-2">
+                      <Textarea
+                        placeholder="Observações"
+                        className="min-h-[100px]"
+                        value={report.observations}
+                        disabled
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="grid grid-cols-2 gap-2">
+                    <Button onClick={() => submitCancel(report.id)} variant="destructive">Rejeitar</Button>
+                    <Button onClick={() => submitApprove(report.id)} className="bg-primary">Aprovar</Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </ScrollArea>
         </SheetHeader>
       </SheetContent>
     </Sheet>
