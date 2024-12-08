@@ -1,0 +1,20 @@
+version: '3.5'
+
+services:
+  admin-territory-manager:
+    image: wfelipe2011/admin-territory-manager:main
+    restart: unless-stopped
+    ports:
+      - '3000-3100:3000'
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
+    networks:
+      - npm_public
+
+networks:
+  npm_public:
+    external: true

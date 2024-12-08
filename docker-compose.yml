@@ -1,0 +1,12 @@
+version: "3.5"
+
+services:
+  app:
+    cpus: "0.3"
+    mem_limit: 512m
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: admin-territory-manager
+    ports:
+      - "3000:3000"
