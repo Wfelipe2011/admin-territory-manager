@@ -59,6 +59,8 @@ export function ClientSideTerritory({
   const [territories, setTerritories] = useState<Territory[]>(territoriesRaw);
   const router = useRouter();
 
+  const totalPage = Math.ceil(pagination.total / pagination.limit);
+
   useEffect(() => {
     setTerritories(territoriesRaw);
   }, [territoriesRaw]);
@@ -115,7 +117,7 @@ export function ClientSideTerritory({
 
   const handlePage = (page: number) => {
     const newPage = pagination.page + page;
-    if (newPage < 1 || newPage > pagination.total) {
+    if (newPage < 1 || newPage > totalPage) {
       return;
     }
     router.push(`/cadastro/territorio?page=${newPage}`);
@@ -127,7 +129,7 @@ export function ClientSideTerritory({
         <TableCaption className="w-full bg-white p-2 rounded-md rounded-t-none shadow-md mt-0.5">
           <div className="flex justify-between">
             <div className="flex items-center">
-              {pagination.page} de {pagination.total}
+              {pagination.page} de {totalPage}
             </div>
             <div className="flex items-center gap-1">
               <Button
@@ -150,7 +152,7 @@ export function ClientSideTerritory({
                 className="p-2"
                 variant="outline"
                 onClick={() => handlePage(1)}
-                disabled={pagination.page === pagination.total}
+                disabled={pagination.page === totalPage}
               >
                 <ChevronRight />
               </Button>
@@ -158,9 +160,9 @@ export function ClientSideTerritory({
                 className="p-2 ml-1"
                 variant="outline"
                 onClick={() =>
-                  router.push(`/cadastro/territorio?page=${pagination.total}`)
+                  router.push(`/cadastro/territorio?page=${totalPage}`)
                 }
-                disabled={pagination.page === pagination.total}
+                disabled={pagination.page === totalPage}
               >
                 <ChevronLast />
               </Button>
