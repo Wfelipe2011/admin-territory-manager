@@ -20,6 +20,7 @@ WORKDIR /app
 
 # Copy only necessary files from the builder stage
 COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 COPY package*.json ./
 
 # Install production dependencies (excluding devDependencies)
