@@ -78,6 +78,7 @@ export function ReportsDrawer() {
   };
 
   useEffect(() => {
+    startRequestReports();
     return () => {
       clearInterval(interval);
     };
