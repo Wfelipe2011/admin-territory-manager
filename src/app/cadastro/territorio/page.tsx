@@ -74,9 +74,6 @@ async function ListTerritory(ctx: any) {
 
   return (
     <div className="w-full m-auto md:max-w-[70vw] h-full p-4">
-      <div className="flex w-full h-10 border border-red-500">
-        <h1>header aqui</h1>
-      </div>
       <ClientSideTerritory
         territories={territories}
         pagination={pagination}

@@ -39,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { TerritoryFilter } from "@/components/TerritoryFilter";
 
 const axios = new AxiosAdapter(undefined, "v2");
 interface ClientSideTerritoryProps {
@@ -123,8 +124,39 @@ export function ClientSideTerritory({
     router.push(`/cadastro/territorio?page=${newPage}`);
   };
 
+  const handleSearch = (value: string) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('search', value);
+    router.push(`/cadastro/territorio?${params.toString()}`);
+  }
+
+  const setTabValue = (value: number) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('type', String(value));
+    router.push(`/cadastro/territorio?${params.toString()}`);
+  }
+
   return (
     <>
+      <TerritoryFilter
+        className="rounded-md shadow-md rounded-b-none bg-white my-4 p-4"
+        title="Territórios"
+        onSearch={(e) => handleSearch(e.target.value)}
+        onBlockChange={(e) => {
+          console.log("Block change", e);
+        }}
+        onTabChange={(e) => setTabValue(+e)}
+        selectedBlock={[
+          { value: "1", label: "Quadra 1" },
+          { value: "2", label: "Quadra 2" },
+          { value: "3", label: "Quadra 3" },
+        ]}
+        tabs={territoryTypes.map((type) => ({
+          value: String(type.id),
+          label: type.name,
+        }))
+        }
+      />
       <Table className="rounded-md shadow-md rounded-b-none bg-white">
         <TableCaption className="w-full bg-white p-2 rounded-md rounded-t-none shadow-md mt-0.5">
           <div className="flex justify-between">
