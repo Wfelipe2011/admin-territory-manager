@@ -24,7 +24,10 @@ async function fetchData() {
     axios.get<any>('dashboard/territory-details'),
     axios.get<any>('dashboard/marked-houses'),
   ]);
-
+  console.log({
+    territoryDetails: territoryDetailsResponse.data,
+    markedHouses: markedHousesResponse.data,
+  });
   return {
     territoryDetails: territoryDetailsResponse.data,
     markedHouses: markedHousesResponse.data,
