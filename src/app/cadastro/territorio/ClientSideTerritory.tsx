@@ -142,9 +142,6 @@ export function ClientSideTerritory({
         className="rounded-md shadow-md rounded-b-none bg-white my-4 p-4"
         title="Territórios"
         onSearch={(e) => handleSearch(e.target.value)}
-        onBlockChange={(e) => {
-          console.log("Block change", e);
-        }}
         onTabChange={(e) => setTabValue(+e)}
         selectedBlock={[
           { value: "1", label: "Quadra 1" },

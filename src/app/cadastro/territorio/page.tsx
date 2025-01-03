@@ -62,7 +62,7 @@ async function fetchTerritoryTypes() {
   return data;
 }
 
-async function ListTerritory(ctx: Promise<{ searchParams: Promise<SearchParams> }>) {
+async function ListTerritory(ctx: any) {
   const { searchParams } = await ctx;
   const { data: territories, ...pagination } = await fetchTerritories(
     await searchParams
