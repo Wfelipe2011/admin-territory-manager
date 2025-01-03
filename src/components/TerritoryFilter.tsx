@@ -2,17 +2,16 @@
 
 import { Search } from 'lucide-react'
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
+import { ChangeEvent, FormEvent, MouseEventHandler } from 'react'
 
 export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   selectedBlock: Array<{ value: string; label: string }>;
   tabs: Array<{ value: string; label: string }>;
-  onTabChange: (value: any) => void;
-  onBlockChange: (value: any) => void;
-  onSearch: (value: any) => void;
+  onTabChange: (value: string) => void;
+  onSearch: (value: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function TerritoryFilter(props: TerritoryFilterProps) {
@@ -35,23 +34,9 @@ export function TerritoryFilter(props: TerritoryFilterProps) {
         {/* Filters row */}
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4 items-center flex-1">
-            {/* Quadra dropdown */}
-            <Select>
-              <SelectTrigger className="w-[120px]" onChange={props.onBlockChange}>
-                <SelectValue placeholder="Quadra" />
-              </SelectTrigger>
-              <SelectContent>
-                {props.selectedBlock.map((block) => (
-                  <SelectItem key={block.value} value={block.value}>
-                    {block.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
             {/* Property type tabs */}
             <Tabs defaultValue={props.tabs[0].value}>
-              <TabsList onChange={props.onTabChange}>
+              <TabsList>
                 {props.tabs.map((tab) => (
                   <TabsTrigger key={tab.value} value={tab.value} onClick={() => props.onTabChange(tab.value)}>
                     {tab.label}

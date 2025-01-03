@@ -17,11 +17,7 @@ interface SearchParams {
   sort?: string;
 }
 
-async function fetchTerritories({
-  page = "1",
-  limit = "10",
-  sort = "-id",
-}: SearchParams): Promise<HttpResponse> {
+async function fetchTerritories(params: SearchParams): Promise<HttpResponse> {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
   if (!token) {
@@ -30,9 +26,10 @@ async function fetchTerritories({
 
   const axios = new AxiosAdapter(token, "v2");
   const searchParams = new URLSearchParams({
-    page,
-    limit,
-    sort,
+    ...params,
+    page: params.page || "1",
+    limit: params.limit || "10",
+    sort: params.sort || "name",
   });
   const query = searchParams.toString();
   const { data, status, message } = await axios.get<HttpResponse>(
