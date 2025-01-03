@@ -4,7 +4,7 @@ import { Search } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { ChangeEvent, FormEvent, MouseEventHandler } from 'react'
+import { ChangeEvent } from 'react'
 
 export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -15,7 +15,7 @@ export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElemen
 }
 
 export function TerritoryFilter(props: TerritoryFilterProps) {
-  const { children, ...rest } = props;
+  const { ...rest } = props;
   return (
     <div className="p-4 max-w-4xl mx-auto" {...rest}>
       <h1 className="text-2xl font-semibold mb-6">{props.title}</h1>
