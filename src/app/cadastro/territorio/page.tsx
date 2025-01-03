@@ -16,11 +16,8 @@ interface SearchParams {
   limit?: string;
   sort?: string;
 }
-async function fetchTerritories({
-  page = "1",
-  limit = "10",
-  sort = "-id",
-}: SearchParams): Promise<HttpResponse> {
+
+async function fetchTerritories(params: SearchParams): Promise<HttpResponse> {
   const cookieStore = cookies();
   const token = (await cookieStore).get("token")?.value;
   if (!token) {
@@ -29,12 +26,12 @@ async function fetchTerritories({
 
   const axios = new AxiosAdapter(token, "v2");
   const searchParams = new URLSearchParams({
-    page,
-    limit,
-    sort,
+    ...params,
+    page: params.page || "1",
+    limit: params.limit || "10",
+    sort: params.sort || "name",
   });
   const query = searchParams.toString();
-  console.log(query);
   const { data, status, message } = await axios.get<HttpResponse>(
     `territories?${query}`
   );
@@ -65,18 +62,15 @@ async function fetchTerritoryTypes() {
   return data;
 }
 
-async function ListTerritory(ctx: any) {
+async function ListTerritory(ctx: Promise<{ searchParams: Promise<SearchParams> }>) {
   const { searchParams } = await ctx;
   const { data: territories, ...pagination } = await fetchTerritories(
-    searchParams
+    await searchParams
   );
   const territoryTypes = await fetchTerritoryTypes();
 
   return (
     <div className="w-full m-auto md:max-w-[70vw] h-full p-4">
-      <div className="flex w-full h-10 border border-red-500">
-        <h1>header aqui</h1>
-      </div>
       <ClientSideTerritory
         territories={territories}
         pagination={pagination}
