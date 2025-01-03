@@ -16,6 +16,7 @@ interface SearchParams {
   limit?: string;
   sort?: string;
 }
+
 async function fetchTerritories({
   page = "1",
   limit = "10",
@@ -34,7 +35,6 @@ async function fetchTerritories({
     sort,
   });
   const query = searchParams.toString();
-  console.log(query);
   const { data, status, message } = await axios.get<HttpResponse>(
     `territories?${query}`
   );
@@ -65,10 +65,10 @@ async function fetchTerritoryTypes() {
   return data;
 }
 
-async function ListTerritory(ctx: any) {
+async function ListTerritory(ctx: Promise<{ searchParams: Promise<SearchParams> }>) {
   const { searchParams } = await ctx;
   const { data: territories, ...pagination } = await fetchTerritories(
-    searchParams
+    await searchParams
   );
   const territoryTypes = await fetchTerritoryTypes();
 
