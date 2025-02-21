@@ -41,7 +41,7 @@ import {
 import { useRouter } from "next/navigation";
 import { TerritoryFilter } from "@/components/TerritoryFilter";
 
-const axios = new AxiosAdapter(undefined, "v2");
+const axios = new AxiosAdapter();
 interface ClientSideTerritoryProps {
   territories: Territory[];
   pagination: {
@@ -108,6 +108,7 @@ export function ClientSideTerritory({
     const { status, message } = await axios.put(`territories/${territoryId}`, {
       name: territory.name,
       typeId: territory.typeId,
+      id: territory.id
     });
     if (status > 299) {
       console.error(message);
