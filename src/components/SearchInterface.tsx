@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ReportModal } from "./report-modal";
 
 export function SearchInterface({
   onSearchChange,
@@ -36,26 +37,30 @@ export function SearchInterface({
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       </div>
-      <Dialog
-        open={open}
-        onOpenChange={onOpenChange}
-      >
-        <DialogTrigger asChild>
-          <Button
-            className="bg-[#6BA84F] hover:bg-[#6BA84F]/90 text-white"
-          >
-            {buttonLabel}
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <RoundMenu
-            onButtonClick={async (e) => {
-              await onButtonClick(e);
-              onOpenChange(false);
-            }}
-          ></RoundMenu>
-        </DialogContent>
-      </Dialog>
+      <div className="flex items-center gap-4">
+        <ReportModal />
+        <Dialog
+          open={open}
+          onOpenChange={onOpenChange}
+        >
+          <DialogTrigger asChild>
+            <Button
+              className="bg-[#6BA84F] hover:bg-[#6BA84F]/90 text-white"
+            >
+              {buttonLabel}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <RoundMenu
+              onButtonClick={async (e) => {
+                await onButtonClick(e);
+                onOpenChange(false);
+              }}
+            ></RoundMenu>
+          </DialogContent>
+        </Dialog>
+
+      </div>
     </div>
   )
 }

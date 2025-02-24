@@ -120,10 +120,10 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
               round.end_date === null
                 ? null
                 : new Date(round.end_date).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
             }
             title={round.name}
             id={round.id}
@@ -148,7 +148,7 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
           setDialogRound(0);
         }}
       >
-        <p className="text-lg font-medium">Desenha arquivar este território?</p>
+        <p className="text-lg font-medium">Deseja arquivar este território?</p>
       </DialogTextConfirm>
     </div>
   );
