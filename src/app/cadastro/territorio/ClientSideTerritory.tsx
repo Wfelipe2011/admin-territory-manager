@@ -47,7 +47,7 @@ import { TerritoryFilter } from "@/components/TerritoryFilter";
 import { Label } from "@radix-ui/react-label";
 import { Separator } from "@radix-ui/react-separator";
 
-const axios = new AxiosAdapter(undefined, "v2");
+const axios = new AxiosAdapter();
 interface ClientSideTerritoryProps {
   territories: Territory[];
   pagination: {
@@ -115,6 +115,7 @@ export function ClientSideTerritory({
     const { status, message } = await axios.put(`territories/${territoryId}`, {
       name: territory.name,
       typeId: territory.typeId,
+      id: territory.id
     });
     if (status > 299) {
       console.error(message);

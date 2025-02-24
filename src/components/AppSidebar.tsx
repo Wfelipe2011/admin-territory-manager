@@ -21,6 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 import { Button } from "./ui/button";
@@ -70,13 +71,14 @@ const itemsRegister = [
 
 export function AppSidebar() {
   return (
-    <Sidebar collapsible="icon" className="pt-10">
+    <Sidebar collapsible="icon" className="">
       <SidebarContent>
         <SidebarMenu>
+          <SidebarTrigger />
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <Link href={item.url} className="flex gap-3 my-1">
+                <Link href={item.url} className="h-10 w-10 ml-1">
                   <item.icon
                     style={{
                       width: "1.5rem",
@@ -92,7 +94,7 @@ export function AppSidebar() {
           <Collapsible defaultOpen className="group/collapsible">
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="!text-sidebar-foreground hover:!text-sidebar-accent-foreground w-full">
-                <SidebarMenuItem className="flex w-full justify-between items-center gap-3 my-1">
+                <SidebarMenuItem className="flex w-full justify-between items-center ml-1 gap-2">
                   <PenBox
                     style={{
                       width: "1.5rem",
@@ -111,7 +113,7 @@ export function AppSidebar() {
                   {itemsRegister.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
-                        <Link href={item.url} className="my-1 pl-4">
+                        <Link href={item.url} className="h-10 w-10 ml-2">
                           <span className="text-lg">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
