@@ -1,9 +1,33 @@
+'use client'
+
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogTrigger, DialogClose, DialogFooter, Button, Input, Label, Separator } from "@/components/ui";
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
+import { useParams } from "next/navigation";
+import { AxiosAdapter } from "@/infra/AxiosAdapter";
+import type { Block as BlockType } from "./type";
+const axiosV2 = new AxiosAdapter(undefined, "v2");
 
+
+interface UpsertBlockDto {
+    id?: number;
+    name: string;
+    addresses: UpsertAddressDto[];
+}
+
+interface UpsertAddressDto {
+    id?: number;
+    street: string;
+    zipCode: string;
+}
+
+interface BlockFormProps {
+    block?: BlockType;
+    callBack: () => void;
+}
 interface Block {
-    id: string | undefined;
+    id: number | undefined;
     name: string;
 }
 interface Address {
@@ -11,14 +35,31 @@ interface Address {
     street: string;
     zip_code: string;
 }
-export function AddBlock() {
+export function BlockForm({ block: initialBlock, callBack }: BlockFormProps) {
+    const { id } = useParams();
     const [open, setOpen] = useState(false);
-    const [block, setBlock] = useState<Block>({
+    const [block, setBlock] = useState<Block>(initialBlock ?? {
         id: undefined,
         name: "",
     });
     const [addresses, setAddresses] = useState<Address[]>([]);
     const alreadyExistsAnGhostStreet = addresses.some((address) => address.street === "" || address.zip_code === "");
+
+    useEffect(() => {
+        if (initialBlock) {
+            const block: Block = {
+                id: initialBlock.id,
+                name: initialBlock.name,
+            }
+            setBlock(block);
+            const addresses: Address[] = initialBlock.addresses.map((address) => ({
+                id: address.id.toString(),
+                street: address.street,
+                zip_code: address.zipCode,
+            }));
+            setAddresses(addresses);
+        }
+    }, [initialBlock]);
 
     const handleAddAddress = () => {
         if (alreadyExistsAnGhostStreet) {
@@ -49,7 +90,7 @@ export function AddBlock() {
         }))
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const addressesToSave = addresses.map((address) => {
             if (address.id.startsWith("temp-")) {
                 return {
@@ -59,13 +100,29 @@ export function AddBlock() {
             }
             return address;
         });
-        const body = {
-            block,
-            ...(addressesToSave?.length > 0 ? { addresses: addressesToSave } : {}),
+        const body: UpsertBlockDto = {
+            id: block.id ? Number(block.id) : undefined,
+            name: block.name,
+            addresses: addressesToSave.map((address) => ({
+                id: address.id ? Number(address.id) : undefined,
+                street: address.street,
+                zipCode: address.zip_code,
+            })),
         }
-        console.log(JSON.stringify(body, null, 2));
+        try {
+            const response = await axiosV2.post(`territories/${id}/blocks`, body);
+            if (!response.data || response.status > 299) {
+                throw new Error("Erro ao cadastrar quadra");
+            }
+            toast.success("Quadra cadastrada com sucesso");
+            console.log(response.data);
+            setOpen(false);
+            callBack();
+        } catch (error) {
+            toast.error("Erro ao cadastrar quadra");
+            console.error(error);
+        }
 
-        setOpen(false);
     }
 
     const canSubmit = (addresses?.length > 0 ? addresses.some((address) => address.street !== "" || address.zip_code !== "") : true) && block.name !== "";
@@ -116,11 +173,6 @@ export function AddBlock() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            {/* <datalist id='street'>
-          <option value="Rua João Pessoa">12505707</option>
-          <option value="Rua Nova João Pessoa">12505708</option>
-          <option value="Rua Carlos Tomes">12606380</option>
-        </datalist> */}
         </>
     )
 }

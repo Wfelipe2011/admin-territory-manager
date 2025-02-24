@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 import { Block, BlockAddress, Territory } from "./type";
 import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
 import { Button, Input, Label, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
-import { AddBlock } from "./ClientSideAddBlock";
+import { BlockForm } from "./ClientSideAddBlock";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 const axiosV1 = new AxiosAdapter(undefined, "v1");
 const axiosV2 = new AxiosAdapter(undefined, "v2");
@@ -20,7 +20,6 @@ const debounce = (func: () => void, delay: number) => {
 
 export function ClientSideTerritoryDetails() {
     const [territory, setTerritory] = useState<Territory>({} as Territory);
-    const [filter, setFilter] = useState<string>("");
     const [blocks, setBlocks] = useState<Block[]>([]);
     const [selectedBlock, setSelectedBlock] = useState<string>();
     const { id } = useParams();
@@ -31,8 +30,11 @@ export function ClientSideTerritoryDetails() {
             if (!response.data || response.status > 299) {
                 throw new Error("Quadras não encontradas");
             }
-            setBlocks(response.data);
-            setSelectedBlock(response.data[0]?.id.toString());
+            const blocks = response.data.sort((a, b) => a.name.localeCompare(b.name));
+            setBlocks(blocks);
+            if (!selectedBlock) {
+                setSelectedBlock(blocks[0]?.id.toString());
+            }
         } catch (error) {
             toast.error("Erro ao buscar quadras");
             console.error(error);
@@ -44,8 +46,8 @@ export function ClientSideTerritoryDetails() {
 
     const fetchTerritory = useCallback(async (filter?: string) => {
         try {
-            const queries = filter ? `?round=1&filter=${filter}` : "?round=1";
-            const response = await axiosV1.get<Territory>(`territories/${id}${queries}`);
+            const queries = filter ? `?filter=${filter}` : "";
+            const response = await axiosV2.get<Territory>(`territories/${id}${queries}`);
 
             if (!response.data || response.status > 299) {
                 throw new Error("Território não encontrado");
@@ -60,77 +62,37 @@ export function ClientSideTerritoryDetails() {
         fetchTerritory();
     }, [fetchTerritory]);
 
-    useEffect(() => {
-        debounce(() => {
-            fetchTerritory(filter)
-        }, 1000);
-        return () => {
-            clearTimeout(filterTimeout);
-        }
-    }, [filter, fetchTerritory]);
-
-    const updateTerritoryName = (value: string) => {
-        setTerritory((prev) => ({ ...prev, territoryName: value }));
-    }
-
-    const submitUpdate = async () => {
-        try {
-            // const response = await axios.put(`territories/${id}`, {
-            //     territoryName: territory.territoryName
-            // });
-            // if (response.status > 299) {
-            //     throw new Error("Erro ao atualizar território");
-            // }
-            // toast.success("Território atualizado com sucesso");
-            toast.error("Não implementado")
-        } catch (error) {
-            toast.error("Erro ao atualizar território");
-            console.error(error);
-        }
-    }
-
+    const currentBlock = blocks.find((block) => block.id === Number(selectedBlock));
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
-                <h1 className="text-3xl font-bold text-slate-700">Território:</h1>
-                <div className="grid grid-cols-12 gap-2">
-                    <Label className="text-md text-slate-700 col-span-12">Nome do território</Label>
-                    <Input type="text" placeholder="Nome do território" value={territory?.territoryName} onChange={(e) => updateTerritoryName(e.target.value)} className="col-span-11" />
-                    <Button className="col-span-1" onClick={submitUpdate}><SaveIcon /></Button>
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl font-bold text-slate-700">{territory.territoryName}</h1>
+                    <BlockForm callBack={fetchBlocks} />
                 </div>
             </div>
-            <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
-                <h1 className="text-2xl font-bold text-slate-700">Filtrar:</h1>
-                <div className="grid grid-cols-12 gap-2">
-                    <Label className="text-md text-slate-700 col-span-12">Pesquise o território</Label>
-                    <Input type="text" placeholder="Pesquise o território" value={filter} onChange={(e) => setFilter(e.target.value)} className="col-span-6" />
-                    <div className="col-span-6 flex justify-end">
-                        <AddBlock />
-                    </div>
-                </div>
-            </div>
-            <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
+            <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md relative">
                 <Tabs value={selectedBlock} onValueChange={(value) => setSelectedBlock(value)}>
-                    <TabsList className="gap-4 bg-white" >
-                        {blocks.map((block) => (
-                            <TabsTrigger
-                                key={block.id}
-                                value={block.id.toString()}
-                                className="data-[state=active]:bg-primary data-[state=active]:text-white bg-slate-200 hover:bg-secondary"
-                            >
-                                {block.name}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
+                    <div className="flex items-start overflow-x-auto h-14">
+                        <TabsList className="gap-4 bg-white">
+                            {blocks.map((block) => (
+                                <TabsTrigger
+                                    key={block.id}
+                                    value={block.id.toString()}
+                                    className="data-[state=active]:bg-primary data-[state=active]:text-white bg-slate-200 hover:bg-secondary shadow-sm drop-shadow-sm rounded-md"
+                                >
+                                    {block.name}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </div>
                     <div className="flex flex-col gap-2 mt-4">
-                        <h1 className="text-2xl font-bold text-slate-700">Endereços:</h1>
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-2xl font-bold text-slate-700">Endereços:</h1>
+                            <BlockForm block={currentBlock} callBack={fetchBlocks} />
+                        </div>
                         {blocks.map((block) => (
                             <TabsContent key={block.id} value={block.id.toString()}>
-                                {/* {block.addresses.map((address) => (
-                                    <div key={address.id}>
-                                        <span className="text-slate-700">{address.street}</span>
-                                    </div>
-                                ))} */}
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -170,7 +132,7 @@ const legendas = [
     { name: "Escola" },
     { name: "Residência" },
     { name: "Prédio" },
-  ]
+]
 interface House {
     id: number;
     dontVisit: boolean;
@@ -189,6 +151,7 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
     const [houses, setHouses] = useState<House[]>([]);
     const [editingHouse, setEditingHouse] = useState<House>();
     const [deletingHouse, setDeletingHouse] = useState<House>();
+    const [draggedItem, setDraggedItem] = useState<House | null>(null);
     const { id } = useParams();
 
     const fetchHouses = useCallback(async () => {
@@ -198,14 +161,37 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
             if (!response.data || response.status > 299) {
                 throw new Error("Erro ao buscar casas");
             }
-            setHouses(response.data.house);
+            const houses = response.data.house.sort((a, b) => a.order - b.order);
+            setHouses(houses);
         } catch (error) {
             console.error(error);
         }
     }, [blockId, id]);
+
     useEffect(() => {
         fetchHouses();
     }, [fetchHouses]);
+
+    const updateHouse = async (house: House) => {
+        try {
+            const body = {
+                streetId: address.id,
+                number: house.number,
+                legend: house.legend,
+                dontVisit: house.dontVisit,
+                territoryId: Number(id),
+                blockId: blockId
+            }
+            const response = await axiosV1.put(`houses/${house.id}`, body);
+            if (!response.data || response.status > 299) {
+                throw new Error("Erro ao atualizar casa");
+            }
+            toast.success("Casa atualizada com sucesso");
+        } catch (error) {
+            toast.error("Erro ao atualizar casa");
+            console.error(error);
+        }
+    }
 
     const handleEditHouse = (house: House) => {
         if (editingHouse?.id === house.id) {
@@ -215,11 +201,59 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                 const newHouse = { ...oldHouse, ...editingHouse };
                 return prev.map(h => h.id === house.id ? newHouse : h);
             })
+            updateHouse(editingHouse);
             setEditingHouse(undefined);
             return;
         }
         setEditingHouse(house);
     }
+
+    const saveNewOrder = async () => {
+        try {
+            const response = await axiosV1.post(`houses/order`, {
+                houses: houses.map((house, index) => ({
+                    id: house.id,
+                    order: index + 1
+                }))
+            })
+            if (!response.data || response.status > 299) {
+                throw new Error("Erro ao salvar nova ordem");
+            }
+            toast.success("Ordem salva com sucesso");
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleDragStart = (e: React.DragEvent, house: House) => {
+        setDraggedItem(house);
+        e.currentTarget.classList.add('opacity-50');
+    };
+
+    const handleDragOver = (e: React.DragEvent, targetHouse: House) => {
+        e.preventDefault();
+        if (!draggedItem || draggedItem.id === targetHouse.id) return;
+
+        const draggedIndex = houses.findIndex(h => h.id === draggedItem.id);
+        const targetIndex = houses.findIndex(h => h.id === targetHouse.id);
+
+        if (draggedIndex === targetIndex) return;
+
+        const newHouses = [...houses];
+        const [removed] = newHouses.splice(draggedIndex, 1);
+        newHouses.splice(targetIndex, 0, removed);
+
+        setHouses(newHouses.map((house, index) => ({
+            ...house,
+            order: index + 1
+        })));
+    };
+
+    const handleDragEnd = (e: React.DragEvent) => {
+        setDraggedItem(null);
+        e.currentTarget.classList.remove('opacity-50');
+        saveNewOrder();
+    };
 
     return (
         <Dialog open={opened} onOpenChange={setOpened}>
@@ -229,14 +263,17 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
             <DialogContent className="min-w-[40vw] max-w-[80vw] w-full lg:min-w-[800px] lg:max-w-[1000px] md:min-w-[600px] md:max-w-[80vw]">
                 <DialogHeader>
                     <DialogTitle>{address.street}</DialogTitle>
+                    
                 </DialogHeader>
                 <DialogDescription>
+                    <span>Adicionar opção de cadastrar nova casa</span> <br />
                     <span>{address.zipCode}</span>
                 </DialogDescription>
                 <div className="overflow-y-auto max-h-[500px]">
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-[40px]"></TableHead>
                                 <TableHead>N° Casa</TableHead>
                                 <TableHead>Legenda</TableHead>
                                 <TableHead>Não Bater</TableHead>
@@ -246,10 +283,22 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                         </TableHeader>
                         <TableBody>
                             {houses.map((house) => (
-                                <TableRow key={house.id}>
+                                <TableRow
+                                    key={house.id}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, house)}
+                                    onDragOver={(e) => handleDragOver(e, house)}
+                                    onDragEnd={handleDragEnd}
+                                    className="hover:bg-gray-100"
+                                >
+                                    <TableCell className="w-[40px] cursor-move">
+                                        <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9h8M8 15h8" />
+                                        </svg>
+                                    </TableCell>
                                     <TableCell className="w-4/12">
                                         {editingHouse?.id === house.id ? (
-                                            <Input  type="text" value={editingHouse.number} onChange={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
+                                            <Input type="text" value={editingHouse.number} onChange={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
                                         ) : (
                                             house.number
                                         )}
@@ -280,7 +329,6 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                                                     <SelectItem value="true">Sim</SelectItem>
                                                     <SelectItem value="false">Não</SelectItem>
                                                 </SelectContent>
-
                                             </Select>
                                         ) :
                                             house.dontVisit ? "Sim" : "Não"
@@ -288,7 +336,6 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                                     </TableCell>
                                     <TableCell className="w-3/12">
                                         <div className="flex gap-2 justify-center">
-
                                             {editingHouse && editingHouse.id !== house.id ? (
                                                 <Button disabled variant="outline" size="icon" title={"Edição em andamento na casa " + house.number} className="cursor-not-allowed"><PencilIcon className="text-blue-500 opacity-90 animate-pulse" /></Button>
                                             ) : (
@@ -301,7 +348,6 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                                     </TableCell>
                                     <TableCell className="w-3/12">
                                         <div className="flex gap-2 justify-center">
-                                            {/* <Button variant="outline" size="icon" title="Deletar casa"><TrashIcon className="text-red-500" /></Button> */}
                                             {deletingHouse && deletingHouse.id === house.id ? (
                                                 <>
                                                     <Button variant="outline" size="icon" title={"Confirmar"}><SaveIcon className="text-green-500" /></Button>
