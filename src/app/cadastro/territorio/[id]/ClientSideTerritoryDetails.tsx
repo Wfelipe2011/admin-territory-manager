@@ -6,17 +6,11 @@ import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { toast } from "react-hot-toast";
 import { Block, BlockAddress, Territory } from "./type";
 import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
-import { Button, Input, Label, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
+import { Button, Input, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { BlockForm } from "./ClientSideAddBlock";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 const axiosV1 = new AxiosAdapter(undefined, "v1");
 const axiosV2 = new AxiosAdapter(undefined, "v2");
-
-let filterTimeout: NodeJS.Timeout;
-const debounce = (func: () => void, delay: number) => {
-    clearTimeout(filterTimeout);
-    filterTimeout = setTimeout(func, delay);
-}
 
 export function ClientSideTerritoryDetails() {
     const [territory, setTerritory] = useState<Territory>({} as Territory);
@@ -39,7 +33,7 @@ export function ClientSideTerritoryDetails() {
             toast.error("Erro ao buscar quadras");
             console.error(error);
         }
-    }, [id]);
+    }, [id, selectedBlock]);
     useEffect(() => {
         fetchBlocks();
     }, [fetchBlocks]);
