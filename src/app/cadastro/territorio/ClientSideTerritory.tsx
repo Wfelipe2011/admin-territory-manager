@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Territory, TerritoryTypes } from "./type";
 import { Button } from "@/components/ui/button";
-import { DialogClose, DialogFooter, DialogHeader } from "@/components/ui/dialog";
+import { DialogHeader } from "@/components/ui/dialog";
 import {
   Dialog,
   DialogTrigger,
@@ -27,8 +27,6 @@ import {
   MapIcon,
   PenIcon,
   TrashIcon,
-  PlusIcon,
-  MinusIcon,
   EyeIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -44,8 +42,6 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { TerritoryFilter } from "@/components/TerritoryFilter";
-import { Label } from "@radix-ui/react-label";
-import { Separator } from "@radix-ui/react-separator";
 
 const axios = new AxiosAdapter();
 interface ClientSideTerritoryProps {
