@@ -70,7 +70,7 @@ async function ListTerritory(ctx: any) {
   const territoryTypes = await fetchTerritoryTypes();
 
   return (
-    <div className="w-full m-auto md:max-w-[70vw] h-full p-4">
+    <div className="w-full m-auto md:max-w-[70vw] h-full">
       <ClientSideTerritory
         territories={territories}
         pagination={pagination}

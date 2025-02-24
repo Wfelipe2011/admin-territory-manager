@@ -25,7 +25,7 @@ export function SearchInterface({
 }) {
   const [open, onOpenChange] = useState(false)
   return (
-    <div className="w-full flex items-center justify-between gap-4 pt-6 ">
+    <div className="w-full flex items-center justify-between gap-4">
       <div className="relative">
         <Input
           type="search"
