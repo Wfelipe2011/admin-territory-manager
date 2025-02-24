@@ -22,6 +22,7 @@ export function ClientSideTerritoryDetails() {
             setTerritory(response.data);
         } catch (error) {
             toast.error("Erro ao buscar território");
+            console.error(error);
         }
     }, [id]);
     useEffect(() => {

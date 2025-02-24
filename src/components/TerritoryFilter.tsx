@@ -3,7 +3,6 @@
 import { Search } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
 import { ChangeEvent } from 'react'
 
 export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -17,7 +16,7 @@ export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElemen
 
 export function TerritoryFilter({
   title,
-  selectedBlock,
+  // selectedBlock,
   tabs,
   onTabChange,
   onSearch,
