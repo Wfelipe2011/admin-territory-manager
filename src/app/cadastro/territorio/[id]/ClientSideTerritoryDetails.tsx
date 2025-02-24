@@ -6,7 +6,7 @@ import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { toast } from "react-hot-toast";
 import { Block, BlockAddress, Territory } from "./type";
 import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
-import { Button, Input, Label, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Separator, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
+import { Button, Input, Label, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { AddBlock } from "./ClientSideAddBlock";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 const axiosV1 = new AxiosAdapter(undefined, "v1");
@@ -67,7 +67,7 @@ export function ClientSideTerritoryDetails() {
         return () => {
             clearTimeout(filterTimeout);
         }
-    }, [filter]);
+    }, [filter, fetchTerritory]);
 
     const updateTerritoryName = (value: string) => {
         setTerritory((prev) => ({ ...prev, territoryName: value }));
@@ -202,7 +202,7 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
         } catch (error) {
             console.error(error);
         }
-    }, [address]);
+    }, [address, blockId, id]);
     useEffect(() => {
         fetchHouses();
     }, [fetchHouses]);

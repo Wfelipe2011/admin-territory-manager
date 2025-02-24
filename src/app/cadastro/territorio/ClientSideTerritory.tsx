@@ -26,7 +26,6 @@ import {
   ChevronRight,
   MapIcon,
   PenIcon,
-  TrashIcon,
   EyeIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -59,7 +58,6 @@ export function ClientSideTerritory({
   territoryTypes,
 }: ClientSideTerritoryProps) {
   const [editMode, setEditMode] = useState<number>(0);
-  const [deleteMode, setDeleteMode] = useState<number>(0);
   const [territories, setTerritories] = useState<Territory[]>(territoriesRaw);
   const router = useRouter();
 
@@ -119,10 +117,6 @@ export function ClientSideTerritory({
     }
     setEditMode(0);
   };
-
-  const submitDelete = async (territoryId: number) => {
-    setDeleteMode((prev) => prev === territoryId ? 0 : territoryId);
-  }
 
   const handlePage = (page: number) => {
     const newPage = pagination.page + page;
