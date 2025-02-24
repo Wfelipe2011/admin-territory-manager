@@ -202,7 +202,7 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
         } catch (error) {
             console.error(error);
         }
-    }, [address, blockId, id]);
+    }, [blockId, id]);
     useEffect(() => {
         fetchHouses();
     }, [fetchHouses]);
