@@ -3,18 +3,18 @@ interface Territory {
     territoryName: string;
     imageUrl: string;
     hasRounds: boolean;
-    history: History[];
-    blocks: Block[];
+    history: TerritoryHistory[];
+    blocks: TerritoryBlock[];
 }
 
-interface History {
+interface TerritoryHistory {
     overseer: string;
     initialDate: string;
     expirationDate: string;
     finished: boolean;
 }
 
-interface Block {
+interface TerritoryBlock {
     id: number;
     name: string;
     positiveCompleted: number;
@@ -26,4 +26,16 @@ interface Block {
     }
 }
 
-export type { Territory }
+interface Block {
+    id: number;
+    name: string;
+    addresses: BlockAddress[];
+}
+
+interface BlockAddress {
+    id: number;
+    street: string;
+    zipCode: string;
+}
+
+export type { Territory, Block, BlockAddress }
