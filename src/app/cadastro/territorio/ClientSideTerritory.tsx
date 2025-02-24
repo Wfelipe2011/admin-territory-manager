@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Territory, TerritoryTypes } from "./type";
 import { Button } from "@/components/ui/button";
-import { DialogHeader } from "@/components/ui/dialog";
+import { DialogClose, DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import {
   Dialog,
   DialogTrigger,
@@ -26,6 +26,10 @@ import {
   ChevronRight,
   MapIcon,
   PenIcon,
+  TrashIcon,
+  PlusIcon,
+  MinusIcon,
+  EyeIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -40,6 +44,8 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { TerritoryFilter } from "@/components/TerritoryFilter";
+import { Label } from "@radix-ui/react-label";
+import { Separator } from "@radix-ui/react-separator";
 
 const axios = new AxiosAdapter(undefined, "v2");
 interface ClientSideTerritoryProps {
@@ -57,6 +63,7 @@ export function ClientSideTerritory({
   territoryTypes,
 }: ClientSideTerritoryProps) {
   const [editMode, setEditMode] = useState<number>(0);
+  const [deleteMode, setDeleteMode] = useState<number>(0);
   const [territories, setTerritories] = useState<Territory[]>(territoriesRaw);
   const router = useRouter();
 
@@ -116,6 +123,10 @@ export function ClientSideTerritory({
     setEditMode(0);
   };
 
+  const submitDelete = async (territoryId: number) => {
+    setDeleteMode((prev) => prev === territoryId ? 0 : territoryId);
+  }
+
   const handlePage = (page: number) => {
     const newPage = pagination.page + page;
     if (newPage < 1 || newPage > totalPage) {
@@ -151,9 +162,10 @@ export function ClientSideTerritory({
         tabs={territoryTypes.map((type) => ({
           value: String(type.id),
           label: type.name,
-        }))
-        }
-      />
+        }))}
+      >
+        {/* <AddBlock /> */}
+      </TerritoryFilter>
       <Table className="rounded-md shadow-md rounded-b-none bg-white">
         <TableCaption className="w-full bg-white p-2 rounded-md rounded-t-none shadow-md mt-0.5">
           <div className="flex justify-between">
@@ -203,7 +215,7 @@ export function ClientSideTerritory({
             <TableHead>Territorio</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Mapa</TableHead>
-            <TableHead>Ações</TableHead>
+            <TableHead className="flex items-center justify-center">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -230,12 +242,54 @@ export function ClientSideTerritory({
                   imageUrl={territory.imageUrl}
                   name={territory.name}
                 />
-                <CellTerritoryActions
-                  territoryId={territory.id}
-                  editMode={editMode}
-                  setEditMode={handleEditMode}
-                  submitUpdate={submitUpdate}
+                <CellTerritoryAction
+                  actions={[
+                    {
+                      toggleMode: editMode === territory.id,
+                      setToggleMode: () => handleEditMode(territory.id),
+                      submitAction: () => submitUpdate(territory.id),
+                      icon: {
+                        jsx: <CheckIcon />,
+                        className: "text-green-500 hover:text-green-700"
+                      },
+                      secondaryIcon: {
+                        jsx: <PenIcon />,
+                        className: "text-blue-500 hover:text-blue-700"
+                      }
+                    },
+                    {
+                      toggleMode: deleteMode === territory.id,
+                      setToggleMode: () => setDeleteMode(territory.id),
+                      submitAction: () => submitDelete(territory.id),
+                      icon: {
+                        jsx: <CheckIcon />,
+                        className: "text-green-500 hover:text-green-700"
+                      },
+                      secondaryIcon: {
+                        jsx: <TrashIcon />,
+                        className: "text-red-500 hover:text-red-700"
+                      }
+                    },
+                    {
+                      toggleMode: false,
+                      setToggleMode: () => {
+                        router.push(`/cadastro/territorio/${territory.id}`);
+                      },
+                      submitAction: () => {
+                        router.push(`/cadastro/territorio/${territory.id}`);
+                      },
+                      icon: {
+                        jsx: <EyeIcon />,
+                        className: "text-yellow-500 hover:text-yellow-700"
+                      },
+                      secondaryIcon: {
+                        jsx: <EyeIcon />,
+                        className: "text-yellow-500 hover:text-yellow-700"
+                      }
+                    }
+                  ]}
                 />
+
               </TableRow>
             );
           })}
@@ -243,6 +297,132 @@ export function ClientSideTerritory({
       </Table>
     </>
   );
+}
+
+interface AddBlockProps {
+
+}
+interface Block {
+  id: string | undefined;
+  name: string;
+}
+interface Address {
+  id: string;
+  street: string;
+  zip_code: string;
+}
+function AddBlock({ }: AddBlockProps) {
+  const [open, setOpen] = useState(false);
+  const [block, setBlock] = useState<Block>({
+    id: undefined,
+    name: "",
+  });
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const alreadyExistsAnGhostStreet = addresses.some((address) => address.street === "" || address.zip_code === "");
+
+  const handleAddAddress = () => {
+    if (alreadyExistsAnGhostStreet) {
+      return;
+    }
+
+    const uuid = crypto.randomUUID();
+    const address: Address = {
+      id: "temp-" + uuid,
+      street: "",
+      zip_code: "",
+    }
+    setAddresses([...addresses, address]);
+  }
+
+  const removeAddress = (address: Address) => {
+    setAddresses((prev) => prev.filter((item) => {
+      return item.id !== address.id;
+    }))
+  }
+
+  const updateAddress = (street: Address) => {
+    setAddresses((prev) => prev.map((item) => {
+      if (street.id === item.id) {
+        return street;
+      }
+      return item;
+    }))
+  }
+
+  const handleSubmit = () => {
+    const addressesToSave = addresses.map((address) => {
+      if (address.id.startsWith("temp-")) {
+        return {
+          ...address,
+          id: undefined,
+        }
+      }
+      return address;
+    });
+    const body = {
+      block,
+      ...(addressesToSave?.length > 0 ? { addresses: addressesToSave } : {}),
+    }
+    console.log(JSON.stringify(body, null, 2));
+
+    setOpen(false);
+  }
+
+  const canSubmit = (addresses?.length > 0 ? addresses.some((address) => address.street !== "" || address.zip_code !== "") : true) && block.name !== "";
+  return (
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>{block.id ? "Editar" : "Adicionar"} quadra</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{block.id ? "Editar" : "Cadastrar"} quadra</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <Label>
+              <span className="text-sm font-medium">Nome do quadra</span>
+              <Input type="text" placeholder="Digitar nome da quadra" list="street" value={block.name} onChange={(e) => setBlock({ ...block, name: e.target.value })} />
+            </Label>
+
+            <Separator className="border-b-2 border-b-gray-200" />
+
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center gap-2">
+                <h2 className="text-lg font-medium">Ruas:</h2>
+                <Button variant="outline" className="w-9 text-green-500" disabled={alreadyExistsAnGhostStreet} onClick={handleAddAddress}><PlusIcon /></Button>
+              </div>
+              {addresses.map((address) => {
+                const formatZipCode = (value: string) => {
+                  const valueRaw = value.replace(/\D/g, '');
+                  return valueRaw.replace(/(\d{5})(\d{3})/, "$1-$2");
+                }
+
+                return (
+                  <div className="grid grid-cols-10 gap-3" key={address.id}>
+                    <Input type="text" placeholder="Digitar nome da rua" list="street" className="col-span-6" name="street" value={address.street} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
+                    <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" value={formatZipCode(address.zip_code)} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
+                    <Button variant="outline" className="p-2 text-red-500 col-span-1" onClick={() => removeAddress(address)}><MinusIcon /></Button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button disabled={!canSubmit} title={!canSubmit ? "Preencha todos os campos" : ""} onClick={handleSubmit}>{block.id ? "Editar" : "Cadastrar"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* <datalist id='street'>
+        <option value="Rua João Pessoa">12505707</option>
+        <option value="Rua Nova João Pessoa">12505708</option>
+        <option value="Rua Carlos Tomes">12606380</option>
+      </datalist> */}
+    </>
+  )
 }
 
 interface TerritoryNameProps {
@@ -343,33 +523,46 @@ function CellTerritoryImage({ imageUrl, name }: CellTerritoryImageProps) {
   );
 }
 
-interface CellTerritoryActionsProps {
-  territoryId: number;
-  editMode: number;
-  setEditMode: (value: number) => void;
-  submitUpdate: (territoryId: number) => void;
+interface CellTerritoryActionProps {
+  actions: {
+    icon: {
+      jsx: React.ReactNode
+      className: string
+    };
+    secondaryIcon: {
+      jsx: React.ReactNode
+      className: string
+    };
+    toggleMode: boolean;
+    setToggleMode: (value: boolean) => void;
+    submitAction: () => void;
+  }[]
 }
-function CellTerritoryActions({
-  territoryId,
-  editMode,
-  setEditMode,
-  submitUpdate,
-}: CellTerritoryActionsProps) {
+function CellTerritoryAction({ actions }: CellTerritoryActionProps) {
   return (
-    <TableCell>
-      {editMode === territoryId ? (
-        <Button
-          variant="outline"
-          className="text-green-500 hover:text-green-700"
-          onClick={() => submitUpdate(territoryId)}
-        >
-          <CheckIcon />
-        </Button>
-      ) : (
-        <Button variant="outline" onClick={() => setEditMode(territoryId)}>
-          <PenIcon />
-        </Button>
-      )}
+    <TableCell className="flex gap-1 items-center justify-center">
+      {actions.map((action) => {
+        if (action.toggleMode) {
+          return (
+            <Button
+              variant="outline"
+              className={action.icon.className}
+              onClick={action.submitAction}
+            >
+              {action.icon.jsx}
+            </Button>
+          );
+        }
+        return (
+          <Button
+            variant="outline"
+            className={action.secondaryIcon.className}
+            onClick={() => action.setToggleMode(true)}
+          >
+            {action.secondaryIcon.jsx}
+          </Button>
+        )
+      })}
     </TableCell>
-  );
+  )
 }

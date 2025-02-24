@@ -12,13 +12,21 @@ export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElemen
   tabs: Array<{ value: string; label: string }>;
   onTabChange: (value: string) => void;
   onSearch: (value: ChangeEvent<HTMLInputElement>) => void;
+  children?: React.ReactNode;
 }
 
-export function TerritoryFilter(props: TerritoryFilterProps) {
-  const { ...rest } = props;
+export function TerritoryFilter({
+  title,
+  selectedBlock,
+  tabs,
+  onTabChange,
+  onSearch,
+  children,
+  ...rest
+}: TerritoryFilterProps) {
   return (
     <div className="p-4 max-w-4xl mx-auto" {...rest}>
-      <h1 className="text-2xl font-semibold mb-6">{props.title}</h1>
+      <h1 className="text-2xl font-semibold mb-6">{title}</h1>
 
       <div className="space-y-4">
         {/* Search bar */}
@@ -27,7 +35,7 @@ export function TerritoryFilter(props: TerritoryFilterProps) {
           <Input
             placeholder="Pesquisar"
             className="pl-10"
-            onChange={props.onSearch}
+            onChange={onSearch}
           />
         </div>
 
@@ -35,10 +43,10 @@ export function TerritoryFilter(props: TerritoryFilterProps) {
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4 items-center flex-1">
             {/* Property type tabs */}
-            <Tabs defaultValue={props.tabs[0].value}>
+            <Tabs defaultValue={tabs[0].value}>
               <TabsList>
-                {props.tabs.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} onClick={() => props.onTabChange(tab.value)}>
+                {tabs.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value} onClick={() => onTabChange(tab.value)}>
                     {tab.label}
                   </TabsTrigger>
                 ))}
@@ -47,7 +55,8 @@ export function TerritoryFilter(props: TerritoryFilterProps) {
           </div>
 
           {/* Add button */}
-          <Button>ADICIONAR</Button>
+          {/* <Button>ADICIONAR</Button> */}
+          {children}
         </div>
       </div>
     </div>
