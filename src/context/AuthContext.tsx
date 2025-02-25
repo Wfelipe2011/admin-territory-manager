@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  ReactNode,
-} from "react";
+import { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { parseCookies, setCookie, destroyCookie } from "nookies";
 import { AuthContextType, User } from "@/types/auth";
@@ -52,15 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     destroyCookie(null, "token");
     setUser(null);
     const cookieStore = await cookies();
-    cookieStore.delete('token');
+    cookieStore.delete("token");
     router.push("/login");
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextType {
