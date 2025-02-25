@@ -87,7 +87,7 @@ export function ReportsDrawer() {
   return (
     <Sheet>
       {isBellActive && (
-        <SheetTrigger className="absolute right-2 top-0 flex min-h-10 min-w-10 items-center justify-center z-50 text-white cursor-pointer">
+        <SheetTrigger className="fixed right-2 top-0 flex min-h-10 min-w-10 items-center justify-center z-50 text-white cursor-pointer">
           <Bell />
           <div className="absolute right-2 top-2 h-2 w-2 animate-ping rounded-full bg-red-500"></div>
         </SheetTrigger>
