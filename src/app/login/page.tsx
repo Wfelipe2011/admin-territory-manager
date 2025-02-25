@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 export default function Login() {
+
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const { login } = useAuth();
