@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { toast } from "react-hot-toast";
 import { BlockAddress, House } from "./type";
-import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
+import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon, PlusIcon } from "lucide-react";
 import { Button, Input, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { BlockForm } from "./ClientSideAddBlock";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -216,9 +216,9 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                 <DialogHeader>
                     <DialogTitle>{address.street}</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                    <span>Adicionar opção de cadastrar nova casa</span> <br />
-                    <span>{address.zipCode}</span>
+                <DialogDescription className="flex justify-between items-center">
+                    <span>Essa rua possui {houses.length} casa{houses.length > 1 ? "s" : ""}</span>
+                    <Button variant="outline" className="flex items-center gap-2 bg-green-500 text-white hover:text-green-500 hover:border-green-500 shadow-md hover:shadow-sm">Adicionar casa<PlusIcon /></Button>
                 </DialogDescription>
                 <div className="overflow-y-auto max-h-[500px]">
                     <Table>
