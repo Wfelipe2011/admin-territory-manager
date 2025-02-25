@@ -1,16 +1,11 @@
 "use client";
 
-import {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  ReactNode,
-} from "react";
+import { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { parseCookies, setCookie, destroyCookie } from "nookies";
 import { AuthContextType, User } from "@/types/auth";
 import { URL_API } from "@/infra/AxiosAdapter";
+import { deleteAuthToken } from "@/utils/cookies";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -47,17 +42,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     destroyCookie(null, "token");
     setUser(null);
+    await deleteAuthToken();
     router.push("/login");
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextType {
