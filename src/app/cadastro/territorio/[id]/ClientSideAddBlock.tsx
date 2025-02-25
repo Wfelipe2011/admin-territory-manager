@@ -1,14 +1,15 @@
 'use client'
 
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogTrigger, DialogClose, DialogFooter, Button, Input, Label, Separator } from "@/components/ui";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogTrigger, DialogClose, DialogFooter, Button, Input, Label, Separator, Datalist } from "@/components/ui";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import type { Block as BlockType } from "./type";
+import type { Address as AddressType } from "./hooks";
+import { formatZipCode } from "@/lib/formatZipCode";
 const axiosV2 = new AxiosAdapter(undefined, "v2");
-
 
 interface UpsertBlockDto {
     id?: number;
@@ -25,6 +26,7 @@ interface UpsertAddressDto {
 interface BlockFormProps {
     block?: BlockType;
     callBack: () => void;
+    addresses: AddressType[];
 }
 interface Block {
     id: number | undefined;
@@ -35,7 +37,7 @@ interface Address {
     street: string;
     zip_code: string;
 }
-export function BlockForm({ block: initialBlock, callBack }: BlockFormProps) {
+export function BlockForm({ block: initialBlock, callBack, addresses: existingAddresses }: BlockFormProps) {
     const { id } = useParams();
     const [open, setOpen] = useState(false);
     const [block, setBlock] = useState<Block>(initialBlock ?? {
@@ -60,6 +62,12 @@ export function BlockForm({ block: initialBlock, callBack }: BlockFormProps) {
             setAddresses(addresses);
         }
     }, [initialBlock]);
+
+    useEffect(() => {
+        return () => {
+            setOpen(false)
+        }
+    }, [])
 
     const handleAddAddress = () => {
         if (alreadyExistsAnGhostStreet) {
@@ -106,7 +114,7 @@ export function BlockForm({ block: initialBlock, callBack }: BlockFormProps) {
             addresses: addressesToSave.map((address) => ({
                 id: address.id ? Number(address.id) : undefined,
                 street: address.street,
-                zipCode: address.zip_code,
+                zipCode: address.zip_code?.replace(/\D/g, ''),
             })),
         }
         try {
@@ -126,6 +134,10 @@ export function BlockForm({ block: initialBlock, callBack }: BlockFormProps) {
     }
 
     const canSubmit = (addresses?.length > 0 ? addresses.some((address) => address.street !== "" || address.zip_code !== "") : true) && block.name !== "";
+    const options = existingAddresses.map((address) => ({
+        value: address.name,
+        label: address.name,
+    }));
     return (
         <>
             <Dialog open={open} onOpenChange={setOpen}>
@@ -139,7 +151,7 @@ export function BlockForm({ block: initialBlock, callBack }: BlockFormProps) {
                     <div className="flex flex-col gap-4">
                         <Label>
                             <span className="text-sm font-medium">Nome do quadra</span>
-                            <Input type="text" placeholder="Digitar nome da quadra" list="street" value={block.name} onChange={(e) => setBlock({ ...block, name: e.target.value })} />
+                            <Input type="text" placeholder="Digitar nome da quadra" list="street" defaultValue={block.name} onSelect={(e) => setBlock({ ...block, name: e.target.value })} />
                         </Label>
 
                         <Separator className="border-b-2 border-b-gray-200" />
@@ -150,15 +162,12 @@ export function BlockForm({ block: initialBlock, callBack }: BlockFormProps) {
                                 <Button variant="outline" className="w-9 text-green-500" disabled={alreadyExistsAnGhostStreet} onClick={handleAddAddress}><PlusIcon /></Button>
                             </div>
                             {addresses.map((address) => {
-                                const formatZipCode = (value: string) => {
-                                    const valueRaw = value.replace(/\D/g, '');
-                                    return valueRaw.replace(/(\d{5})(\d{3})/, "$1-$2");
-                                }
-
                                 return (
                                     <div className="grid grid-cols-10 gap-3" key={address.id}>
-                                        <Input type="text" placeholder="Digitar nome da rua" list="street" className="col-span-6" name="street" value={address.street} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
-                                        <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" value={formatZipCode(address.zip_code)} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
+                                        <div className="col-span-6">
+                                            <Datalist options={options} placeholder="Selecione uma rua" defaultValue={address.street} onSelect={(e) => updateAddress({ ...address, street: e.target.value })} />
+                                        </div>
+                                        <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" defaultValue={formatZipCode(address.zip_code)} onSelect={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
                                         <Button variant="outline" className="p-2 text-red-500 col-span-1" onClick={() => removeAddress(address)}><MinusIcon /></Button>
                                     </div>
                                 )

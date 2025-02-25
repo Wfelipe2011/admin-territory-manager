@@ -4,65 +4,32 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { toast } from "react-hot-toast";
-import { Block, BlockAddress, Territory } from "./type";
+import { BlockAddress, House } from "./type";
 import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
 import { Button, Input, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { BlockForm } from "./ClientSideAddBlock";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useAddresses, useBlocks, useTerritory } from "./hooks";
+import { formatZipCode } from "@/lib/formatZipCode";
 const axiosV1 = new AxiosAdapter(undefined, "v1");
-const axiosV2 = new AxiosAdapter(undefined, "v2");
 
 export function ClientSideTerritoryDetails() {
-    const [territory, setTerritory] = useState<Territory>({} as Territory);
-    const [blocks, setBlocks] = useState<Block[]>([]);
-    const [selectedBlock, setSelectedBlock] = useState<string>();
     const { id } = useParams();
-
-    const fetchBlocks = useCallback(async () => {
-        try {
-            const response = await axiosV2.get<Block[]>(`territories/${id}/blocks`);
-            if (!response.data || response.status > 299) {
-                throw new Error("Quadras não encontradas");
-            }
-            const blocks = response.data.sort((a, b) => a.name.localeCompare(b.name));
-            setBlocks(blocks);
-            if (!selectedBlock) {
-                setSelectedBlock(blocks[0]?.id.toString());
-            }
-        } catch (error) {
-            toast.error("Erro ao buscar quadras");
-            console.error(error);
-        }
-    }, [id, selectedBlock]);
-    useEffect(() => {
-        fetchBlocks();
-    }, [fetchBlocks]);
-
-    const fetchTerritory = useCallback(async (filter?: string) => {
-        try {
-            const queries = filter ? `?filter=${filter}` : "";
-            const response = await axiosV2.get<Territory>(`territories/${id}${queries}`);
-
-            if (!response.data || response.status > 299) {
-                throw new Error("Território não encontrado");
-            }
-            setTerritory(response.data);
-        } catch (error) {
-            toast.error("Erro ao buscar território");
-            console.error(error);
-        }
-    }, [id]);
-    useEffect(() => {
-        fetchTerritory();
-    }, [fetchTerritory]);
+    const { territory } = useTerritory(Number(id));
+    const { addresses, fetchAddresses } = useAddresses();
+    const { blocks, selectedBlock, setSelectedBlock, fetchBlocks } = useBlocks(Number(id));
 
     const currentBlock = blocks.find((block) => block.id === Number(selectedBlock));
+    const callBack = () => {
+        fetchBlocks();
+        fetchAddresses();
+    }
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-slate-700">{territory.territoryName}</h1>
-                    <BlockForm callBack={fetchBlocks} />
+                    <h1 className="text-3xl font-bold text-slate-700">{territory.name}</h1>
+                    <BlockForm callBack={callBack} addresses={addresses} />
                 </div>
             </div>
             <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md relative">
@@ -83,7 +50,7 @@ export function ClientSideTerritoryDetails() {
                     <div className="flex flex-col gap-2 mt-4">
                         <div className="flex justify-between items-center">
                             <h1 className="text-2xl font-bold text-slate-700">Endereços:</h1>
-                            <BlockForm block={currentBlock} callBack={fetchBlocks} />
+                            <BlockForm block={currentBlock} callBack={callBack} addresses={addresses} />
                         </div>
                         {blocks.map((block) => (
                             <TabsContent key={block.id} value={block.id.toString()}>
@@ -99,7 +66,7 @@ export function ClientSideTerritoryDetails() {
                                         {block.addresses.map((address) => (
                                             <TableRow key={address.id}>
                                                 <TableCell>{address.street}</TableCell>
-                                                <TableCell>{address.zipCode}</TableCell>
+                                                <TableCell>{formatZipCode(address.zipCode)}</TableCell>
                                                 <TableCell>
                                                     <AddressDialog address={address} blockId={block.id} />
                                                 </TableCell>
@@ -127,15 +94,6 @@ const legendas = [
     { name: "Residência" },
     { name: "Prédio" },
 ]
-interface House {
-    id: number;
-    dontVisit: boolean;
-    legend: string;
-    number: string;
-    street: string;
-    observations: string | null;
-    order: number;
-}
 interface AddressDialogProps {
     address: BlockAddress;
     blockId: number;
@@ -251,13 +209,12 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
 
     return (
         <Dialog open={opened} onOpenChange={setOpened}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button variant="outline" size="icon"><EyeIcon /></Button>
             </DialogTrigger>
             <DialogContent className="min-w-[40vw] max-w-[80vw] w-full lg:min-w-[800px] lg:max-w-[1000px] md:min-w-[600px] md:max-w-[80vw]">
                 <DialogHeader>
                     <DialogTitle>{address.street}</DialogTitle>
-                    
                 </DialogHeader>
                 <DialogDescription>
                     <span>Adicionar opção de cadastrar nova casa</span> <br />
@@ -292,7 +249,7 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                                     </TableCell>
                                     <TableCell className="w-4/12">
                                         {editingHouse?.id === house.id ? (
-                                            <Input type="text" value={editingHouse.number} onChange={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
+                                            <Input type="text" defaultValue={editingHouse.number} onSelect={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
                                         ) : (
                                             house.number
                                         )}

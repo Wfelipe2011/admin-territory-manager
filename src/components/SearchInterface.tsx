@@ -32,7 +32,7 @@ export function SearchInterface({
           type="search"
           placeholder="Pesquise"
           value={searchValue}
-          onChange={onSearchChange}
+          onSelect={onSearchChange}
           className="pl-10 bg-background border rounded-md"
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

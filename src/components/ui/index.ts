@@ -17,4 +17,6 @@ export * from "./table";
 export * from "./tabs";
 export * from "./textarea";
 export * from "./tooltip";
-
+export * from "./command";
+export * from "./combobox";
+export * from "./datalist";

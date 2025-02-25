@@ -1,30 +1,39 @@
 interface Territory {
-    territoryId: number;
-    territoryName: string;
-    imageUrl: string;
-    hasRounds: boolean;
-    history: TerritoryHistory[];
-    blocks: TerritoryBlock[];
-}
-
-interface TerritoryHistory {
-    overseer: string;
-    initialDate: string;
-    expirationDate: string;
-    finished: boolean;
-}
-
-interface TerritoryBlock {
-    id: number;
     name: string;
-    positiveCompleted: number;
-    negativeCompleted: number;
-    connections: number[];
-    signature: {
-        key: string;
-        expirationDate: string;
-    }
+    imageUrl: string;
+    house: House[];
+    totalHouse: number;
+    typeName: string;
 }
+
+interface House {
+    id: number;
+    dontVisit: boolean;
+    legend: string;
+    number: string;
+    street: string;
+    observations: string | null;
+    order: number;
+}
+
+// interface TerritoryHistory {
+//     overseer: string;
+//     initialDate: string;
+//     expirationDate: string;
+//     finished: boolean;
+// }
+
+// interface TerritoryBlock {
+//     id: number;
+//     name: string;
+//     positiveCompleted: number;
+//     negativeCompleted: number;
+//     connections: number[];
+//     signature: {
+//         key: string;
+//         expirationDate: string;
+//     }
+// }
 
 interface Block {
     id: number;
@@ -38,4 +47,4 @@ interface BlockAddress {
     zipCode: string;
 }
 
-export type { Territory, Block, BlockAddress }
+export type { Territory, Block, BlockAddress, House }
