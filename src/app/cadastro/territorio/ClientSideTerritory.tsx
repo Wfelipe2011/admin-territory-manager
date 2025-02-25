@@ -295,7 +295,7 @@ function CellTerritoryName({
           type="text"
           value={name}
           name="name"
-          onSelect={({ target }) => updateName(target.value)}
+          onChange={({ target }) => updateName(target.value)}
         />
       </TableCell>
     );

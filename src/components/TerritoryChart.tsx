@@ -104,12 +104,12 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
             <div className="flex flex-col w-full mb-2">
               <div className="relative">
                 <User className="absolute right-[14px] top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input type="text" placeholder="Dirigente" value={overseer || ""} onSelect={(e) => setOverseer(e.target.value)} className="pr-8 bg-background border rounded-md" />
+                <Input type="text" placeholder="Dirigente" value={overseer || ""} onChange={(e) => setOverseer(e.target.value)} className="pr-8 bg-background border rounded-md" />
               </div>
             </div>
             <div className="flex flex-col w-full mb-2">
               <div className="relative">
-                <Input type="date" placeholder="Data de início" value={expirationDate || ""} onSelect={(e) => setExpirationDate(e.target.value)} className="bg-background border rounded-md" />
+                <Input type="date" placeholder="Data de início" value={expirationDate || ""} onChange={(e) => setExpirationDate(e.target.value)} className="bg-background border rounded-md" />
               </div>
             </div>
             {territory.signature?.key && (

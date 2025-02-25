@@ -151,7 +151,7 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
                     <div className="flex flex-col gap-4">
                         <Label>
                             <span className="text-sm font-medium">Nome do quadra</span>
-                            <Input type="text" placeholder="Digitar nome da quadra" list="street" defaultValue={block.name} onSelect={(e) => setBlock({ ...block, name: e.target.value })} />
+                            <Input type="text" placeholder="Digitar nome da quadra" list="street" value={block.name} onChange={(e) => setBlock({ ...block, name: e.target.value })} />
                         </Label>
 
                         <Separator className="border-b-2 border-b-gray-200" />
@@ -165,9 +165,9 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
                                 return (
                                     <div className="grid grid-cols-10 gap-3" key={address.id}>
                                         <div className="col-span-6">
-                                            <Datalist options={options} placeholder="Selecione uma rua" defaultValue={address.street} onSelect={(e) => updateAddress({ ...address, street: e.target.value })} />
+                                            <Datalist options={options} placeholder="Selecione uma rua" value={address.street} onChange={(e) => updateAddress({ ...address, street: e.target.value })} />
                                         </div>
-                                        <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" defaultValue={formatZipCode(address.zip_code)} onSelect={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
+                                        <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" value={formatZipCode(address.zip_code)} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
                                         <Button variant="outline" className="p-2 text-red-500 col-span-1" onClick={() => removeAddress(address)}><MinusIcon /></Button>
                                     </div>
                                 )

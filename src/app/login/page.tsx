@@ -33,8 +33,8 @@ export default function Login() {
         <div className="w-full max-w-md mx-auto space-y-6">
           <Image src="/logo.png" alt="Logo Território Digital" width={500} height={400} className="m-auto -mt-16 mb-8 w-[200px] bg-primary rounded-full" />
           <div className="space-y-4">
-            <Input value={email} onSelect={(e) => setEmail(e.target.value)} type="email" placeholder="E-mail" className="h-12 px-4 rounded-md border border-gray-200" />
-            <Input value={password} onSelect={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" className="h-12 px-4 rounded-md border border-gray-200" />
+            <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="E-mail" className="h-12 px-4 rounded-md border border-gray-200" />
+            <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" className="h-12 px-4 rounded-md border border-gray-200" />
           </div>
           <Button onClick={handleLogin} className="w-full h-12 bg-primary hover:bg-[#69a75d] text-white rounded-full font-medium">
             ENTRAR
