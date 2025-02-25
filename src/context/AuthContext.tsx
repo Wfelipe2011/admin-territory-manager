@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { parseCookies, setCookie, destroyCookie } from "nookies";
 import { AuthContextType, User } from "@/types/auth";
 import { URL_API } from "@/infra/AxiosAdapter";
+import { cookies } from "next/headers";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -47,9 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     destroyCookie(null, "token");
     setUser(null);
+    const cookieStore = await cookies();
+    cookieStore.delete('token');
     router.push("/login");
   };
 
