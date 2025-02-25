@@ -30,7 +30,7 @@ export function RoundMenu({
             id="name"
             placeholder="Digite o nome da rodada"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onSelect={(e) => setName(e.target.value)}
           />
         </div>
 
