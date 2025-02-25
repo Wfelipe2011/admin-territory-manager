@@ -34,7 +34,7 @@ export function TerritoryFilter({
           <Input
             placeholder="Pesquisar"
             className="pl-10"
-            onSelect={onSearch}
+            onChange={onSearch}
           />
         </div>
 

@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { toast } from "react-hot-toast";
 import { BlockAddress, House } from "./type";
-import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
+import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon, PlusIcon } from "lucide-react";
 import { Button, Input, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
 import { BlockForm } from "./ClientSideAddBlock";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -207,6 +207,57 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
         saveNewOrder();
     };
 
+    const CellHouseNumber = ({ house }: { house: House }) => {
+        if (editingHouse?.id === house.id) {
+            return <Input type="text" defaultValue={editingHouse.number} onChange={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
+        }
+        return <span>{house.number}</span>
+    }
+    const CellHouseLegend = ({ house }: { house: House }) => {
+        if (editingHouse?.id === house.id) {
+            return (
+                <Select value={editingHouse.legend} onValueChange={(value) => setEditingHouse({ ...editingHouse, legend: value })}>
+                    <SelectTrigger>
+                        <SelectValue placeholder={editingHouse.legend} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {legendas.map((legend) => (
+                            <SelectItem key={legend.name} value={legend.name}>{legend.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            )
+        }
+        return <span>{house.legend}</span>
+    }
+    const CellHouseDontVisit = ({ house }: { house: House }) => {
+        if (editingHouse?.id === house.id) {
+            return (
+                <Select value={editingHouse.dontVisit ? "true" : "false"} onValueChange={(value) => setEditingHouse({ ...editingHouse, dontVisit: value === "true" })}>
+                    <SelectTrigger>
+                        <SelectValue placeholder={house.dontVisit ? "Sim" : "Não"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="true">Sim</SelectItem>
+                        <SelectItem value="false">Não</SelectItem>
+                    </SelectContent>
+                </Select>
+            )
+        }
+        return <span>{house.dontVisit ? "Sim" : "Não"}</span>
+    }
+    const CellHouseEditActions = ({ house }: { house: House }) => {
+        if (editingHouse && editingHouse.id !== house.id) {
+            return <Button disabled variant="outline" size="icon" title={"Edição em andamento na casa " + house.number} className="cursor-not-allowed"><PencilIcon className="text-blue-500 opacity-90 animate-pulse" /></Button>
+        }
+        return (
+            <div className="flex gap-2 justify-center">
+                <Button variant="outline" size="icon" onClick={() => handleEditHouse(house)} title={editingHouse?.id === house.id ? "Salvar alteração" : "Editar casa"}>{editingHouse?.id === house.id ? <SaveIcon className="text-green-500" /> : <PencilIcon className="text-blue-500" />}</Button>
+                {editingHouse?.id === house.id && <Button variant="outline" size="icon" onClick={() => setEditingHouse(undefined)} title="Cancelar edição"><XIcon className="text-red-500" /></Button>}
+            </div>
+        )
+    }
+
     return (
         <Dialog open={opened} onOpenChange={setOpened}>
             <DialogTrigger asChild>
@@ -216,9 +267,9 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                 <DialogHeader>
                     <DialogTitle>{address.street}</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                    <span>Adicionar opção de cadastrar nova casa</span> <br />
-                    <span>{address.zipCode}</span>
+                <DialogDescription className="flex justify-between items-center">
+                    <span>Essa rua possui {houses.length} casa{houses.length > 1 ? "s" : ""}</span>
+                    <Button variant="outline" className="flex items-center gap-2 bg-green-500 text-white hover:text-green-500 hover:border-green-500 shadow-md hover:shadow-sm">Adicionar casa<PlusIcon /></Button>
                 </DialogDescription>
                 <div className="overflow-y-auto max-h-[500px]">
                     <Table>
@@ -247,56 +298,10 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9h8M8 15h8" />
                                         </svg>
                                     </TableCell>
-                                    <TableCell className="w-4/12">
-                                        {editingHouse?.id === house.id ? (
-                                            <Input type="text" defaultValue={editingHouse.number} onSelect={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
-                                        ) : (
-                                            house.number
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="w-3/12">
-                                        {editingHouse?.id === house.id ? (
-                                            <Select value={editingHouse.legend} onValueChange={(value) => setEditingHouse({ ...editingHouse, legend: value })}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder={editingHouse.legend} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {legendas.map((legend) => (
-                                                        <SelectItem key={legend.name} value={legend.name}>{legend.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        ) : (
-                                            house.legend
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="w-2/12">
-                                        {editingHouse?.id === house.id ? (
-                                            <Select value={editingHouse.dontVisit ? "true" : "false"} onValueChange={(value) => setEditingHouse({ ...editingHouse, dontVisit: value === "true" })}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder={house.dontVisit ? "Sim" : "Não"} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="true">Sim</SelectItem>
-                                                    <SelectItem value="false">Não</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        ) :
-                                            house.dontVisit ? "Sim" : "Não"
-                                        }
-                                    </TableCell>
-                                    <TableCell className="w-3/12">
-                                        <div className="flex gap-2 justify-center">
-                                            {editingHouse && editingHouse.id !== house.id ? (
-                                                <Button disabled variant="outline" size="icon" title={"Edição em andamento na casa " + house.number} className="cursor-not-allowed"><PencilIcon className="text-blue-500 opacity-90 animate-pulse" /></Button>
-                                            ) : (
-                                                <>
-                                                    <Button variant="outline" size="icon" onClick={() => handleEditHouse(house)} title={editingHouse?.id === house.id ? "Salvar alteração" : "Editar casa"}>{editingHouse?.id === house.id ? <SaveIcon className="text-green-500" /> : <PencilIcon className="text-blue-500" />}</Button>
-                                                    {editingHouse?.id === house.id && <Button variant="outline" size="icon" onClick={() => setEditingHouse(undefined)} title="Cancelar edição"><XIcon className="text-red-500" /></Button>}
-                                                </>
-                                            )}
-                                        </div>
-                                    </TableCell>
+                                    <TableCell className="w-4/12"><CellHouseNumber house={house} /></TableCell>
+                                    <TableCell className="w-3/12"><CellHouseLegend house={house} /></TableCell>
+                                    <TableCell className="w-2/12"><CellHouseDontVisit house={house} /></TableCell>
+                                    <TableCell className="w-3/12"><CellHouseEditActions house={house} /></TableCell>
                                     <TableCell className="w-3/12">
                                         <div className="flex gap-2 justify-center">
                                             {deletingHouse && deletingHouse.id === house.id ? (
