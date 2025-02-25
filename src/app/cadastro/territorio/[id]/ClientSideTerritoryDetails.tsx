@@ -98,6 +98,23 @@ interface AddressDialogProps {
     address: BlockAddress;
     blockId: number;
 }
+interface SubmitHouseBody {
+    streetId: number;
+    number: string;
+    legend: string;
+    dontVisit: boolean;
+    territoryId: number;
+    blockId: number;
+}
+const NEW_HOUSE: House = {
+    id: 0,
+    number: "",
+    legend: "",
+    dontVisit: false,
+    order: 0,
+    street: "",
+    observations: ""
+}
 const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
     const [opened, setOpened] = useState(false);
     const [houses, setHouses] = useState<House[]>([]);
@@ -124,17 +141,51 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
         fetchHouses();
     }, [fetchHouses]);
 
-    const updateHouse = async (house: House) => {
+    const submitHouse = async (house: House) => {
+        const body = {
+            streetId: address.id,
+            number: house.number,
+            legend: house.legend,
+            dontVisit: house.dontVisit,
+            territoryId: Number(id),
+            blockId: blockId
+        }
+        if (house.id === 0) {
+            createHouse(body)
+        } else {
+            updateHouse(body, house.id)
+        }
+    }
+
+    const createHouse = async (body: SubmitHouseBody) => {
         try {
-            const body = {
-                streetId: address.id,
-                number: house.number,
-                legend: house.legend,
-                dontVisit: house.dontVisit,
-                territoryId: Number(id),
-                blockId: blockId
+            const response = await axiosV1.post(`houses`, body);
+            if (!response.data || response.status > 299) {
+                throw new Error("Erro ao criar casa");
             }
-            const response = await axiosV1.put(`houses/${house.id}`, body);
+            const newHouseRaw = response.data;
+            setHouses(prev => {
+                const newHouse: House = {
+                    id: newHouseRaw.id,
+                    number: newHouseRaw.number,
+                    legend: newHouseRaw.legend,
+                    dontVisit: newHouseRaw.dontVisit,
+                    order: newHouseRaw.order,
+                    street: newHouseRaw?.street,
+                    observations: newHouseRaw.observations
+                }
+                return [newHouse, ...prev];
+            })
+            toast.success("Casa criada com sucesso");
+        } catch (error) {
+            toast.error("Erro ao criar casa");
+            console.error(error);
+        }
+    }
+
+    const updateHouse = async (body: SubmitHouseBody, houseId: number) => {
+        try {
+            const response = await axiosV1.put(`houses/${houseId}`, body);
             if (!response.data || response.status > 299) {
                 throw new Error("Erro ao atualizar casa");
             }
@@ -146,14 +197,18 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
     }
 
     const handleEditHouse = (house: House) => {
-        if (editingHouse?.id === house.id) {
+        if (house.id === editingHouse?.id) {
             setHouses(prev => {
+                const isNewHouse = editingHouse?.id === 0;
+                if (isNewHouse) {
+                    return prev.filter(h => h.id !== 0);
+                }
                 const oldHouse = prev.find(h => h.id === editingHouse?.id);
                 if (!oldHouse) return prev;
                 const newHouse = { ...oldHouse, ...editingHouse };
                 return prev.map(h => h.id === house.id ? newHouse : h);
             })
-            updateHouse(editingHouse);
+            submitHouse(editingHouse);
             setEditingHouse(undefined);
             return;
         }
@@ -207,55 +262,15 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
         saveNewOrder();
     };
 
-    const CellHouseNumber = ({ house }: { house: House }) => {
-        if (editingHouse?.id === house.id) {
-            return <Input type="text" defaultValue={editingHouse.number} onChange={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
+    const handleAddHouse = () => {
+        const hasAnHouseWithoutId = houses.some((house) => house.id === 0);
+        if (hasAnHouseWithoutId) {
+            return;
         }
-        return <span>{house.number}</span>
-    }
-    const CellHouseLegend = ({ house }: { house: House }) => {
-        if (editingHouse?.id === house.id) {
-            return (
-                <Select value={editingHouse.legend} onValueChange={(value) => setEditingHouse({ ...editingHouse, legend: value })}>
-                    <SelectTrigger>
-                        <SelectValue placeholder={editingHouse.legend} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {legendas.map((legend) => (
-                            <SelectItem key={legend.name} value={legend.name}>{legend.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            )
-        }
-        return <span>{house.legend}</span>
-    }
-    const CellHouseDontVisit = ({ house }: { house: House }) => {
-        if (editingHouse?.id === house.id) {
-            return (
-                <Select value={editingHouse.dontVisit ? "true" : "false"} onValueChange={(value) => setEditingHouse({ ...editingHouse, dontVisit: value === "true" })}>
-                    <SelectTrigger>
-                        <SelectValue placeholder={house.dontVisit ? "Sim" : "Não"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="true">Sim</SelectItem>
-                        <SelectItem value="false">Não</SelectItem>
-                    </SelectContent>
-                </Select>
-            )
-        }
-        return <span>{house.dontVisit ? "Sim" : "Não"}</span>
-    }
-    const CellHouseEditActions = ({ house }: { house: House }) => {
-        if (editingHouse && editingHouse.id !== house.id) {
-            return <Button disabled variant="outline" size="icon" title={"Edição em andamento na casa " + house.number} className="cursor-not-allowed"><PencilIcon className="text-blue-500 opacity-90 animate-pulse" /></Button>
-        }
-        return (
-            <div className="flex gap-2 justify-center">
-                <Button variant="outline" size="icon" onClick={() => handleEditHouse(house)} title={editingHouse?.id === house.id ? "Salvar alteração" : "Editar casa"}>{editingHouse?.id === house.id ? <SaveIcon className="text-green-500" /> : <PencilIcon className="text-blue-500" />}</Button>
-                {editingHouse?.id === house.id && <Button variant="outline" size="icon" onClick={() => setEditingHouse(undefined)} title="Cancelar edição"><XIcon className="text-red-500" /></Button>}
-            </div>
-        )
+        setHouses((prev) => {
+            return [NEW_HOUSE, ...prev];
+        });
+        setEditingHouse(NEW_HOUSE);
     }
 
     return (
@@ -269,7 +284,7 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                 </DialogHeader>
                 <DialogDescription className="flex justify-between items-center">
                     <span>Essa rua possui {houses.length} casa{houses.length > 1 ? "s" : ""}</span>
-                    <Button variant="outline" className="flex items-center gap-2 bg-green-500 text-white hover:text-green-500 hover:border-green-500 shadow-md hover:shadow-sm">Adicionar casa<PlusIcon /></Button>
+                    <Button disabled={houses?.some((house) => house?.id === 0)} onClick={handleAddHouse} variant="outline" className="flex items-center gap-2 bg-primary text-white hover:text-primary hover:border-primary shadow-md hover:shadow-sm">Adicionar casa<PlusIcon /></Button>
                 </DialogDescription>
                 <div className="overflow-y-auto max-h-[500px]">
                     <Table>
@@ -287,31 +302,81 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                             {houses.map((house) => (
                                 <TableRow
                                     key={house.id}
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, house)}
-                                    onDragOver={(e) => handleDragOver(e, house)}
-                                    onDragEnd={handleDragEnd}
-                                    className="hover:bg-gray-100"
+                                    draggable={editingHouse?.id === 0 ? false : true}
+                                    onDragStart={(e) => editingHouse?.id === 0 ? {} : handleDragStart(e, house)}
+                                    onDragOver={(e) => editingHouse?.id === 0 ? {} : handleDragOver(e, house)}
+                                    onDragEnd={(e) => editingHouse?.id === 0 ? {} : handleDragEnd(e)}
+                                    className={`hover:bg-gray-100 ${editingHouse?.id === house.id ? "h-20 bg-green-50" : ""}`}
                                 >
-                                    <TableCell className="w-[40px] cursor-move">
-                                        <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <TableCell className={`w-[40px] ${editingHouse?.id === 0 ? "" : "cursor-move"}`}>
+                                        <svg className={`w-6 h-6 text-gray-500 ${editingHouse?.id === 0 ? "invisible" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" >
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9h8M8 15h8" />
                                         </svg>
                                     </TableCell>
-                                    <TableCell className="w-4/12"><CellHouseNumber house={house} /></TableCell>
-                                    <TableCell className="w-3/12"><CellHouseLegend house={house} /></TableCell>
-                                    <TableCell className="w-2/12"><CellHouseDontVisit house={house} /></TableCell>
-                                    <TableCell className="w-3/12"><CellHouseEditActions house={house} /></TableCell>
+                                    <TableCell className="w-4/12">
+                                        {editingHouse?.id === house.id ? (
+                                            <Input className="bg-white" type="text" value={editingHouse.number} onChange={(e) => setEditingHouse({ ...editingHouse, number: e.target.value })} />
+                                        ) : (
+                                            <span>{house.number}</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="w-3/12">
+                                        {editingHouse?.id === house.id ? (
+                                            <Select value={editingHouse.legend} onValueChange={(value) => setEditingHouse({ ...editingHouse, legend: value })}>
+                                                <SelectTrigger className="bg-white">
+                                                    <SelectValue placeholder={editingHouse.legend} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {legendas.map((legend) => (
+                                                        <SelectItem key={legend.name} value={legend.name}>{legend.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <span>{house.legend}</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="w-2/12">
+                                        {editingHouse?.id === house.id ? (
+                                            <Select value={editingHouse.dontVisit ? "true" : "false"} onValueChange={(value) => setEditingHouse({ ...editingHouse, dontVisit: value === "true" })}>
+                                                <SelectTrigger className="bg-white">
+                                                    <SelectValue placeholder={house.dontVisit ? "Sim" : "Não"} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="true">Sim</SelectItem>
+                                                    <SelectItem value="false">Não</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <span>{house.dontVisit ? "Sim" : "Não"}</span>
+                                        )}
+                                    </TableCell>
                                     <TableCell className="w-3/12">
                                         <div className="flex gap-2 justify-center">
-                                            {deletingHouse && deletingHouse.id === house.id ? (
+                                            {editingHouse && editingHouse.id !== house.id ? (
+                                                <Button disabled variant="outline" size="icon" title={"Edição em andamento na casa " + house.number} className="cursor-not-allowed"><PencilIcon className="text-blue-500 opacity-90 animate-pulse" /></Button>
+                                            ) : (
+                                                <>
+                                                    <Button variant="outline" disabled={editingHouse && (!editingHouse?.number || !editingHouse?.legend)} size="icon" onClick={() => handleEditHouse(house)} title={editingHouse?.id === house.id ? "Salvar alteração" : "Editar casa"}>{editingHouse?.id === house.id ? <SaveIcon className="text-green-500" /> : <PencilIcon className="text-blue-500" />}</Button>
+                                                    {editingHouse?.id === house.id && <Button variant="outline" size="icon" onClick={() => {
+                                                        setEditingHouse(undefined);
+                                                        setHouses(prev => prev.filter(h => h.id !== 0));
+                                                    }} title="Cancelar edição"><XIcon className="text-red-500" /></Button>}
+                                                </>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="w-3/12">
+                                        <div className="flex gap-2 justify-center">
+                                            {deletingHouse && deletingHouse.id === house.id && (
                                                 <>
                                                     <Button variant="outline" size="icon" title={"Confirmar"}><SaveIcon className="text-green-500" /></Button>
                                                     <Button variant="outline" size="icon" title={"Cancelar"} onClick={() => setDeletingHouse(undefined)}><XIcon className="text-red-500" /></Button>
                                                 </>
-                                            ) : (
-                                                <Button variant="outline" size="icon" title={"Deletar casa"} onClick={() => setDeletingHouse(house)}><TrashIcon className="text-red-500" /></Button>
                                             )}
+                                            <Button variant="outline" size="icon" title={"Deletar casa"} onClick={() => setDeletingHouse(house)} className={`${(deletingHouse && deletingHouse.id === house.id) || (editingHouse?.id === house.id && editingHouse?.id === 0) ? "hidden" : ""}`}>
+                                                <TrashIcon className="text-red-500" />
+                                            </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -320,6 +385,6 @@ const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                     </Table>
                 </div>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }
