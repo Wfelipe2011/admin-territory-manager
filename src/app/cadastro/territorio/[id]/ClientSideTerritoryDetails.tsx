@@ -7,10 +7,11 @@ import { toast } from "react-hot-toast";
 import { BlockAddress, House } from "./type";
 import { EyeIcon, SaveIcon, PencilIcon, TrashIcon, XIcon, PlusIcon } from "lucide-react";
 import { Button, Input, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui";
-import { BlockForm } from "./ClientSideAddBlock";
+import { BlockForm } from "./ClientSideBlockForm";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAddresses, useBlocks, useTerritory } from "./hooks";
 import { formatZipCode } from "@/lib/formatZipCode";
+import { DeleteBlock } from "./ClientSideDeleteBlock";
 const axiosV1 = new AxiosAdapter(undefined, "v1");
 
 export function ClientSideTerritoryDetails() {
@@ -50,7 +51,10 @@ export function ClientSideTerritoryDetails() {
                     <div className="flex flex-col gap-2 mt-4">
                         <div className="flex justify-between items-center">
                             <h1 className="text-2xl font-bold text-slate-700">Endereços:</h1>
-                            <BlockForm block={currentBlock} callBack={callBack} addresses={addresses} />
+                            <div className="flex gap-2">
+                                {currentBlock && <DeleteBlock block={currentBlock} callBack={callBack} />}
+                                <BlockForm block={currentBlock} callBack={callBack} addresses={addresses} />
+                            </div>
                         </div>
                         {blocks.map((block) => (
                             <TabsContent key={block.id} value={block.id.toString()}>

@@ -16,7 +16,8 @@ export const useBlocks = (territoryId: number) => {
             }
             const blocks = response.data.sort((a, b) => a.name.localeCompare(b.name));
             setBlocks(blocks);
-            if (!selectedBlock) {
+            const selectedBlockExists = blocks.find((block) => block.id === Number(selectedBlock));
+            if (!selectedBlockExists) {
                 setSelectedBlock(blocks[0]?.id.toString());
             }
         } catch (error) {
