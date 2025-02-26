@@ -3,11 +3,6 @@ import {
   ChartNoAxesColumn,
   LogOut,
   Map,
-  MapPinHouse,
-  MapPinPlusInside,
-  HousePlus,
-  MapPinPlus,
-  ChevronDown,
   PenBox,
 } from "lucide-react";
 
@@ -15,9 +10,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -27,11 +19,6 @@ import {
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-import { Collapsible } from "@radix-ui/react-collapsible";
-import {
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 const items = [
   {
@@ -44,28 +31,10 @@ const items = [
     url: "/gestao",
     icon: Map,
   },
-];
-
-const itemsRegister = [
   {
-    title: "Território",
+    title: "Cadastros",
     url: "/cadastro/territorio",
-    icon: MapPinPlusInside,
-  },
-  {
-    title: "Quadra",
-    url: "/cadastro/quadra",
-    icon: MapPinHouse,
-  },
-  {
-    title: "Rua",
-    url: "/cadastro/rua",
-    icon: MapPinPlus,
-  },
-  {
-    title: "Casa",
-    url: "/cadastro/casa",
-    icon: HousePlus,
+    icon: PenBox,
   },
 ];
 
@@ -91,38 +60,6 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-          <Collapsible defaultOpen className="group/collapsible">
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="!text-sidebar-foreground hover:!text-sidebar-accent-foreground w-full">
-                <SidebarMenuItem className="flex w-full justify-between items-center ml-1 gap-2">
-                  <PenBox
-                    style={{
-                      width: "1.5rem",
-                      height: "1.5rem",
-                    }}
-                    className="text-primary"
-                  />
-                  <span className="text-lg">Cadastro</span>
-                  <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                </SidebarMenuItem>
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroup>
-                <SidebarGroupContent>
-                  {itemsRegister.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link href={item.url} className="h-10 w-10 ml-2">
-                          <span className="text-lg">{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </CollapsibleContent>
-          </Collapsible>
         </SidebarMenu>
       </SidebarContent>
       <FooterSidebar />
