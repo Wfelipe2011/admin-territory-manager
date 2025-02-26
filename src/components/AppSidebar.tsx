@@ -3,11 +3,6 @@ import {
   ChartNoAxesColumn,
   LogOut,
   Map,
-  MapPinHouse,
-  MapPinPlusInside,
-  HousePlus,
-  MapPinPlus,
-  ChevronDown,
   PenBox,
 } from "lucide-react";
 
@@ -15,9 +10,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -27,11 +19,6 @@ import {
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-import { Collapsible } from "@radix-ui/react-collapsible";
-import {
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 const items = [
   {
