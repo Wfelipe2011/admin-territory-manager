@@ -20,7 +20,7 @@ export function DeleteBlock({ block, callBack }: DeleteBlockProps) {
             toast.success("Quadra deletada com sucesso");
             setOpen(false);
             callBack();
-        } catch (error: any) {
+        } catch (error) {
             toast.error("Erro ao deletar quadra");
             console.error(error);
         }
