@@ -21,7 +21,7 @@ export interface DatalistProps extends Omit<React.InputHTMLAttributes<HTMLInputE
 const Datalist = React.forwardRef<HTMLInputElement, DatalistProps>(
   ({ className, options, listId = "datalist", error, icon, ...props }, ref) => {
     const [isOpen, setIsOpen] = React.useState(false)
-    const [inputValue, setInputValue] = React.useState(props.defaultValue || "")
+    const [inputValue, setInputValue] = React.useState(props.value || "")
     const [filteredOptions, setFilteredOptions] = React.useState(options?.filter((option) => option?.label?.toLowerCase()?.includes(inputValue?.toLowerCase())))
     const wrapperRef = React.useRef<HTMLDivElement>(null)
 

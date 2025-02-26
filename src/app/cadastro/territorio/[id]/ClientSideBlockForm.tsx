@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogTrigger, DialogClose, DialogFooter, Button, Input, Label, Separator, Datalist } from "@/components/ui";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogTrigger, DialogFooter, Button, Input, Label, Separator, Datalist, DialogDescription } from "@/components/ui";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
@@ -40,11 +40,13 @@ interface Address {
 export function BlockForm({ block: initialBlock, callBack, addresses: existingAddresses }: BlockFormProps) {
     const { id } = useParams();
     const [open, setOpen] = useState(false);
+    const [status, setStatus] = useState<'form' | 'delete'>('form');
     const [block, setBlock] = useState<Block>(initialBlock ?? {
         id: undefined,
         name: "",
     });
     const [addresses, setAddresses] = useState<Address[]>([]);
+    const [deletingAddresses, setDeletingAddresses] = useState<Address[]>([]);
     const alreadyExistsAnGhostStreet = addresses.some((address) => address.street === "" || address.zip_code === "");
 
     useEffect(() => {
@@ -87,8 +89,11 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
         setAddresses((prev) => prev.filter((item) => {
             return item.id !== address.id;
         }))
-    }
 
+        if (!address.id.startsWith("temp-")) {
+            setDeletingAddresses((prev) => [...prev, address]);
+        }
+    }
     const updateAddress = (street: Address) => {
         setAddresses((prev) => prev.map((item) => {
             if (street.id === item.id) {
@@ -133,11 +138,25 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
 
     }
 
+    const handleCancel = () => {
+        if (status === 'delete') {
+            setAddresses((prev) => {
+                const newAddresses = [...prev, ...deletingAddresses];
+                setDeletingAddresses([]);
+                return newAddresses;
+            });
+            setStatus('form');
+            return
+        }
+        setOpen(false);
+    }
+
     const canSubmit = (addresses?.length > 0 ? addresses.some((address) => address.street !== "" || address.zip_code !== "") : true) && block.name !== "";
     const options = existingAddresses.map((address) => ({
         value: address.name,
         label: address.name,
     }));
+
     return (
         <>
             <Dialog open={open} onOpenChange={setOpen}>
@@ -146,39 +165,61 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{block.id ? "Editar" : "Cadastrar"} quadra</DialogTitle>
+                        <DialogTitle>
+                            {status === 'form' ? (
+                                <span>{block.id ? "Editar" : "Cadastrar"} quadra</span>
+                            ) : (
+                                <span>Tem certeza que deseja deletar essas ruas?</span>
+                            )}
+                        </DialogTitle>
                     </DialogHeader>
-                    <div className="flex flex-col gap-4">
-                        <Label>
-                            <span className="text-sm font-medium">Nome do quadra</span>
-                            <Input type="text" placeholder="Digitar nome da quadra" list="street" value={block.name} onChange={(e) => setBlock({ ...block, name: e.target.value })} />
-                        </Label>
+                    {status === 'form' ? (
+                        <div className="flex flex-col gap-4">
+                            <Label>
+                                <span className="text-sm font-medium">Nome do quadra</span>
+                                <Input type="text" placeholder="Digitar nome da quadra" list="street" value={block.name} onChange={(e) => setBlock({ ...block, name: e.target.value })} />
+                            </Label>
 
-                        <Separator className="border-b-2 border-b-gray-200" />
+                            <Separator className="border-b-2 border-b-gray-200" />
 
-                        <div className="flex flex-col gap-2">
-                            <div className="flex justify-between items-center gap-2">
-                                <h2 className="text-lg font-medium">Ruas:</h2>
-                                <Button variant="outline" className="w-9 text-green-500" disabled={alreadyExistsAnGhostStreet} onClick={handleAddAddress}><PlusIcon /></Button>
-                            </div>
-                            {addresses.map((address) => {
-                                return (
-                                    <div className="grid grid-cols-10 gap-3" key={address.id}>
-                                        <div className="col-span-6">
-                                            <Datalist options={options} placeholder="Selecione uma rua" value={address.street} onChange={(e) => updateAddress({ ...address, street: e.target.value })} />
+                            <div className="flex flex-col gap-2">
+                                <div className="flex justify-between items-center gap-2">
+                                    <h2 className="text-lg font-medium">Ruas:</h2>
+                                    <Button variant="outline" className="w-9 text-green-500" disabled={alreadyExistsAnGhostStreet} onClick={handleAddAddress}><PlusIcon /></Button>
+                                </div>
+                                {addresses.map((address) => {
+                                    return (
+                                        <div className="grid grid-cols-10 gap-3" key={address.id}>
+                                            <div className="col-span-6">
+                                                <Datalist options={options} placeholder="Selecione uma rua" value={address.street} onChange={(e) => updateAddress({ ...address, street: e.target.value })} />
+                                            </div>
+                                            <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" value={formatZipCode(address.zip_code)} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
+                                            <Button variant="outline" className="p-2 text-red-500 col-span-1" onClick={() => removeAddress(address)}><MinusIcon /></Button>
                                         </div>
-                                        <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" value={formatZipCode(address.zip_code)} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} />
-                                        <Button variant="outline" className="p-2 text-red-500 col-span-1" onClick={() => removeAddress(address)}><MinusIcon /></Button>
-                                    </div>
-                                )
-                            })}
+                                    )
+                                })}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <DialogDescription className="flex flex-col gap-2 font-medium text-base text-slate-700">
+                            <ul className="list-disc list-inside">
+                                {deletingAddresses.map((address) => {
+                                    return <li key={address.id}>{address.street} {address.zip_code ? `- ${formatZipCode(address.zip_code)}` : ""}</li>
+                                })}
+                            </ul>
+                        </DialogDescription>
+                    )}
                     <DialogFooter>
-                        <DialogClose asChild>
-                            <Button variant="outline">Cancelar</Button>
-                        </DialogClose>
-                        <Button disabled={!canSubmit} title={!canSubmit ? "Preencha todos os campos" : ""} onClick={handleSubmit}>{block.id ? "Editar" : "Cadastrar"}</Button>
+                        <Button variant="outline" onClick={handleCancel}>Cancelar</Button>
+                        {status === 'form' && deletingAddresses.length > 0 && block.id && (
+                            <Button onClick={() => setStatus('delete')}>Deletar</Button>
+                        )}
+                        {!deletingAddresses.length && (
+                            <Button disabled={!canSubmit} title={!canSubmit ? "Preencha todos os campos" : ""} onClick={handleSubmit}>{block.id ? "Editar" : "Cadastrar"}</Button>
+                        )}
+                        {status === 'delete' && (
+                            <Button onClick={handleSubmit} className="bg-red-500 text-white hover:bg-red-600 hover:text-white">Deletar</Button>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
