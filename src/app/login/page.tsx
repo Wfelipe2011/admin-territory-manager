@@ -48,19 +48,23 @@ export default function Login() {
   );
 }
 
-function ButtonManage({ loading, handleLogin }: any) {
+interface ButtonManageProps {
+  loading: boolean;
+  handleLogin: () => void;
+}
+
+function ButtonManage({ loading, handleLogin }: ButtonManageProps) {
   if (loading) {
     return (
       <Button disabled className="w-full h-12 bg-primary hover:bg-[#69a75d] text-white rounded-full font-medium">
         <Loader2 className="animate-spin" />
         Entrando...
       </Button>
-    )
+    );
   }
   return (
     <Button onClick={handleLogin} className="w-full h-12 bg-primary hover:bg-[#69a75d] text-white rounded-full font-medium">
       ENTRAR
     </Button>
-
-  )
+  );
 }
