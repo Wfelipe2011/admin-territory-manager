@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Toaster } from 'react-hot-toast';
 import { SpiralLoader } from './ui/spiral';
 
@@ -6,7 +6,7 @@ function Loading() {
   return (
     <main>
       <section className='bg-gray-50'>
-        <div className='layout flex min-h-screen flex-col items-center justify-center text-center text-black'>
+        <div className='w-full relative flex min-h-screen flex-col items-center justify-center text-center text-black'>
           <SpiralLoader />
         </div>
       </section>
