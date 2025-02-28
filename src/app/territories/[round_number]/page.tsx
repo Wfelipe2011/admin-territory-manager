@@ -1,4 +1,5 @@
 "use client";
+
 import { TerritoryChart } from "@/components/TerritoryChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Blocks, Building, Home, Hotel, Store } from "lucide-react";
@@ -9,10 +10,11 @@ import { navigatorShare } from "@/lib/share";
 import dayjs from "dayjs";
 import { use, useCallback, useEffect, useState } from "react";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
+import { Territories, Round, TerritoryType } from "@/types/territories";
 
 const axios = new AxiosAdapter();
 
-const ClientSideTerritories = ({ params }: { params: Promise<{ round_number: string }> }) => {
+const ClientTerritories = ({ params }: { params: Promise<{ round_number: string }> }) => {
   const { round_number } = use(params);
   const [mode, setMode] = useState<MODE>(MODE.LOADING);
   const [territoriesState, setTerritoriesState] = useState<Territories[]>([]);
@@ -186,41 +188,4 @@ const ClientSideTerritories = ({ params }: { params: Promise<{ round_number: str
   );
 };
 
-export default ClientSideTerritories;
-
-type TerritoryType = {
-  id: number;
-  name: string;
-  tenantId: number;
-}
-
-type Territories = {
-  territoryId: number;
-  typeId: number;
-  name: string;
-  overseer: string | null;
-  signature: {
-    expirationDate: string | null;
-    key: string | null;
-  };
-  hasRounds: boolean;
-  negativeCompleted: number;
-  positiveCompleted: {
-    date: string;
-    period: string;
-  }[];
-}
-
-type Round = {
-  id: number;
-  round_number: number;
-  name: string;
-  theme: string;
-  tenant_id: number;
-  color_primary: string;
-  color_secondary: string;
-  start_date: string;
-  end_date: string | null;
-  completed: number;
-  not_completed: number;
-};
+export default ClientTerritories;

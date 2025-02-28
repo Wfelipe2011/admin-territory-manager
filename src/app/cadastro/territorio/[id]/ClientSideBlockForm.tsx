@@ -9,7 +9,7 @@ import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import type { Block as BlockType } from "./type";
 import type { Address as AddressType } from "./hooks";
 import { formatZipCode } from "@/lib/formatZipCode";
-const axiosV2 = new AxiosAdapter(undefined, "v2");
+const axiosV2 = new AxiosAdapter("v2");
 
 interface UpsertBlockDto {
     id?: number;

@@ -7,21 +7,20 @@ export const URL_API = `https://api-hmg.territory-manager.com.br`;
 
 type AxiosResponse<T> =
   | {
-      status: number;
-      data: T;
-      message?: undefined;
-    }
+    status: number;
+    data: T;
+    message?: undefined;
+  }
   | {
-      status: any;
-      message: any;
-      data?: undefined;
-    };
+    status: any;
+    message: any;
+    data?: undefined;
+  };
 
 export class AxiosAdapter {
-  constructor(ctxCookie?: string, private version = "v1") {
+  constructor(private version = "v1") {
     axios.interceptors.request.use((config: any) => {
-      const { token: tokenCookie } = parseCookies();
-      const tokenBearer = ctxCookie || tokenCookie;
+      const { token: tokenBearer } = parseCookies();
       if (tokenBearer) {
         config.headers["Authorization"] = `Bearer ${tokenBearer}`;
       }

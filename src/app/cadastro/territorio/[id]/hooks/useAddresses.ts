@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useCallback } from "react";
 import { useState } from "react";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
-const axiosV1 = new AxiosAdapter(undefined, "v1");
+const axiosV1 = new AxiosAdapter("v1");
 
 export interface Address {
     id: number;
@@ -10,7 +10,7 @@ export interface Address {
 }
 export const useAddresses = () => {
     const [addresses, setAddresses] = useState<Address[]>([]);
-    
+
     const fetchAddresses = useCallback(async () => {
         try {
             const response = await axiosV1.get<Address[]>(`addresses`);

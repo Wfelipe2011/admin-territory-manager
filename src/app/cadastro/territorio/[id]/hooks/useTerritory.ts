@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Territory } from "../type";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
-const axiosV2 = new AxiosAdapter(undefined, "v2");
+const axiosV2 = new AxiosAdapter("v2");
 
 export const useTerritory = (territoryId: number) => {
     const [territory, setTerritory] = useState<Territory>({} as Territory);

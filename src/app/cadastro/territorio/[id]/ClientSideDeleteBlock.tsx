@@ -4,7 +4,7 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Block } from "./type";
 import { toast } from "react-hot-toast";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
-const axiosV2 = new AxiosAdapter(undefined, "v2");
+const axiosV2 = new AxiosAdapter("v2");
 
 interface DeleteBlockProps {
     block: Block;

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Block } from "../type";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { toast } from "react-hot-toast";
-const axiosV2 = new AxiosAdapter(undefined, "v2");
+const axiosV2 = new AxiosAdapter("v2");
 
 export const useBlocks = (territoryId: number) => {
     const [blocks, setBlocks] = useState<Block[]>([]);

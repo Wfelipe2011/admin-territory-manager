@@ -7,7 +7,6 @@ import { ChangeEvent } from 'react'
 
 export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
-  selectedBlock: Array<{ value: string; label: string }>;
   tabs: Array<{ value: string; label: string }>;
   onTabChange: (value: string) => void;
   onSearch: (value: ChangeEvent<HTMLInputElement>) => void;

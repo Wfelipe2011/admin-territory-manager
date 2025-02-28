@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
-import { Territories } from "@/app/territories/[round_number]/page";
 import dayjs from "dayjs";
 import { Button } from "./ui/button";
+import { Territories } from "@/types/territories";
 
 interface TerritoryChartProps {
   data: { name: string; value: number }[];

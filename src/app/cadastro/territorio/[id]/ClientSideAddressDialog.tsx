@@ -3,9 +3,9 @@ import { House, BlockAddress } from "./type";
 import { useParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, Button, Input, Select, SelectValue, SelectItem, SelectContent, SelectTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui";
-import { EyeIcon, PencilIcon, SaveIcon, TrashIcon, XIcon, PlusIcon } from "lucide-react";  
+import { EyeIcon, PencilIcon, SaveIcon, TrashIcon, XIcon, PlusIcon } from "lucide-react";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
-const axiosV1 = new AxiosAdapter(undefined, "v1");
+const axiosV1 = new AxiosAdapter("v1");
 
 const legendas = [
     { name: "Fundos" },
