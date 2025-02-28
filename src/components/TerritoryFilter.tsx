@@ -16,7 +16,6 @@ export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElemen
 
 export function TerritoryFilter({
   title,
-  // selectedBlock,
   tabs,
   onTabChange,
   onSearch,
