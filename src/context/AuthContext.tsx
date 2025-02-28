@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useEffect, useContext, ReactNode } from "react";
+import { createContext, useState, useEffect, useContext, ReactNode, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { parseCookies, setCookie, destroyCookie } from "nookies";
 import { AuthContextType, User } from "@/types/auth";
@@ -10,15 +10,17 @@ import { deleteAuthToken } from "@/utils/cookies";
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const { token } = parseCookies();
+      return token ? { token } : null;
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const { token } = parseCookies();
-    if (token) {
-      setUser({ token });
-    }
     setLoading(false);
   }, []);
 
@@ -35,8 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         maxAge: 60 * 60 * 24, // 1 dia
         path: "/",
       });
+
       setUser({ token: data.token });
-      router.push("/dashboard");
+
+      startTransition(() => {
+        router.push("/dashboard");
+      });
     } else {
       alert("Login falhou!");
     }
