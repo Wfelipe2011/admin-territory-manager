@@ -1,3 +1,5 @@
+"use client";
+
 import { ClientSideTerritoryDetails } from "./ClientSideTerritoryDetails";
 
 function TerritoryPage() {

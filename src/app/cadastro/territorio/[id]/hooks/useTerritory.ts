@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { Territory } from "../type";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
@@ -8,7 +8,7 @@ export const useTerritory = (territoryId: number) => {
     const [territory, setTerritory] = useState<Territory>({} as Territory);
 
 
-    const fetchTerritory = useCallback(async () => {
+    const fetchTerritory = async () => {
         try {
             const response = await axiosV2.get<Territory>(`territories/${territoryId}/edit`);
             if (!response.data || response.status > 299) {
@@ -19,12 +19,10 @@ export const useTerritory = (territoryId: number) => {
             toast.error("Erro ao buscar território");
             console.error(error);
         }
-    }, [territoryId]);
-    useEffect(() => {
-        fetchTerritory();
-    }, [fetchTerritory]);
+    }
 
     return {
         territory,
+        fetchTerritory
     }
 }

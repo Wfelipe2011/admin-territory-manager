@@ -29,14 +29,14 @@ export function DeleteBlock({ block, callBack }: DeleteBlockProps) {
         <>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" className="bg-red-500 text-white hover:bg-red-600 hover:text-white">Deletar quadra</Button>
+                    <Button variant="outline" className="bg-red-500 text-white hover:bg-red-600 hover:text-white">Deletar</Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Deletar quadra</DialogTitle>
+                        <DialogTitle>Deletar</DialogTitle>
                     </DialogHeader>
                     <DialogDescription>
-                        <p>Tem certeza que deseja deletar a quadra <span className="font-bold">{block.name}</span>?</p>
+                        <p>Tem certeza que deseja deletar <span className="font-bold">{block.name}</span>?</p>
                     </DialogDescription>
                     <DialogFooter>
                         <DialogClose asChild>

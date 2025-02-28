@@ -161,13 +161,13 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
         <>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button>{block.id ? "Editar" : "Adicionar"} quadra</Button>
+                    <Button>{block.id ? "Editar" : "Adicionar"}</Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
                             {status === 'form' ? (
-                                <span>{block.id ? "Editar" : "Cadastrar"} quadra</span>
+                                <span>{block.id ? "Editar" : "Cadastrar"}</span>
                             ) : (
                                 <span>Tem certeza que deseja deletar essas ruas?</span>
                             )}
@@ -176,8 +176,8 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
                     {status === 'form' ? (
                         <div className="flex flex-col gap-4">
                             <Label>
-                                <span className="text-sm font-medium">Nome do quadra</span>
-                                <Input type="text" placeholder="Digitar nome da quadra" list="street" value={block.name} onChange={(e) => setBlock({ ...block, name: e.target.value })} />
+                                <span className="text-sm font-medium">Nome do divisão</span>
+                                <Input type="text" placeholder="Digitar nome da divisão" list="street" value={block.name} onChange={(e) => setBlock({ ...block, name: e.target.value })} />
                             </Label>
 
                             <Separator className="border-b-2 border-b-gray-200" />
