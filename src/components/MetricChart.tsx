@@ -10,9 +10,9 @@ interface MetricChartProps {
 export function MetricChart({ title, value, Icon }: MetricChartProps) {
     return (
         <Card className="bg-background/60 w-full">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
                 <div className="w-full flex gap-4 justify-between">
-                    <span className="text-lg font-medium">{title}</span>
+                    <span className="text-md font-medium">{title}</span>
                     {Icon}
                 </div>
                 <div className="mt-3">
