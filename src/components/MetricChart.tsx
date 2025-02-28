@@ -16,7 +16,7 @@ export function MetricChart({ title, value, Icon }: MetricChartProps) {
                     {Icon}
                 </div>
                 <div className="mt-3">
-                    <span className="text-2xl font-bold">{value}</span>
+                    <span className="text-2xl font-bold">{value?.toLocaleString()}</span>
                 </div>
             </CardContent>
         </Card>

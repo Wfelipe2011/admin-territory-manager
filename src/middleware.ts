@@ -29,9 +29,6 @@ export function middleware(req: NextRequest) {
   }
 
   console.log("Token encontrado, continuando navegação");
-  setCookie(null, "token", token, {
-    path: "/",
-  });
 
   const decoded = jwtDecode<DecodedToken>(token);
   console.log(`[middleware] Usuário autenticado: ${decoded.userName} - Roles: ${decoded.roles} - Tenant: ${decoded.tenantId}`);
