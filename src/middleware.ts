@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { parseCookies, setCookie } from "nookies";
+import { parseCookies } from "nookies";
 import type { NextRequest } from "next/server";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "./types/auth";

@@ -80,7 +80,7 @@ const ClientSideGestao = () => {
     .sort((a, b) =>
       a.start_date < b.start_date ? -1 : a.start_date > b.start_date ? 1 : 0
     )
-    .sort((a, b) => (a.end_date === null ? -1 : 1));
+    .sort((a, _b) => (a.end_date === null ? -1 : 1));
 
   const handleButtonClick = async ({
     name,
