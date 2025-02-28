@@ -94,6 +94,14 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
     router.refresh();
   };
 
+  if (!rounds?.length) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-lg font-medium">Nenhum território cadastrado</p>
+      </div>
+    )
+  }
+
   return (
     <div className="md:px-6">
       <SearchInterface
@@ -151,7 +159,7 @@ const ClientSideGestao = ({ rounds }: ClientSideGestaoProps) => {
         <p className="text-lg font-medium">Deseja arquivar este território?</p>
       </DialogTextConfirm>
     </div>
-  );
+  )
 };
 
 export default ClientSideGestao;

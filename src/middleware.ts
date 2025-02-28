@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { parseCookies } from "nookies";
+import { parseCookies, setCookie } from "nookies";
 import type { NextRequest } from "next/server";
+import { jwtDecode } from "jwt-decode";
+import { DecodedToken } from "./types/auth";
 
 export function middleware(req: NextRequest) {
   const cookies = parseCookies({
@@ -27,7 +29,12 @@ export function middleware(req: NextRequest) {
   }
 
   console.log("Token encontrado, continuando navegação");
+  setCookie(null, "token", token, {
+    path: "/",
+  });
 
+  const decoded = jwtDecode<DecodedToken>(token);
+  console.log(`[middleware] Usuário autenticado: ${decoded.userName} - Roles: ${decoded.roles} - Tenant: ${decoded.tenantId}`);
   return NextResponse.next();
 }
 

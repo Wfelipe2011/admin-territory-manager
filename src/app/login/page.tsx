@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
 export default function Login() {
-
+  const [loading, setLoading] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const { login } = useAuth();
@@ -16,11 +17,12 @@ export default function Login() {
     if (!email || !password) {
       return;
     }
-    return login(email, password);
+    setLoading(true);
+    await login(email, password);
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-white">
+    <div className="min-h-screen w-full flex items-center justify-center bg-white" onKeyDownCapture={(e) => e.key === "Enter" && handleLogin()}>
       {/* Left Side - Logo and Dashboard Preview */}
       <div className="hidden md:flex justify-center items-center relative z-10 w-full min-h-screen md:w-1/3">
         <Image src="/rectangle_2.png" alt="Laptop" width={400} height={300} className="absolute w-full h-full" />
@@ -36,11 +38,29 @@ export default function Login() {
             <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="E-mail" className="h-12 px-4 rounded-md border border-gray-200" />
             <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" className="h-12 px-4 rounded-md border border-gray-200" />
           </div>
-          <Button onClick={handleLogin} className="w-full h-12 bg-primary hover:bg-[#69a75d] text-white rounded-full font-medium">
-            ENTRAR
-          </Button>
+          <ButtonManage
+            loading={loading}
+            handleLogin={handleLogin}
+          />
         </div>
       </div>
     </div>
   );
+}
+
+function ButtonManage({ loading, handleLogin }: any) {
+  if (loading) {
+    return (
+      <Button disabled className="w-full h-12 bg-primary hover:bg-[#69a75d] text-white rounded-full font-medium">
+        <Loader2 className="animate-spin" />
+        Entrando...
+      </Button>
+    )
+  }
+  return (
+    <Button onClick={handleLogin} className="w-full h-12 bg-primary hover:bg-[#69a75d] text-white rounded-full font-medium">
+      ENTRAR
+    </Button>
+
+  )
 }

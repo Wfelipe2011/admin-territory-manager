@@ -51,22 +51,22 @@ const DashboardPage = async () => {
       <div className="w-full flex flex-wrap gap-4 mt-4 md:flex-nowrap">
         <MetricChart
           title="Total de Casas"
-          value={territoryDetails.total.toLocaleString()}
+          value={territoryDetails.total?.toLocaleString()}
           Icon={<HomeIcon className="h-5 w-5 text-muted-foreground" />}
         />
         <MetricChart
           title="Território Residencial"
-          value={territoryDetails.residential.toLocaleString()}
+          value={territoryDetails.residential?.toLocaleString()}
           Icon={<Map className="h-5 w-5 text-muted-foreground" />}
         />
         <MetricChart
           title="Território Comercial"
-          value={territoryDetails.commercial.toLocaleString()}
+          value={territoryDetails.commercial?.toLocaleString()}
           Icon={<Store className="h-5 w-5 text-muted-foreground" />}
         />
         <MetricChart
           title="Território Predial"
-          value={territoryDetails.building.toLocaleString()}
+          value={territoryDetails.building?.toLocaleString()}
           Icon={<Building2 className="h-5 w-5 text-muted-foreground" />}
         />
       </div>
