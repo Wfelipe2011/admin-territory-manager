@@ -7,7 +7,7 @@ import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import toast from "react-hot-toast";
 import { navigatorShare } from "@/lib/share";
 import dayjs from "dayjs";
-import { use, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 
 const axios = new AxiosAdapter();
@@ -28,7 +28,7 @@ const ClientSideTerritories = ({ params }: { params: Promise<{ round_number: str
 
   const generateSignature = async (territoryId: number, overseer: string, expirationDate: string) => {
     try {
-      const { data, status } = await axios.post<any, { signature: string }>(`territories/${territoryId}/signature`, {
+      const { data, status } = await axios.post<{ overseer: string, expirationTime: string, round: string }, { signature: string }>(`territories/${territoryId}/signature`, {
         overseer,
         expirationTime: expirationDate,
         round: round_number,
@@ -119,7 +119,7 @@ const ClientSideTerritories = ({ params }: { params: Promise<{ round_number: str
     );
   };
 
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     const query = new URLSearchParams({ round: round_number.toString() });
 
     const [territoriesResponse, roundResponse, typesResponse] = await Promise.all([
@@ -132,7 +132,7 @@ const ClientSideTerritories = ({ params }: { params: Promise<{ round_number: str
     const round = roundResponse.data as Round;
     const types = typesResponse.data as TerritoryType[];
     return { territories, round, types };
-  }
+  }, [round_number]);
 
   useEffect(() => {
     fetchData().then(({ territories, round, types }) => {
@@ -141,7 +141,7 @@ const ClientSideTerritories = ({ params }: { params: Promise<{ round_number: str
       setTypes(types);
       setMode(MODE.SCREEN);
     });
-  }, []);
+  }, [fetchData]);
 
   return (
     <RootModeScreen mode={mode}>
