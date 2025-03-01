@@ -94,7 +94,7 @@ export default function BalancoPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary mb-2">Balanço Financeiro</h1>
+          <h1 className="text-3xl font-bold text-primary mb-2">Balanço Financeiro Anual</h1>
           <p className="text-muted-foreground mb-8">
             Transparência total sobre como as doações são utilizadas para manter o projeto.
           </p>
