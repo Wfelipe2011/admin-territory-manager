@@ -11,24 +11,16 @@ import {
 } from "@/components/ui/table";
 import { Territory, TerritoryTypes } from "./type";
 import { Button } from "@/components/ui/button";
-import { DialogHeader } from "@/components/ui/dialog";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   ChevronFirst,
   ChevronLast,
   CheckIcon,
   ChevronLeft,
   ChevronRight,
-  MapIcon,
   PenIcon,
   EyeIcon,
 } from "lucide-react";
-import Image from "next/image";
+
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
@@ -42,6 +34,7 @@ import {
 import { useRouter } from "next/navigation";
 import { TerritoryFilter } from "@/components/TerritoryFilter";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
+import { CellTerritoryImage } from "./CellTerritoryImage";
 
 const axios = new AxiosAdapter();
 
@@ -181,6 +174,31 @@ function ClientSideTerritory() {
     setEditMode(0);
   };
 
+  const onAddTerritory = async (data: { name: string; typeId: number }) => {
+    const { status, message } = await axios.post("territories", data);
+    if (status > 299) {
+      console.error(message);
+      return;
+    }
+    setParams((prev) => ({ ...prev, page: "1" }));
+  };
+
+  const handleImageUpload = async (territoryId: string | number, file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    const axios = new AxiosAdapter("v2")
+    const response = await axios.postFile(`territories/${territoryId}/upload`, formData)
+    if (response.status > 299) {
+      throw new Error(response.message)
+    }
+    setTerritories((prev) =>
+      prev.map((item) =>
+        item.id === territoryId ? { ...item, imageUrl: response.data.imageUrl } : item
+      )
+    )
+    setParams((prev) => ({ ...prev, page: "1" }))
+  }
+
   const handlePage = (page: number) => {
     const newPage = pagination.page + page;
     if (newPage < 1 || newPage > totalPage) {
@@ -207,6 +225,7 @@ function ClientSideTerritory() {
         title="Territórios"
         onSearch={(e) => handleSearch(e.target.value)}
         onTabChange={(e) => setTabValue(+e)}
+        onAddTerritory={onAddTerritory}
         tabs={territoryTypes.map((type) => ({
           value: String(type.id),
           label: type.name,
@@ -288,6 +307,8 @@ function ClientSideTerritory() {
                 <CellTerritoryImage
                   imageUrl={territory.imageUrl}
                   name={territory.name}
+                  territoryId={territory.id}
+                  onImageUpload={handleImageUpload}
                 />
                 <CellTerritoryAction
                   actions={[
@@ -398,38 +419,7 @@ function CellTerritoryType({
   return <TableCell>{typeName}</TableCell>;
 }
 
-interface CellTerritoryImageProps {
-  imageUrl: string;
-  name: string;
-}
-function CellTerritoryImage({ imageUrl, name }: CellTerritoryImageProps) {
-  return (
-    <TableCell>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline">
-            <MapIcon />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Mapa {name}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Image
-              src={imageUrl}
-              loading="lazy"
-              alt={name}
-              className=" max-h-[70vh]"
-              width={425}
-              height={425}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </TableCell>
-  );
-}
+
 
 interface CellTerritoryActionProps {
   actions: {

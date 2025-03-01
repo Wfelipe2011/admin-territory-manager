@@ -85,7 +85,7 @@ export class AxiosAdapter {
       const config = {
         ...httpConfig,
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
       };
       const response = await axios(`${URL_API}/${this.version}/${url}`, config);

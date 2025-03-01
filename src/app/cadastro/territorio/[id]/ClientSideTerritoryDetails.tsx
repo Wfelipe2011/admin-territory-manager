@@ -19,6 +19,7 @@ export function ClientSideTerritoryDetails() {
     const currentBlock = blocks.find((block) => block.id === Number(selectedBlock));
 
     const callBack = useCallback(() => {
+        setMode(MODE.LOADING)
         Promise.all([
             fetchTerritory(),
             fetchBlocks(),

@@ -4,21 +4,22 @@ import { Search } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChangeEvent } from 'react'
+import { AddTerritoryButton } from '@/app/cadastro/territorio/AddTerritoryButton'
 
 export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   tabs: Array<{ value: string; label: string }>;
   onTabChange: (value: string) => void;
+  onAddTerritory: (data: { name: string; typeId: number }) => void;
   onSearch: (value: ChangeEvent<HTMLInputElement>) => void;
-  children?: React.ReactNode;
 }
 
 export function TerritoryFilter({
   title,
   tabs,
   onTabChange,
+  onAddTerritory,
   onSearch,
-  children,
   ...rest
 }: TerritoryFilterProps) {
   return (
@@ -51,9 +52,10 @@ export function TerritoryFilter({
             </Tabs>
           </div>
 
-          {/* Add button */}
-          {/* <Button>ADICIONAR</Button> */}
-          {children}
+          <AddTerritoryButton
+            territoryTypes={tabs}
+            onAddTerritory={onAddTerritory}
+          />
         </div>
       </div>
     </div>
