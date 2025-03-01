@@ -6,7 +6,7 @@ export const DonationButton = () => {
   return (
     <div className="">
       <a
-        href="https://www.paypal.com/donate/?hosted_button_id=VKVMUKKR6QCSA"
+        href="https://www.paypal.com/donate/?hosted_button_id=VKVMUKKR6QCSA&locale.x=pt_BR"
         target="_blank"
         rel="noopener noreferrer"
       >
