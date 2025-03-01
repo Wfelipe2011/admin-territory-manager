@@ -129,3 +129,47 @@ body {
     transform: rotate(360deg);
   }
 }
+
+@keyframes ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  5% {
+    transform: rotate(15deg);
+  }
+  10% {
+    transform: rotate(-15deg);
+  }
+  15% {
+    transform: rotate(12deg);
+  }
+  20% {
+    transform: rotate(-12deg);
+  }
+  25% {
+    transform: rotate(9deg);
+  }
+  30% {
+    transform: rotate(-9deg);
+  }
+  35% {
+    transform: rotate(6deg);
+  }
+  40% {
+    transform: rotate(-6deg);
+  }
+  45% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: rotate(-3deg);
+  }
+  55%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-ring {
+  animation: ring 1s ease-in-out infinite;
+}
