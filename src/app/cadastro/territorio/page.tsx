@@ -34,7 +34,7 @@ import {
 import { useRouter } from "next/navigation";
 import { TerritoryFilter } from "@/components/TerritoryFilter";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
-import { CellTerritoryImage } from "./CellTerritoryImage";
+import { TerritoryImage } from "./TerritoryImage";
 
 const axios = new AxiosAdapter();
 
@@ -56,7 +56,9 @@ let debounceTimer: NodeJS.Timeout;
 
 async function fetchTerritories(params: SearchParams): Promise<HttpResponse> {
   const axios = new AxiosAdapter("v2");
-  const searchParams = new URLSearchParams(params as unknown as Record<string, string>);
+  const searchParams = new URLSearchParams(
+    params as unknown as Record<string, string>
+  );
   const query = searchParams.toString();
   const { data, status, message } = await axios.get<HttpResponse>(
     `territories?${query}`
@@ -106,20 +108,21 @@ function ClientSideTerritory() {
 
   useEffect(() => {
     Promise.all([
-      fetchTerritories(params)
-        .then(({ data, limit, page, total }) => {
-          setTerritories(data);
-          setPagination({ limit, page, total });
-        }),
+      fetchTerritories(params).then(({ data, limit, page, total }) => {
+        setTerritories(data);
+        setPagination({ limit, page, total });
+      }),
       fetchTerritoryTypes().then(setTerritoryTypes),
     ]).then(() => setMode(MODE.SCREEN));
   }, [params]);
 
   useEffect(() => {
-    fetchTerritoryTypes().then((types) => {
-      setTerritoryTypes(types);
-      setParams((prev) => ({ ...prev, type: types[0].id }));
-    }).then(() => setMode(MODE.SCREEN));
+    fetchTerritoryTypes()
+      .then((types) => {
+        setTerritoryTypes(types);
+        setParams((prev) => ({ ...prev, type: types[0].id }));
+      })
+      .then(() => setMode(MODE.SCREEN));
   }, []);
 
   const handleEditMode = (value: number) => {
@@ -165,7 +168,7 @@ function ClientSideTerritory() {
     const { status, message } = await axios.put(`territories/${territoryId}`, {
       name: territory.name,
       typeId: territory.typeId,
-      id: territory.id
+      id: territory.id,
     });
     if (status > 299) {
       console.error(message);
@@ -183,21 +186,20 @@ function ClientSideTerritory() {
     setParams((prev) => ({ ...prev, page: "1" }));
   };
 
-  const handleImageUpload = async (territoryId: string | number, file: File) => {
-    const formData = new FormData()
-    formData.append("file", file)
-    const axios = new AxiosAdapter("v2")
-    const response = await axios.postFile(`territories/${territoryId}/upload`, formData)
-    if (response.status > 299) {
-      throw new Error(response.message)
+  const handleImageUpload = async (
+    territoryId: string | number,
+    imageUrl: string
+  ) => {
+    if (!imageUrl) {
+      return;
     }
     setTerritories((prev) =>
       prev.map((item) =>
-        item.id === territoryId ? { ...item, imageUrl: response.data.imageUrl } : item
+        item.id === territoryId ? { ...item, imageUrl: imageUrl } : item
       )
-    )
-    setParams((prev) => ({ ...prev, page: "1" }))
-  }
+    );
+    setParams((prev) => ({ ...prev, page: "1" }));
+  };
 
   const handlePage = (page: number) => {
     const newPage = pagination.page + page;
@@ -212,11 +214,11 @@ function ClientSideTerritory() {
     debounceTimer = setTimeout(() => {
       setParams((prev) => ({ ...prev, search: value, page: "1" }));
     }, 500);
-  }
+  };
 
   const setTabValue = (value: number) => {
     setParams((prev) => ({ ...prev, type: String(value), page: "1" }));
-  }
+  };
 
   return (
     <RootModeScreen mode={mode}>
@@ -230,8 +232,7 @@ function ClientSideTerritory() {
           value: String(type.id),
           label: type.name,
         }))}
-      >
-      </TerritoryFilter>
+      ></TerritoryFilter>
       <Table className="rounded-md shadow-md rounded-b-none bg-white">
         <TableCaption className="w-full bg-white p-2 rounded-md rounded-t-none shadow-md mt-0.5">
           <div className="flex justify-between">
@@ -281,7 +282,9 @@ function ClientSideTerritory() {
             <TableHead>Territorio</TableHead>
             <TableHead>Tipo</TableHead>
             <TableHead>Mapa</TableHead>
-            <TableHead className="flex items-center justify-center">Ações</TableHead>
+            <TableHead className="flex items-center justify-center">
+              Ações
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -304,12 +307,14 @@ function ClientSideTerritory() {
                   }
                   territoryTypes={territoryTypes}
                 />
-                <CellTerritoryImage
-                  imageUrl={territory.imageUrl}
-                  name={territory.name}
-                  territoryId={territory.id}
-                  onImageUpload={handleImageUpload}
-                />
+                <TableCell>
+                  <TerritoryImage
+                    imageUrl={territory.imageUrl}
+                    name={territory.name}
+                    territoryId={territory.id}
+                    onImageUpload={handleImageUpload}
+                  />
+                </TableCell>
                 <CellTerritoryAction
                   actions={[
                     {
@@ -318,12 +323,12 @@ function ClientSideTerritory() {
                       submitAction: () => submitUpdate(territory.id),
                       icon: {
                         jsx: <CheckIcon />,
-                        className: "text-green-500 hover:text-green-700"
+                        className: "text-green-500 hover:text-green-700",
                       },
                       secondaryIcon: {
                         jsx: <PenIcon />,
-                        className: "text-blue-500 hover:text-blue-700"
-                      }
+                        className: "text-blue-500 hover:text-blue-700",
+                      },
                     },
                     {
                       toggleMode: false,
@@ -335,16 +340,15 @@ function ClientSideTerritory() {
                       },
                       icon: {
                         jsx: <EyeIcon />,
-                        className: "text-yellow-500 hover:text-yellow-700"
+                        className: "text-yellow-500 hover:text-yellow-700",
                       },
                       secondaryIcon: {
                         jsx: <EyeIcon />,
-                        className: "text-yellow-500 hover:text-yellow-700"
-                      }
-                    }
+                        className: "text-yellow-500 hover:text-yellow-700",
+                      },
+                    },
                   ]}
                 />
-
               </TableRow>
             );
           })}
@@ -419,22 +423,20 @@ function CellTerritoryType({
   return <TableCell>{typeName}</TableCell>;
 }
 
-
-
 interface CellTerritoryActionProps {
   actions: {
     icon: {
-      jsx: React.ReactNode
-      className: string
+      jsx: React.ReactNode;
+      className: string;
     };
     secondaryIcon: {
-      jsx: React.ReactNode
-      className: string
+      jsx: React.ReactNode;
+      className: string;
     };
     toggleMode: boolean;
     setToggleMode: (value: boolean) => void;
     submitAction: () => void;
-  }[]
+  }[];
 }
 function CellTerritoryAction({ actions }: CellTerritoryActionProps) {
   return (
@@ -461,10 +463,10 @@ function CellTerritoryAction({ actions }: CellTerritoryActionProps) {
           >
             {action.secondaryIcon.jsx}
           </Button>
-        )
+        );
       })}
     </TableCell>
-  )
+  );
 }
 
 export default ClientSideTerritory;
