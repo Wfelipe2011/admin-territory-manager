@@ -5,7 +5,7 @@ services:
     image: wfelipe2011/admin-territory-manager:main
     restart: unless-stopped
     ports:
-      - "4800-4900:4800"
+      - "4800:4800"
     deploy:
       replicas: 1
       resources:
