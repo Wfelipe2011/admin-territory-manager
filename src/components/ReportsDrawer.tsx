@@ -13,6 +13,8 @@ import { Textarea } from "./ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "./ui/scroll-area"
 import { AnimatedBell } from "./ui/AnimatedBell"
+import { FaMoneyBillWave } from "react-icons/fa"
+import Link from "next/link"
 
 type Reports = {
   id: number
@@ -89,6 +91,10 @@ export function ReportsDrawer() {
 
   return (
     <Sheet>
+      <Link href="/balanco" className="fixed right-11 top-0 flex min-h-10 min-w-10 items-center justify-center z-50 text-white cursor-pointer">
+        <FaMoneyBillWave size={20} />
+      </Link>
+
       <SheetTrigger disabled={!isBellActive} className="fixed right-2 top-0 flex min-h-10 min-w-10 items-center justify-center z-50 text-white cursor-pointer">
         <AnimatedBell isActive={isBellActive} />
         {isBellActive && (<div className="absolute right-2 top-2 h-2 w-2 animate-ping rounded-full bg-red-500"></div>)}
