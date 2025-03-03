@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search } from 'lucide-react'
 
-import { ChangeEventHandler, useState } from 'react';
+import { ChangeEventHandler, useEffect, useState } from 'react';
 import { RoundMenu } from "./RoundMenu";
 import {
   Dialog,
@@ -12,6 +12,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ReportModal } from "./report-modal";
+import { AxiosAdapter } from "@/infra/AxiosAdapter";
+import { CreateRoundDto } from "@/types/CreateRoundDto";
+
+const axios = new AxiosAdapter('v1')
 
 export function SearchInterface({
   onSearchChange,
@@ -20,11 +24,17 @@ export function SearchInterface({
   buttonLabel = "Criar Novo"
 }: {
   onSearchChange: ChangeEventHandler<HTMLInputElement>,
-  onButtonClick: ({ name, theme }: { name: string; theme: string }) => Promise<void>,
+  onButtonClick: (params: CreateRoundDto) => Promise<void>,
   searchValue: string,
   buttonLabel?: string
 }) {
   const [open, onOpenChange] = useState(false)
+  const [territoryTypes, setTerritoryTypes] = useState<Array<{ id: number, name: string }>>([])
+  useEffect(() => {
+    axios.get<Array<{ id: number, name: string }>>('territories/types').then(({ data }) => {
+      if (data) setTerritoryTypes(data)
+    })
+  }, [])
   return (
     <div className="w-full flex items-center justify-between gap-4">
       <div className="relative">
@@ -52,6 +62,7 @@ export function SearchInterface({
           </DialogTrigger>
           <DialogContent>
             <RoundMenu
+              territoryTypes={territoryTypes}
               onButtonClick={async (e) => {
                 await onButtonClick(e);
                 onOpenChange(false);

@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { DialogTextConfirm } from "@/components/DialogTextConfirm";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
+import { CreateRoundDto } from "@/types/CreateRoundDto";
+import toast from "react-hot-toast";
 
 type Round = {
   id: number;
@@ -22,8 +24,6 @@ type Round = {
   completed: number;
   not_completed: number;
 };
-
-
 
 const axios = new AxiosAdapter();
 const ClientSideGestao = () => {
@@ -82,19 +82,16 @@ const ClientSideGestao = () => {
     )
     .sort((a, _b) => (a.end_date === null ? -1 : 1));
 
-  const handleButtonClick = async ({
-    name,
-    theme,
-  }: {
-    name: string;
-    theme: string;
-  }) => {
-    setMode(MODE.LOADING)
-    await axios.post(`rounds/start`, {
-      name,
-      theme,
-    });
-    fetchData()
+  const handleButtonClick = async (params: CreateRoundDto) => {
+    try {
+      setMode(MODE.LOADING)
+      await axios.post(`rounds/start`, params);
+      toast.success("Rodada iniciada com sucesso");
+      fetchData()
+    } catch (error) {
+      toast.error("Erro ao iniciar rodada");
+      console.log(error);
+    }
   };
 
   const handleArchClick = async () => {
@@ -143,13 +140,12 @@ const ClientSideGestao = () => {
                     year: "numeric",
                   })
               }
-              title={round.name}
+              title={`${round.round_number} - ${round.name}`}
               id={round.id}
               onEditClick={() =>
                 router.push(`/territories/${round.round_number}`)
               }
               onArchClick={() => {
-                console.log("Botão 'Arquivar' clicado!", round.round_number);
                 setDialogStatus(true);
                 setDialogRound(round.round_number);
               }}
