@@ -18,7 +18,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
   const { round_number } = use(params);
   const [mode, setMode] = useState<MODE>(MODE.LOADING);
   const [territoriesState, setTerritoriesState] = useState<Territories[]>([]);
-  const [round, setRound] = useState<Round>({ id: 0, round_number: 0, name: "", theme: "", tenant_id: 0, color_primary: "", color_secondary: "", start_date: "", end_date: null, completed: 0, not_completed: 0 });
+  const [round, setRound] = useState<Round>({ id: 0, round_number: 0, name: "", type: "", theme: "", tenant_id: 0, color_primary: "", color_secondary: "", start_date: "", end_date: null, completed: 0, not_completed: 0 });
   const [types, setTypes] = useState<TerritoryType[]>([]);
 
   const TypesIcon: { [key: string]: JSX.Element } = {
@@ -133,7 +133,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
     const territories = territoriesResponse.data as Territories[];
     const round = roundResponse.data as Round;
     const types = typesResponse.data as TerritoryType[];
-    return { territories, round, types };
+    return { territories, round, types: types.filter((type) => Boolean(type.name === round.type)) };
   }, [round_number]);
 
   useEffect(() => {

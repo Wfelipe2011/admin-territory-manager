@@ -25,6 +25,7 @@ export type Round = {
     id: number;
     round_number: number;
     name: string;
+    type: string;
     theme: string;
     tenant_id: number;
     color_primary: string;

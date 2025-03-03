@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/tooltip"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { Badge } from "./ui"
 
 interface RoundChartProps {
   id: number
   title: string
+  type: string
   onEditClick: () => void
   onArchClick: () => void
   data: { name: string; value: number }[]
@@ -28,7 +30,8 @@ export function RoundChart({
   colors,
   start_date,
   end_date,
-  title = "Cartas",
+  title,
+  type,
   onEditClick,
   onArchClick,
 }: RoundChartProps) {
@@ -43,7 +46,7 @@ export function RoundChart({
         <span className={cn("absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-6xl opacity-10 z-10 pointer-events-none")}>Finalizado</span>
       }
       <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+        <CardTitle className="flex gap-2 items-end text-lg font-medium"><span>{title}</span> <div className="pb-1"><Badge variant="secondary" style={{ backgroundColor: colors[0] || "#ccc", color: 'white' }}>{type}</Badge></div> </CardTitle>
         <CardTitle className="text-lg font-medium min-h-6">
           {end_date === null && (
             <Eye onClick={onEditClick} className="scale-100 text-muted-foreground cursor-pointer" style={{ fill: colors[0] || "#ccc", color: 'white' }} />

@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 type Round = {
   id: number;
   round_number: number;
+  type: string;
   name: string;
   theme: string;
   tenant_id: number;
@@ -141,6 +142,7 @@ const ClientSideGestao = () => {
                   })
               }
               title={`${round.round_number} - ${round.name}`}
+              type={round.type}
               id={round.id}
               onEditClick={() =>
                 router.push(`/territories/${round.round_number}`)
