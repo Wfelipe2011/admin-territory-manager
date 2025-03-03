@@ -143,6 +143,7 @@ const ClientSideGestao = () => {
               }
               title={`${round.round_number} - ${round.name}`}
               type={round.type}
+              theme={round.theme}
               id={round.id}
               onEditClick={() =>
                 router.push(`/territories/${round.round_number}`)
