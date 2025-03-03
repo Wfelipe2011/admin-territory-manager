@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChangeEvent } from 'react'
 import { AddTerritoryButton } from '@/app/cadastro/territorio/AddTerritoryButton'
+import { TypeIcon } from './ui/TypeIcon'
 
 export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -45,6 +46,7 @@ export function TerritoryFilter({
               <TabsList>
                 {tabs.map((tab) => (
                   <TabsTrigger key={tab.value} value={tab.value} onClick={() => onTabChange(tab.value)}>
+                    <TypeIcon type={tab.label} className="w-4 h-4 mr-2 stroke-primary" />
                     {tab.label}
                   </TabsTrigger>
                 ))}

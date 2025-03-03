@@ -2,7 +2,6 @@
 
 import { TerritoryChart } from "@/components/TerritoryChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Blocks, Building, Home, Hotel, Store } from "lucide-react";
 import { RoundThemeUpdater } from "@/components/RoundThemeUpdater";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import toast from "react-hot-toast";
@@ -11,6 +10,7 @@ import dayjs from "dayjs";
 import { use, useCallback, useEffect, useState } from "react";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { Territories, Round, TerritoryType } from "@/types/territories";
+import { TypeIcon } from "@/components/ui/TypeIcon";
 
 const axios = new AxiosAdapter();
 
@@ -20,13 +20,6 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
   const [territoriesState, setTerritoriesState] = useState<Territories[]>([]);
   const [round, setRound] = useState<Round>({ id: 0, round_number: 0, name: "", type: "", theme: "", tenant_id: 0, color_primary: "", color_secondary: "", start_date: "", end_date: null, completed: 0, not_completed: 0 });
   const [types, setTypes] = useState<TerritoryType[]>([]);
-
-  const TypesIcon: { [key: string]: JSX.Element } = {
-    Residencial: <Home className="w-4 h-4 mr-2" style={{ color: round?.color_primary }} />,
-    Comercial: <Store className="w-4 h-4 mr-2" style={{ color: round?.color_primary }} />,
-    "Predial-Interno": <Hotel className="w-4 h-4 mr-2" style={{ color: round?.color_primary }} />,
-    "Predial-Externo": <Building className="w-4 h-4 mr-2" style={{ color: round?.color_primary }} />,
-  };
 
   const generateSignature = async (territoryId: number, overseer: string, expirationDate: string) => {
     try {
@@ -158,7 +151,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
           <TabsList className="flex flex-wrap justify-center gap-2 md:inline-flex h-full">
             {types.map((type) => (
               <TabsTrigger id={String(type.id)} key={type.id} value={type.name}>
-                {TypesIcon[type.name] || <Blocks />}
+                <TypeIcon type={type.name} className="w-4 h-4 mr-2" style={{ color: round?.color_primary }} />
                 {type.name}
               </TabsTrigger>
             ))}

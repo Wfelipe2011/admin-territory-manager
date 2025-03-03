@@ -3,40 +3,23 @@
 import { LineChart } from "@/components/LineChart";
 import { MetricChart } from "@/components/MetricChart";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
+import { TypeIcon } from "@/components/ui/TypeIcon";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
-import { Building2, Home as HomeIcon, Map, Store } from "lucide-react";
 import { useEffect, useState } from "react";
-
-const config = {
-  residential: { label: "Residencial", color: "#7AAD58" },
-  commercial: { label: "Comercial", color: "#5B98AB" },
-};
 
 interface TerritoryDetails {
   total: number;
-  residential: number;
-  commercial: number;
-  building: number;
+  [key: string]: number;
 }
 
 interface MarkedHouses {
   date: string;
-  residential: number;
-  commercial: number;
+  [key: string]: string | number;
 }
 
 const DashboardPage = () => {
-  const [territoryDetails, setTerritoryDetails] = useState<TerritoryDetails>({
-    total: 0,
-    residential: 0,
-    commercial: 0,
-    building: 0,
-  });
-  const [markedHouses, setMarkedHouses] = useState<MarkedHouses[]>([{
-    date: "",
-    residential: 0,
-    commercial: 0,
-  }]);
+  const [territoryDetails, setTerritoryDetails] = useState<TerritoryDetails>({ total: 0 });
+  const [markedHouses, setMarkedHouses] = useState<MarkedHouses[]>([]);
   const [mode, setMode] = useState<MODE>(MODE.LOADING);
 
   async function fetchData() {
@@ -64,35 +47,19 @@ const DashboardPage = () => {
   return (
     <RootModeScreen mode={mode}>
       <div className="md:p-8">
-        <LineChart
-          data={markedHouses}
-          config={config}
-          yAxisConfig={{
-            dataKey: "residential",
-            label: "Casas marcadas",
-          }}
-        />
+        <LineChart data={markedHouses} baseColor="#7AAD58" yAxisConfig={{ label: "Quantidade" }} />
         <div className="w-full flex flex-wrap gap-4 mt-4 md:flex-nowrap">
-          <MetricChart
-            title="Total de Casas"
-            value={territoryDetails.total}
-            Icon={<HomeIcon className="h-5 w-5 text-muted-foreground" />}
-          />
-          <MetricChart
-            title="Território Residencial"
-            value={territoryDetails.residential}
-            Icon={<Map className="h-5 w-5 text-muted-foreground" />}
-          />
-          <MetricChart
-            title="Território Comercial"
-            value={territoryDetails.commercial}
-            Icon={<Store className="h-5 w-5 text-muted-foreground" />}
-          />
-          <MetricChart
-            title="Território Predial"
-            value={territoryDetails.building}
-            Icon={<Building2 className="h-5 w-5 text-muted-foreground" />}
-          />
+          {Object.keys(territoryDetails).map((key) => {
+            if (key === "total") return null;
+            return (
+              <MetricChart
+                key={key}
+                title={`Território ${key}`}
+                value={territoryDetails[key]}
+                Icon={<TypeIcon type={key} className="h-5 w-5 text-muted-foreground" />}
+              />
+            );
+          })}
         </div>
       </div>
     </RootModeScreen>

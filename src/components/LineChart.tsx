@@ -2,14 +2,9 @@
 
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import tinycolor from "tinycolor2"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   ChartContainer,
   ChartLegend,
@@ -17,33 +12,69 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Modifiquei a interface para incluir as configurações do eixo Y
+// Interface para dados dinâmicos
+interface DataItem {
+  date: string
+  [key: string]: string | number
+}
+
 interface LineChartProps {
-  data: Array<{ date: string; residential: number, commercial: number }>
-  config: {
-    residential: { label: string; color: string }
-    commercial: { label: string; color: string }
-  }
-  yAxisConfig: {
-    dataKey: string
+  data: DataItem[]
+  baseColor?: string // Cor base para gerar variantes
+  yAxisConfig?: {
     label: string
   }
 }
 
-export function LineChart({ data, config, yAxisConfig }: LineChartProps) {
+export function LineChart({ data, baseColor = "#3b82f6", yAxisConfig }: LineChartProps) {
   const [timeRange, setTimeRange] = React.useState("90d")
+
+  // Extrair todas as chaves dinâmicas (exceto 'date')
+  const dataKeys = React.useMemo(() => {
+    const keys = new Set<string>()
+    data.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        if (key !== "date") keys.add(key)
+      })
+    })
+    return Array.from(keys)
+  }, [data])
+
+  // Gerar cores para cada chave
+  const colorMap = React.useMemo(() => {
+    const base = tinycolor(baseColor)
+    const colors: Record<string, string> = {}
+
+    dataKeys.forEach((key, index) => {
+      // Gerar variantes de cor baseadas na cor principal
+      const hue = base.toHsl().h
+      const newHue = (hue + index * (360 / Math.max(dataKeys.length, 1))) % 360
+      const color = tinycolor({ h: newHue, s: base.toHsl().s, l: base.toHsl().l }).toHexString()
+      colors[key] = color
+    })
+
+    return colors
+  }, [dataKeys, baseColor])
+
+  // Gerar configuração dinâmica para o ChartContainer
+  const config = React.useMemo(() => {
+    const result: Record<string, { label: string; color: string }> = {}
+
+    dataKeys.forEach((key) => {
+      result[key] = {
+        label: key,
+        color: colorMap[key],
+      }
+    })
+
+    return result
+  }, [dataKeys, colorMap])
 
   const filteredData = data.filter((item) => {
     const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
+    const referenceDate = new Date()
     let daysToSubtract = 90
     if (timeRange === "30d") {
       daysToSubtract = 30
@@ -73,19 +104,25 @@ export function LineChart({ data, config, yAxisConfig }: LineChartProps) {
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>Residências Marcadas</CardTitle>
-          <CardDescription>
-            Mostrando o total de casas marcadas nos últimos {getSubTitle()}
-          </CardDescription>
+          <CardDescription>Mostrando o total de casas marcadas nos últimos {getSubTitle()}</CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto" aria-label="Select a value">
             <SelectValue placeholder="Últimos 3 meses" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="12m" className="rounded-lg">Últimos 12 meses</SelectItem>
-            <SelectItem value="90d" className="rounded-lg">Últimos 3 meses</SelectItem>
-            <SelectItem value="30d" className="rounded-lg">Últimos 30 dias</SelectItem>
-            <SelectItem value="7d" className="rounded-lg">Últimos 7 dias</SelectItem>
+            <SelectItem value="12m" className="rounded-lg">
+              Últimos 12 meses
+            </SelectItem>
+            <SelectItem value="90d" className="rounded-lg">
+              Últimos 3 meses
+            </SelectItem>
+            <SelectItem value="30d" className="rounded-lg">
+              Últimos 30 dias
+            </SelectItem>
+            <SelectItem value="7d" className="rounded-lg">
+              Últimos 7 dias
+            </SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
@@ -93,14 +130,12 @@ export function LineChart({ data, config, yAxisConfig }: LineChartProps) {
         <ChartContainer config={config} className="aspect-auto h-[250px] w-full">
           <AreaChart data={filteredData}>
             <defs>
-              <linearGradient id="fillResidential" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={config.residential.color} stopOpacity={0.8} />
-                <stop offset="95%" stopColor={config.residential.color} stopOpacity={0.1} />
-              </linearGradient>
-              <linearGradient id="fillCommercial" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={config.commercial.color} stopOpacity={0.8} />
-                <stop offset="95%" stopColor={config.commercial.color} stopOpacity={0.1} />
-              </linearGradient>
+              {dataKeys.map((key) => (
+                <linearGradient key={`fill-${key}`} id={`fill-${key}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={colorMap[key]} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={colorMap[key]} stopOpacity={0.1} />
+                </linearGradient>
+              ))}
             </defs>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -113,14 +148,24 @@ export function LineChart({ data, config, yAxisConfig }: LineChartProps) {
                 const date = new Date(value)
                 return date.toLocaleDateString("pt-BR", {
                   month: "short",
+                  day: "numeric",
+                  year: "numeric",
                 })
               }}
             />
             <YAxis
-              dataKey={yAxisConfig.dataKey}
-              label={{ value: yAxisConfig.label, angle: -90, position: 'insideLeft', dy: 40 }}
               tickLine={false}
               axisLine={false}
+              label={
+                yAxisConfig?.label
+                  ? {
+                    value: yAxisConfig.label,
+                    angle: -90,
+                    position: "insideLeft",
+                    dy: 40,
+                  }
+                  : undefined
+              }
             />
             <ChartTooltip
               cursor={false}
@@ -129,26 +174,24 @@ export function LineChart({ data, config, yAxisConfig }: LineChartProps) {
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString("pt-BR", {
                       month: "short",
+                      day: "numeric",
+                      year: "numeric",
                     })
                   }}
                   indicator="dot"
                 />
               }
             />
-            <Area
-              dataKey="residential"
-              type="natural"
-              fill="url(#fillResidential)"
-              stroke={config.residential.color}
-              stackId="a"
-            />
-            <Area
-              dataKey="commercial"
-              type="natural"
-              fill="url(#fillCommercial)"
-              stroke={config.commercial.color}
-              stackId="b"
-            />
+            {dataKeys.map((key, index) => (
+              <Area
+                key={key}
+                dataKey={key}
+                type="natural"
+                fill={`url(#fill-${key})`}
+                stroke={colorMap[key]}
+                stackId={`stack-${index}`}
+              />
+            ))}
             <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
@@ -156,3 +199,4 @@ export function LineChart({ data, config, yAxisConfig }: LineChartProps) {
     </Card>
   )
 }
+
