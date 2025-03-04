@@ -38,7 +38,7 @@ export default function Login({ searchParams }: { searchParams: Promise<{ error:
         console.error(error, errorMessages[error as string]);
       }
     })
-  }, []);
+  }, [router, searchParams]);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-white" onKeyDownCapture={(e) => e.key === "Enter" && handleLogin()}>

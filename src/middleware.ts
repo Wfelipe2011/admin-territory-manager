@@ -40,7 +40,7 @@ export function middleware(req: NextRequest) {
     console.log(`[middleware] Usuário autenticado: ${decoded.userName} - Roles: ${decoded.roles} - Tenant: ${decoded.tenantId}`);
     return NextResponse.next();
   } catch (error) {
-    console.log("Erro ao decodificar o token, redirecionando para login");
+    console.log("Erro ao decodificar o token, redirecionando para login", error);
     return NextResponse.redirect(new URL("/login?error=invalid", req.url));
   }
 }
