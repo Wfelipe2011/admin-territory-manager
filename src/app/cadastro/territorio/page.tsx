@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { TerritoryFilter } from "@/components/TerritoryFilter";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { TerritoryImage } from "./TerritoryImage";
+import { PageTitle } from "@/components/ui/PageTitle";
 
 const axios = new AxiosAdapter();
 
@@ -222,6 +223,7 @@ function ClientSideTerritory() {
 
   return (
     <RootModeScreen mode={mode}>
+      <PageTitle title="Cadastro de Território" />
       <TerritoryFilter
         className="rounded-md shadow-md rounded-b-none bg-white my-4 p-4"
         title="Territórios"

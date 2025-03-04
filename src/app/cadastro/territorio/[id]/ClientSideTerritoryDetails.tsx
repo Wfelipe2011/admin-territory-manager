@@ -21,6 +21,7 @@ import { AddressDialog } from "./ClientSideAddressDialog";
 import { useCallback } from "react";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { TerritoryImage } from "../TerritoryImage";
+import { PageTitle } from "@/components/ui/PageTitle";
 
 export function ClientSideTerritoryDetails() {
   const { id } = useParams();
@@ -52,10 +53,11 @@ export function ClientSideTerritoryDetails() {
     : MODE.SCREEN;
   return (
     <RootModeScreen mode={mode}>
+      <PageTitle title="Edição Quadra, Rua e Casas" />
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-slate-700">
+            <h1 className="text-2xl font-bold text-slate-700">
               {territory.name}
             </h1>
             <div className="flex items-center gap-2">

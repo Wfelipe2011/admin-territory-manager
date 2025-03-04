@@ -11,6 +11,7 @@ import { use, useCallback, useEffect, useState } from "react";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { Territories, Round, TerritoryType } from "@/types/territories";
 import { TypeIcon } from "@/components/ui/TypeIcon";
+import { PageTitle } from "@/components/ui/PageTitle";
 
 const axios = new AxiosAdapter();
 
@@ -140,43 +141,42 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
 
   return (
     <RootModeScreen mode={mode}>
-      <div className="p-2 md:p-6">
-        <RoundThemeUpdater round={round!} />
-        <div>
-          <h1 className="text-xl font-bold py-4" style={{ color: round!.color_primary }}>
-            {round!.name}
-          </h1>
-        </div>
-        <Tabs defaultValue={types[0]?.name}>
-          <TabsList className="flex flex-wrap justify-center gap-2 md:inline-flex h-full">
-            {types.map((type) => (
-              <TabsTrigger id={String(type.id)} key={type.id} value={type.name}>
-                <TypeIcon type={type.name} className="w-4 h-4 mr-2" style={{ color: round?.color_primary }} />
-                {type.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {types.map((type) => {
-            return (
-              <TabsContent key={type.name} className="flex flex-wrap gap-4 items-center justify-center" value={type.name}>
-                {territoriesState.filter((t) => t.typeId === type.id).map((territory) => (
-                  <TerritoryChart
-                    key={`${type.name}-${territory.territoryId}`}
-                    data={[
-                      { name: "Concluído", value: territory.positiveCompleted.length },
-                      { name: "A fazer", value: territory.negativeCompleted },
-                    ]}
-                    colors={[round!.color_primary, round!.color_secondary]}
-                    territory={territory}
-                    onShareClick={(overseer, expirationDate) => shareSubmit(territory.territoryId, overseer, expirationDate)}
-                    onRevokeClick={() => onRevokeClick(territory.territoryId)}
-                  />
-                ))}
-              </TabsContent>
-            )
-          })}
-        </Tabs>
+      <PageTitle title="Gestão de Territórios" />
+      <RoundThemeUpdater round={round!} />
+      <div>
+        <h1 className="text-xl font-bold pb-2" style={{ color: round!.color_primary }}>
+          {round!.name}
+        </h1>
       </div>
+      <Tabs defaultValue={types[0]?.name}>
+        <TabsList className="flex flex-wrap justify-center gap-2 md:inline-flex h-full">
+          {types.map((type) => (
+            <TabsTrigger id={String(type.id)} key={type.id} value={type.name}>
+              <TypeIcon type={type.name} className="w-4 h-4 mr-2" style={{ color: round?.color_primary }} />
+              {type.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {types.map((type) => {
+          return (
+            <TabsContent key={type.name} className="flex flex-wrap gap-4 items-center justify-center" value={type.name}>
+              {territoriesState.filter((t) => t.typeId === type.id).map((territory) => (
+                <TerritoryChart
+                  key={`${type.name}-${territory.territoryId}`}
+                  data={[
+                    { name: "Concluído", value: territory.positiveCompleted.length },
+                    { name: "A fazer", value: territory.negativeCompleted },
+                  ]}
+                  colors={[round!.color_primary, round!.color_secondary]}
+                  territory={territory}
+                  onShareClick={(overseer, expirationDate) => shareSubmit(territory.territoryId, overseer, expirationDate)}
+                  onRevokeClick={() => onRevokeClick(territory.territoryId)}
+                />
+              ))}
+            </TabsContent>
+          )
+        })}
+      </Tabs>
     </RootModeScreen>
   );
 };

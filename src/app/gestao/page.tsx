@@ -10,6 +10,7 @@ import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { CreateRoundDto } from "@/types/CreateRoundDto";
 import toast from "react-hot-toast";
+import { PageTitle } from "@/components/ui/PageTitle";
 
 type Round = {
   id: number;
@@ -111,63 +112,63 @@ const ClientSideGestao = () => {
 
   return (
     <RootModeScreen mode={mode}>
-      <div className="md:px-6">
-        <SearchInterface
-          searchValue={searchValue}
-          onSearchChange={handleSearchChange}
-          onButtonClick={handleButtonClick}
-        />
+      <PageTitle title="Gestão de Rodadas" />
 
-        <div className="flex flex-wrap justify-center gap-6 py-8">
-          {filteredRounds?.map((round) => (
-            <RoundChart
-              key={round.id}
-              data={[
-                { name: "Concluído", value: round.completed },
-                { name: "A fazer", value: round.not_completed },
-              ]}
-              colors={[round.color_primary, round.color_secondary]}
-              start_date={new Date(round.start_date).toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
-              end_date={
-                round.end_date === null
-                  ? null
-                  : new Date(round.end_date).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })
-              }
-              title={`${round.round_number} - ${round.name}`}
-              type={round.type}
-              theme={round.theme}
-              id={round.id}
-              onEditClick={() =>
-                router.push(`/territories/${round.round_number}`)
-              }
-              onArchClick={() => {
-                setDialogStatus(true);
-                setDialogRound(round.round_number);
-              }}
-            />
-          ))}
-        </div>
-        <DialogTextConfirm
-          status={dialogStatus}
-          onStatusChange={setDialogStatus}
-          onLeafClick={handleArchClick}
-          onRightClick={() => {
-            console.log("Botão 'Cancelar' clicado!");
-            setDialogStatus(false);
-            setDialogRound(0);
-          }}
-        >
-          <p className="text-lg font-medium">Deseja arquivar este território?</p>
-        </DialogTextConfirm>
+      <SearchInterface
+        searchValue={searchValue}
+        onSearchChange={handleSearchChange}
+        onButtonClick={handleButtonClick}
+      />
+
+      <div className="flex flex-wrap justify-center gap-6 py-8">
+        {filteredRounds?.map((round) => (
+          <RoundChart
+            key={round.id}
+            data={[
+              { name: "Concluído", value: round.completed },
+              { name: "A fazer", value: round.not_completed },
+            ]}
+            colors={[round.color_primary, round.color_secondary]}
+            start_date={new Date(round.start_date).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
+            end_date={
+              round.end_date === null
+                ? null
+                : new Date(round.end_date).toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })
+            }
+            title={`${round.round_number} - ${round.name}`}
+            type={round.type}
+            theme={round.theme}
+            id={round.id}
+            onEditClick={() =>
+              router.push(`/territories/${round.round_number}`)
+            }
+            onArchClick={() => {
+              setDialogStatus(true);
+              setDialogRound(round.round_number);
+            }}
+          />
+        ))}
       </div>
+      <DialogTextConfirm
+        status={dialogStatus}
+        onStatusChange={setDialogStatus}
+        onLeafClick={handleArchClick}
+        onRightClick={() => {
+          console.log("Botão 'Cancelar' clicado!");
+          setDialogStatus(false);
+          setDialogRound(0);
+        }}
+      >
+        <p className="text-lg font-medium">Deseja arquivar este território?</p>
+      </DialogTextConfirm>
     </RootModeScreen>
   )
 };
