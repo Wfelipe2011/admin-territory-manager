@@ -15,8 +15,8 @@ export function middleware(req: NextRequest) {
 
   const token = cookies.token;
   const isAuthRoute = req.nextUrl.pathname.startsWith("/login");
+
   console.log("Rota autenticada?", isAuthRoute);
-  //   const isProtectedRoute = req.nextUrl.pathname.startsWith("/dashboard");
 
   if (isAuthRoute) {
     console.log("Rota autenticada, continuando navegação");
@@ -25,16 +25,26 @@ export function middleware(req: NextRequest) {
 
   if (!token) {
     console.log("Token não encontrado, redirecionando para login");
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/login?error=missing", req.url));
   }
 
-  console.log("Token encontrado, continuando navegação");
+  try {
+    const decoded = jwtDecode<DecodedToken>(token);
+    const currentTime = Math.floor(Date.now() / 1000);
 
-  const decoded = jwtDecode<DecodedToken>(token);
-  console.log(`[middleware] Usuário autenticado: ${decoded.userName} - Roles: ${decoded.roles} - Tenant: ${decoded.tenantId}`);
-  return NextResponse.next();
+    if (decoded.exp && decoded.exp < currentTime) {
+      console.log("Token expirado, redirecionando para login");
+      return NextResponse.redirect(new URL("/login?error=expired", req.url));
+    }
+
+    console.log(`[middleware] Usuário autenticado: ${decoded.userName} - Roles: ${decoded.roles} - Tenant: ${decoded.tenantId}`);
+    return NextResponse.next();
+  } catch (error) {
+    console.log("Erro ao decodificar o token, redirecionando para login");
+    return NextResponse.redirect(new URL("/login?error=invalid", req.url));
+  }
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/gestao/:path*"], // Ajuste as rotas protegidas
+  matcher: ["/dashboard/:path*", "/gestao/:path*", "/cadastro/:path*", "/territories/:path*"],
 };

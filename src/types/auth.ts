@@ -15,4 +15,6 @@ export interface DecodedToken {
   userName: string;
   roles: string[];
   tenantId: number;
+  exp: number;
+  iat: number;
 }
