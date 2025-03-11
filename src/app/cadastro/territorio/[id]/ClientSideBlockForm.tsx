@@ -47,7 +47,6 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
     });
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [deletingAddresses, setDeletingAddresses] = useState<Address[]>([]);
-    const alreadyExistsAnGhostStreet = addresses.some((address) => address.street === "" || address.zip_code === "");
 
     useEffect(() => {
         if (initialBlock) {
@@ -72,9 +71,6 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
     }, [])
 
     const handleAddAddress = () => {
-        if (alreadyExistsAnGhostStreet) {
-            return;
-        }
 
         const uuid = crypto.randomUUID();
         const address: Address = {
@@ -185,7 +181,7 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
                             <div className="flex flex-col gap-2">
                                 <div className="flex justify-between items-center gap-2">
                                     <h2 className="text-lg font-medium">Ruas:</h2>
-                                    <Button variant="outline" className="w-9 text-green-500" disabled={alreadyExistsAnGhostStreet} onClick={handleAddAddress}><PlusIcon /></Button>
+                                    <Button variant="outline" className="w-9 text-green-500" onClick={handleAddAddress}><PlusIcon /></Button>
                                 </div>
                                 {addresses.map((address) => {
                                     return (
