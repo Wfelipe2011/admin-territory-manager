@@ -3,7 +3,7 @@ import axios from "axios";
 import { parseCookies } from "nookies";
 
 // export const URL_API = "https://fe1c-187-180-188-14.ngrok-free.app";
-export const URL_API = `https://api-hmg.territory-manager.com.br`;
+export const URL_API = `https://api.territory-manager.com.br`;
 
 type AxiosResponse<T> =
   | {
