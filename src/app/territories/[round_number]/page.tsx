@@ -52,7 +52,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
     const query = new URLSearchParams({ p: `territorio/${territoryId}?${queryRound.toString()}`, s: signature });
     const toShare = {
       title: `*DESIGNAÇÃO DE TERRITÓRIO*`,
-      url: `https://qa.territory-manager.com.br/home?${query.toString()}`,
+      url: `https://app.territory-manager.com.br/home?${query.toString()}`,
       text: `*DESIGNAÇÃO DE TERRITÓRIO*\n\nPrezado irmão *_${overseer}_*\nsegue o link para o território *${territory.name}* que você irá trabalhar até ${dayjs(expirationDate).format(
         "DD/MM/YYYY"
       )} \n\n\r`,
