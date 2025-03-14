@@ -163,6 +163,22 @@ export const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
         setEditingHouse(house)
     }
 
+    const handleDeleteHouse = async (house: House) => {
+        try {
+            const response = await axiosV1.delete(`houses/${house.id}`)
+            console.log(response)
+            if (response.status > 299) {
+                throw new Error("Erro ao deletar casa")
+            }
+            setHouses((prev) => prev.filter((h) => h.id !== house.id))
+            toast.success("Casa deletada com sucesso")
+        }
+        catch (error) {
+            toast.error("Erro ao deletar casa")
+            console.error(error)
+        }
+    }
+
     const saveNewOrder = async () => {
         try {
             const response = await axiosV1.post(`houses/order`, {
@@ -380,7 +396,7 @@ export const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
                                             <div className="flex gap-1 justify-center">
                                                 {deletingHouse && deletingHouse.id === house.id && (
                                                     <>
-                                                        <Button variant="outline" size="icon" title={"Confirmar"}>
+                                                        <Button variant="outline" size="icon" title={"Confirmar"} onClick={() => handleDeleteHouse(house)}>
                                                             <SaveIcon className="text-green-500" />
                                                         </Button>
                                                         <Button
