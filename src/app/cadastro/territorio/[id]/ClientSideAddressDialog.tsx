@@ -73,7 +73,7 @@ export const AddressDialog = ({ address, blockId }: AddressDialogProps) => {
 
     const fetchHouses = useCallback(async () => {
         try {
-            const url = `territories/${id}/edit?blockId=${blockId}&page=1&pageSize=1000`
+            const url = `territories/${id}/edit?blockId=${blockId}&streetFilter=${address.street}&page=1&pageSize=1000`
             const response = await axiosV1.get<{ house: House[] }>(url)
             if (!response.data || response.status > 299) {
                 throw new Error("Erro ao buscar casas")
