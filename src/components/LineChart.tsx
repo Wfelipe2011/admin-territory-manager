@@ -146,11 +146,8 @@ export function LineChart({ data, baseColor = "#3b82f6", yAxisConfig }: LineChar
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value)
-                return date.toLocaleDateString("pt-BR", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })
+                date.setDate(date.getDate() + 1)
+                return date.toLocaleDateString("pt-BR")
               }}
             />
             <YAxis
