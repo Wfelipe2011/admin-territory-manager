@@ -47,10 +47,10 @@ export function RoundChart({
       {end_date &&
         <span className={cn("absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-6xl opacity-10 z-10 pointer-events-none")}>Finalizado</span>
       }
-      <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
-        <CardTitle className="flex gap-2 items-end text-lg font-medium">
+      <CardHeader className="flex flex-row justify-between p-0 pt-2 px-2">
+        <CardTitle className="flex flex-row flex-wrap gap-2 items-end text-lg font-medium">
           <span>{title}</span>
-          <div className="flex gap-2 pb-1">
+          <div className="flex gap-2 pb-1 pl-1">
             <Badge variant="secondary" style={{ backgroundColor: colors[0] || "#ccc", color: 'white' }}>{type}</Badge>
             {theme === 'campaign' && (<Badge variant="secondary" style={{ backgroundColor: colors[0] || "#ccc", color: 'white' }}>Campanha</Badge>)}
           </div>
