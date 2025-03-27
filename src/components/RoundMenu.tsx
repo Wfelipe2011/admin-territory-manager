@@ -10,10 +10,10 @@ import { CreateRoundDto } from "@/types/CreateRoundDto"
 
 const COLOR_THEMES = [
   { primary: "#7AAD58", secondary: "#CBE6BA" },
-  { primary: "#5B98AB", secondary: "#EAF2F4" },
-  { primary: "#E29D4F", secondary: "#F7E9D9" },
-  { primary: "#b382d2", secondary: "#d5bae6" },
-  { primary: "#d2b382", secondary: "#e6d5ba" },
+  { primary: "#4a6da7", secondary: "#c5dafd" },
+  { primary: "#e36600", secondary: "#f6d5ba" },
+  { primary: "#5b3c88", secondary: "#dfd2f1" },
+  { primary: "#723535", secondary: "#d8bfb9" },
 ]
 
 interface RoundMenuProps {
