@@ -7,6 +7,7 @@ import { PageTitle } from "@/components/ui/PageTitle";
 import { TypeIcon } from "@/components/ui/TypeIcon";
 import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { useEffect, useState } from "react";
+import MetabaseIframe from "@/components/MetabaseIframe";
 
 interface TerritoryDetails {
   total: number;
@@ -48,20 +49,7 @@ const DashboardPage = () => {
   return (
     <RootModeScreen mode={mode}>
       <PageTitle title="Dashboard" />
-      <LineChart data={markedHouses} baseColor="#7AAD58" yAxisConfig={{ label: "Quantidade" }} />
-      <div className="w-full flex flex-wrap gap-4 mt-4 md:flex-nowrap">
-        {Object.keys(territoryDetails).map((key) => {
-          if (key === "total") return null;
-          return (
-            <MetricChart
-              key={key}
-              title={`Território ${key}`}
-              value={territoryDetails[key]}
-              Icon={<TypeIcon type={key} className="h-5 w-5 text-muted-foreground" />}
-            />
-          );
-        })}
-      </div>
+      <MetabaseIframe setMode={setMode} />
     </RootModeScreen>
   );
 };
