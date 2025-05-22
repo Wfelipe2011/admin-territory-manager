@@ -1,55 +1,24 @@
 "use client";
 
-import { LineChart } from "@/components/LineChart";
-import { MetricChart } from "@/components/MetricChart";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { PageTitle } from "@/components/ui/PageTitle";
-import { TypeIcon } from "@/components/ui/TypeIcon";
-import { AxiosAdapter } from "@/infra/AxiosAdapter";
 import { useEffect, useState } from "react";
 import MetabaseIframe from "@/components/MetabaseIframe";
 
-interface TerritoryDetails {
-  total: number;
-  [key: string]: number;
-}
-
-interface MarkedHouses {
-  date: string;
-  [key: string]: string | number;
-}
-
+let timer: NodeJS.Timeout;
 const DashboardPage = () => {
-  const [territoryDetails, setTerritoryDetails] = useState<TerritoryDetails>({ total: 0 });
-  const [markedHouses, setMarkedHouses] = useState<MarkedHouses[]>([]);
   const [mode, setMode] = useState<MODE>(MODE.LOADING);
 
-  async function fetchData() {
-    const axios = new AxiosAdapter()
-
-    const [territoryDetailsResponse, markedHousesResponse] = await Promise.all([
-      axios.get<TerritoryDetails>('dashboard/territory-details'),
-      axios.get<MarkedHouses[]>('dashboard/marked-houses'),
-    ]);
-
-    return {
-      territoryDetails: territoryDetailsResponse.data!,
-      markedHouses: markedHousesResponse.data!,
-    };
-  }
-
   useEffect(() => {
-    fetchData().then((data) => {
-      setTerritoryDetails(data.territoryDetails);
-      setMarkedHouses(data.markedHouses);
+    clearTimeout(timer);
+    timer = setTimeout(() => {
       setMode(MODE.SCREEN)
-    });
+    }, 2000);
   }, []);
-
   return (
     <RootModeScreen mode={mode}>
       <PageTitle title="Dashboard" />
-      <MetabaseIframe setMode={setMode} />
+      <MetabaseIframe />
     </RootModeScreen>
   );
 };

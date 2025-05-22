@@ -4,9 +4,8 @@ import { DecodedToken } from '@/types/auth';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
 import { parseCookies } from 'nookies';
-import { MODE } from './RootModeScreen';
 
-export default function MetabaseIframe({ setMode }: { setMode: any }) {
+export default function MetabaseIframe() {
   const [iframeUrl, setIframeUrl] = useState(null);
 
   useEffect(() => {
@@ -15,14 +14,15 @@ export default function MetabaseIframe({ setMode }: { setMode: any }) {
 
     const decoded = jwtDecode<DecodedToken>(token);
     console.log(decoded)
-    setMode(MODE.LOADING)
     fetch(`/api/metabase?id=${decoded.tenantId}`)
       .then(res => res.json())
-      .then(({ iframeUrl }) => setIframeUrl(iframeUrl), setMode(MODE.SCREEN))
+      .then(({ iframeUrl }) => {
+        setIframeUrl(iframeUrl)
+      })
   }, []);
 
 
-  if (!iframeUrl) return
+  if (!iframeUrl) return null
 
   return (
     <div className="relative">
