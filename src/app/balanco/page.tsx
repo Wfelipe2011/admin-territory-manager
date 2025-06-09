@@ -58,7 +58,7 @@ export default function BalancoPage() {
       setIsLoading(true)
       try {
         const response = await fetch(
-          `https://api-hmg.territory-manager.com.br/transactions/balance?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+          `https://api.territory-manager.com.br/transactions/balance?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
         )
 
         if (!response.ok) {
