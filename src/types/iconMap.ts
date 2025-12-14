@@ -1,6 +1,19 @@
-import { LucideIcon, Store, Building2, Home, Landmark, BookUser, Building, Hotel, Trees, Church, School, DoorClosed, BanIcon, Building as BuildingIcon, House, HomeIcon } from "lucide-react";
+import { LucideIcon, Store, Building2, Home, Landmark, BookUser, Building, Hotel, Trees, Church, School, DoorClosed, BanIcon, House, Cross, Hospital as HospitalIcon } from "lucide-react";
 
 export const iconMap: Record<string, LucideIcon> = {
+    // Legendas principais do sistema
+    "Testemunha de Jeová": Cross,
+    "Não Bater": BanIcon,
+    "Residência": House,
+    Escola: School,
+    Igreja: Church,
+    Apartamento: Hotel,
+    "Comércio": Store,
+    Terreno: Trees,
+    Hospital: HospitalIcon,
+    Fundos: DoorClosed,
+
+    // Compatibilidade com valores antigos
     Comercial: Store,
     Residencial: Home,
     "Predial-Externo": Building2,
@@ -8,14 +21,7 @@ export const iconMap: Record<string, LucideIcon> = {
     Prédios: Building,
     Interfone: BookUser,
     Rural: Landmark,
-    Terreno: Trees,
-    Igreja: Church,
-    Escola: School,
-    Fundos: DoorClosed,
-    "Não Bater": BanIcon,
     Prédio: Building,
     Residencia: House,
-    Apartamento: Hotel,
-    Predio: BuildingIcon,
-    Vila: HomeIcon,
+    Predio: Building,
 };
