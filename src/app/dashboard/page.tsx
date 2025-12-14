@@ -55,7 +55,7 @@ const DashboardPage = () => {
           return (
             <MetricChart
               key={key}
-              title={`Território ${key}`}
+              title={`${key}`}
               value={territoryDetails[key]}
               Icon={<TypeIcon type={key} className="h-5 w-5 text-muted-foreground" />}
             />
