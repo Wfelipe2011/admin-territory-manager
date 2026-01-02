@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -55,7 +56,14 @@ export default function Login({ searchParams }: { searchParams: Promise<{ error:
           <Image priority={true} src="/logo.png" alt="Logo Território Digital" width={500} height={400} className="m-auto -mt-16 mb-8 w-[200px] bg-primary rounded-full" />
           <div className="space-y-4">
             <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="E-mail" className="h-12 px-4 rounded-md border border-gray-200" />
-            <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" className="h-12 px-4 rounded-md border border-gray-200" />
+            <div className="space-y-1">
+              <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" className="h-12 px-4 rounded-md border border-gray-200" />
+              <div className="flex justify-end">
+                <Link href="/forgot-password" title="Esqueci minha senha" className="text-sm text-primary hover:underline">
+                  Esqueceu sua senha?
+                </Link>
+              </div>
+            </div>
           </div>
           <ButtonManage
             loading={loading}

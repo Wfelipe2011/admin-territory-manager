@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, useContext, ReactNode, startTransit
 import { useRouter } from "next/navigation";
 import { parseCookies, setCookie, destroyCookie } from "nookies";
 import { AuthContextType, User } from "@/types/auth";
-import { URL_API } from "@/infra/AxiosAdapter";
+import { URL_API, AxiosAdapter } from "@/infra/AxiosAdapter";
 import { deleteAuthToken } from "@/utils/cookies";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,7 +55,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
-  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
+  const forgotPassword = async (email: string) => {
+    const axios = new AxiosAdapter();
+    const response = await axios.post("forgot-password", { email });
+    if (response.status !== 201 && response.status !== 200) {
+      throw new Error(response.message || "Erro ao solicitar recuperação de senha");
+    }
+  };
+
+  const resetPassword = async (password: string, token: string) => {
+    const axios = new AxiosAdapter();
+    const response = await axios.post("reset-password", { password, token });
+    if (response.status !== 201 && response.status !== 200) {
+      throw new Error(response.message || "Erro ao redefinir senha");
+    }
+  };
+
+  return <AuthContext.Provider value={{ user, loading, login, logout, forgotPassword, resetPassword }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextType {
