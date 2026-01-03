@@ -75,7 +75,7 @@ export class AxiosAdapter {
     } catch (error: any) {
       return {
         status: error?.response?.status,
-        message: error?.response?.data?.error,
+        message: error?.response?.data?.message || error?.response?.data?.error,
       };
     }
   }
@@ -96,7 +96,7 @@ export class AxiosAdapter {
     } catch (error: any) {
       return {
         status: error?.response?.status,
-        message: error?.response?.data?.error,
+        message: error?.response?.data?.message || error?.response?.data?.error,
       };
     }
   }

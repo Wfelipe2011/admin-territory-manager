@@ -4,6 +4,7 @@ import {
   LogOut,
   Map,
   PenBox,
+  Users,
 } from "lucide-react";
 
 import {
@@ -35,6 +36,11 @@ const items = [
     title: "Cadastros",
     url: "/cadastro/territorio",
     icon: PenBox,
+  },
+  {
+    title: "Usuários",
+    url: "/gestao/usuarios",
+    icon: Users,
   },
 ];
 
