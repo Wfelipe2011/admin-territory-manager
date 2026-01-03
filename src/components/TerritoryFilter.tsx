@@ -1,11 +1,12 @@
 "use client"
 
-import { Search } from 'lucide-react'
+import { Search, Upload } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChangeEvent } from 'react'
 import { AddTerritoryButton } from '@/app/cadastro/territorio/AddTerritoryButton'
 import { TypeIcon } from './ui/TypeIcon'
+import { Button } from './ui/button'
 
 export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -13,6 +14,7 @@ export interface TerritoryFilterProps extends React.HTMLAttributes<HTMLDivElemen
   onTabChange: (value: string) => void;
   onAddTerritory: (data: { name: string; typeId: number }) => void;
   onSearch: (value: ChangeEvent<HTMLInputElement>) => void;
+  onImport?: () => void;
 }
 
 export function TerritoryFilter({
@@ -21,6 +23,7 @@ export function TerritoryFilter({
   onTabChange,
   onAddTerritory,
   onSearch,
+  onImport,
   ...rest
 }: TerritoryFilterProps) {
   return (
@@ -54,10 +57,16 @@ export function TerritoryFilter({
             </Tabs>
           </div>
 
-          <AddTerritoryButton
-            territoryTypes={tabs}
-            onAddTerritory={onAddTerritory}
-          />
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onImport} className="flex items-center space-x-2">
+              <Upload className="w-4 h-4" />
+              <span>Importar</span>
+            </Button>
+            <AddTerritoryButton
+              territoryTypes={tabs}
+              onAddTerritory={onAddTerritory}
+            />
+          </div>
         </div>
       </div>
     </div>

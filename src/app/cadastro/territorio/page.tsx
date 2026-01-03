@@ -36,6 +36,7 @@ import { TerritoryFilter } from "@/components/TerritoryFilter";
 import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { TerritoryImage } from "./TerritoryImage";
 import { PageTitle } from "@/components/ui/PageTitle";
+import { ImportTerritoryDialog } from "./ImportTerritoryDialog";
 
 const axios = new AxiosAdapter();
 
@@ -103,9 +104,17 @@ function ClientSideTerritory() {
   });
 
   const [editMode, setEditMode] = useState<number>(0);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const router = useRouter();
 
   const totalPage = Math.ceil(pagination.total / pagination.limit);
+
+  const refresh = () => {
+    fetchTerritories(params).then(({ data, limit, page, total }) => {
+      setTerritories(data);
+      setPagination({ limit, page, total });
+    });
+  };
 
   useEffect(() => {
     Promise.all([
@@ -230,11 +239,17 @@ function ClientSideTerritory() {
         onSearch={(e) => handleSearch(e.target.value)}
         onTabChange={(e) => setTabValue(+e)}
         onAddTerritory={onAddTerritory}
+        onImport={() => setIsImportOpen(true)}
         tabs={territoryTypes.map((type) => ({
           value: String(type.id),
           label: type.name,
         }))}
       ></TerritoryFilter>
+      <ImportTerritoryDialog
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        onSuccess={refresh}
+      />
       <Table className="rounded-md shadow-md rounded-b-none bg-white">
         <TableCaption className="w-full bg-white p-2 rounded-md rounded-t-none shadow-md mt-0.5">
           <div className="flex justify-between">
