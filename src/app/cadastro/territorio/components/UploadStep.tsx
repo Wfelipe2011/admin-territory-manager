@@ -27,7 +27,7 @@ export function UploadStep({ onFileUpload }: UploadStepProps) {
   });
 
   const downloadTemplate = () => {
-    window.open('https://api.territory-manager.com.br/template-importacao.xlsx', '_blank');
+    window.open('/template-importacao.xlsx', '_blank');
   };
 
   return (
