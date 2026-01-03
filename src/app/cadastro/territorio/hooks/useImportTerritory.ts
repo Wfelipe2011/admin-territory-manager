@@ -204,7 +204,13 @@ export const useImportTerritory = () => {
 
     try {
       const api = new AxiosAdapter();
-      const validData = mappedData.filter(row => row.TipoTerritorio && row.Território && !isNaN(row.Quadra) && row.Logradouro);
+      const validData = mappedData.filter(row =>
+        row.TipoTerritorio &&
+        row.Território &&
+        typeof row.Quadra === 'number' &&
+        !isNaN(row.Quadra) &&
+        row.Logradouro
+      );
 
       const response = await api.post('territories/bulk', { rows: validData });
 
