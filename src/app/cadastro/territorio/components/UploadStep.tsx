@@ -27,9 +27,7 @@ export function UploadStep({ onFileUpload }: UploadStepProps) {
   });
 
   const downloadTemplate = () => {
-    // In a real app, this would download a pre-defined Excel file
-    // For now, we can just log or provide a link if available
-    window.open('/templates/territory_import_template.xlsx', '_blank');
+    window.open('https://api.territory-manager.com.br/template-importacao.xlsx', '_blank');
   };
 
   return (
@@ -50,7 +48,7 @@ export function UploadStep({ onFileUpload }: UploadStepProps) {
           ou clique para selecionar do seu computador
         </p>
         <p className="text-[10px] text-blue-500 font-medium mt-4 bg-blue-50 px-2 py-1 rounded border border-blue-100">
-          Apenas a primeira aba da planilha será importada
+          Você poderá selecionar a aba desejada no próximo passo
         </p>
       </div>
 

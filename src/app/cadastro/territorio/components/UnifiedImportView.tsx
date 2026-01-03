@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Check, AlertCircle, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Check, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Mapping, NormalizationRules } from '../hooks/useImportTerritory';
 
 interface UnifiedImportViewProps {
@@ -30,7 +30,7 @@ interface UnifiedImportViewProps {
     setMapping: (mapping: Partial<Mapping>) => void;
     normalization: NormalizationRules;
     setNormalization: (normalization: NormalizationRules) => void;
-    mappedData: any[];
+    mappedData: Record<string, string | number | boolean | undefined>[];
     uniqueFileLegends: string[];
     sheetNames: string[];
     selectedSheet: string;
@@ -92,16 +92,16 @@ export function UnifiedImportView({
         });
     };
 
-    const getRowErrors = (row: any) => {
+    const getRowErrors = (row: Record<string, string | number | boolean | undefined>) => {
         const errors = [];
         if (!row.TipoTerritorio) errors.push('Tipo ausente');
         if (!row.Território) errors.push('Território ausente');
-        if (isNaN(row.Quadra)) errors.push('Quadra inválida');
+        if (typeof row.Quadra !== 'number' || isNaN(row.Quadra)) errors.push('Quadra inválida');
         if (!row.Logradouro) errors.push('Logradouro ausente');
         return errors;
     };
 
-    const isValid = (row: any) => getRowErrors(row).length === 0;
+    const isValid = (row: Record<string, string | number | boolean | undefined>) => getRowErrors(row).length === 0;
 
     const validRows = mappedData.filter(isValid).length;
     const invalidRows = mappedData.length - validRows;
@@ -183,7 +183,7 @@ export function UnifiedImportView({
                     <div className="mt-2 p-3 bg-muted/20 rounded-lg border border-dashed space-y-3">
                         <div className="space-y-1.5">
                             <Label className="text-[10px] uppercase font-bold text-muted-foreground">
-                                Valores para "Não Bater" (Verdadeiro)
+                                Valores para &quot;Não Bater&quot; (Verdadeiro)
                             </Label>
                             <Input
                                 className="h-8 text-xs"

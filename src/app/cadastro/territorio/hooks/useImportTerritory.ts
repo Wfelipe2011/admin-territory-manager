@@ -1,7 +1,6 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { AxiosAdapter } from '@/infra/AxiosAdapter';
-import { parseCookies } from 'nookies';
 
 export type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing' | 'success' | 'error';
 
@@ -60,7 +59,7 @@ export const useImportTerritory = () => {
   const [headers, setHeaders] = useState<string[]>([]);
   const [mapping, setMapping] = useState<Partial<Mapping>>({});
   const [normalization, setNormalization] = useState<NormalizationRules>(DEFAULT_NORMALIZATION);
-  const [rawData, setRawData] = useState<any[]>([]);
+  const [rawData, setRawData] = useState<string[][]>([]);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,7 +80,7 @@ export const useImportTerritory = () => {
   const parseSheetData = useCallback((wb: XLSX.WorkBook, sheetName: string) => {
     try {
       const ws = wb.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+      const json = XLSX.utils.sheet_to_json(ws, { header: 1 }) as string[][];
 
       if (json.length > 0) {
         const headersFound = json[0].map(h => String(h));
@@ -161,9 +160,9 @@ export const useImportTerritory = () => {
 
   const mappedData = useMemo(() => {
     return rawData
-      .filter(row => row.some((cell: any) => cell !== null && cell !== undefined && cell !== '')) // Filter empty rows
+      .filter(row => row.some((cell) => cell !== null && cell !== undefined && cell !== '')) // Filter empty rows
       .map((row) => {
-        const item: any = {};
+        const item: Record<string, string | number | boolean | undefined> = {};
 
         const getValue = (field: keyof Mapping) => {
           const headerName = mapping[field];
@@ -218,9 +217,10 @@ export const useImportTerritory = () => {
         setError(response.message || 'Erro ao importar territórios.');
         setStep('error');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearInterval(interval);
-      setError(err.message || 'Erro na conexão com o servidor.');
+      const message = err instanceof Error ? err.message : 'Erro na conexão com o servidor.';
+      setError(message);
       setStep('error');
     }
   }, [mappedData]);
