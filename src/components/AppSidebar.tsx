@@ -4,6 +4,7 @@ import {
   LogOut,
   Map,
   PenBox,
+  Settings,
   Users,
 } from "lucide-react";
 
@@ -41,6 +42,11 @@ const items = [
     title: "Usuários",
     url: "/gestao/usuarios",
     icon: Users,
+  },
+  {
+    title: "Configurações",
+    url: "/gestao/parametros",
+    icon: Settings,
   },
 ];
 
