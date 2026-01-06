@@ -65,7 +65,7 @@ export function RoundMenu({ onButtonClick, territoryTypes }: RoundMenuProps) {
 
         <div className="space-y-2">
           <Label htmlFor="territory-type">Tipo de rodada</Label>
-          <Select value={selectedTypeId.toString()} onValueChange={(value) => setSelectedTypeId(Number(value))}>
+          <Select value={selectedTypeId ? selectedTypeId.toString() : undefined} onValueChange={(value) => setSelectedTypeId(Number(value))}>
             <SelectTrigger id="territory-type">
               <SelectValue placeholder="Selecione o tipo da rodada" />
             </SelectTrigger>
