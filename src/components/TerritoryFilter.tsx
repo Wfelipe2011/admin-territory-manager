@@ -45,16 +45,18 @@ export function TerritoryFilter({
         <div className="flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4 items-center flex-1">
             {/* Property type tabs */}
-            <Tabs defaultValue={tabs[0].value}>
-              <TabsList>
-                {tabs.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} onClick={() => onTabChange(tab.value)}>
-                    <TypeIcon type={tab.label} className="w-4 h-4 mr-2 stroke-primary" />
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            {tabs.length > 0 && (
+              <Tabs defaultValue={tabs[0].value}>
+                <TabsList>
+                  {tabs.map((tab) => (
+                    <TabsTrigger key={tab.value} value={tab.value} onClick={() => onTabChange(tab.value)}>
+                      <TypeIcon type={tab.label} className="w-4 h-4 mr-2 stroke-primary" />
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            )}
           </div>
 
           <div className="flex gap-2">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,7 +25,13 @@ export function RoundMenu({ onButtonClick, territoryTypes }: RoundMenuProps) {
   const [name, setName] = useState("")
   const [theme, setTheme] = useState<"default" | "campaign">("default")
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
-  const [selectedTypeId, setSelectedTypeId] = useState<number>(territoryTypes[0].id)
+  const [selectedTypeId, setSelectedTypeId] = useState<number | undefined>(territoryTypes[0]?.id)
+
+  useEffect(() => {
+    if (!selectedTypeId && territoryTypes.length > 0) {
+      setSelectedTypeId(territoryTypes[0].id)
+    }
+  }, [territoryTypes, selectedTypeId])
 
   const handleSubmit = () => {
     if (!name || !selectedTypeId) return

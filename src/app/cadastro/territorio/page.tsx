@@ -117,22 +117,26 @@ function ClientSideTerritory() {
   };
 
   useEffect(() => {
-    Promise.all([
-      fetchTerritories(params).then(({ data, limit, page, total }) => {
-        setTerritories(data);
-        setPagination({ limit, page, total });
-      }),
-      fetchTerritoryTypes().then(setTerritoryTypes),
-    ]).then(() => setMode(MODE.SCREEN));
+    fetchTerritories(params).then(({ data, limit, page, total }) => {
+      setTerritories(data);
+      setPagination({ limit, page, total });
+      setMode(MODE.SCREEN);
+    });
   }, [params]);
 
   useEffect(() => {
     fetchTerritoryTypes()
       .then((types) => {
         setTerritoryTypes(types);
-        setParams((prev) => ({ ...prev, type: types[0].id }));
+        if (types && types.length > 0) {
+          setParams((prev) => ({ ...prev, type: String(types[0].id) }));
+        }
       })
-      .then(() => setMode(MODE.SCREEN));
+      .then(() => setMode(MODE.SCREEN))
+      .catch((error) => {
+        console.error("Error fetching territory types:", error);
+        setMode(MODE.SCREEN);
+      });
   }, []);
 
   const handleEditMode = (value: number) => {
