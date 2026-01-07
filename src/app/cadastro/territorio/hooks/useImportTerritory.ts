@@ -44,7 +44,7 @@ const FIELDS: { key: keyof Mapping; label: string; required: boolean }[] = [
   { key: 'territorio', label: 'Território', required: true },
   { key: 'quadra', label: 'Quadra', required: true },
   { key: 'logradouro', label: 'Logradouro', required: true },
-  { key: 'numero', label: 'Número', required: true },
+  { key: 'numero', label: 'Número', required: false },
   { key: 'legenda', label: 'Legenda', required: false },
   { key: 'ordem', label: 'Ordem', required: false },
   { key: 'naoBater', label: 'Não Bater', required: false },
@@ -171,13 +171,19 @@ export const useImportTerritory = () => {
           return index !== -1 ? row[index] : undefined;
         };
 
-        item.TipoTerritorio = String(getValue('tipoTerritorio') || '');
-        item.Território = String(getValue('territorio') || '');
-        item.Quadra = Number(getValue('quadra'));
-        item.Logradouro = String(getValue('logradouro') || '');
-        item.Numero = String(getValue('numero') || '');
+        const getString = (field: keyof Mapping) => {
+          const val = getValue(field);
+          if (val === undefined || val === null || val === '') return '';
+          return String(val);
+        };
 
-        const legendaRaw = String(getValue('legenda') || '').trim();
+        item.TipoTerritorio = getString('tipoTerritorio');
+        item.Território = getString('territorio');
+        item.Quadra = getString('quadra');
+        item.Logradouro = getString('logradouro');
+        item.Numero = getString('numero');
+
+        const legendaRaw = getString('legenda').trim();
         item.Legenda = normalization.legendaMapping[legendaRaw] ?? (legendaRaw || 'Residência');
 
         item.Ordem = Number(getValue('ordem')) || undefined;
@@ -207,12 +213,16 @@ export const useImportTerritory = () => {
       const validData = mappedData.filter(row =>
         row.TipoTerritorio &&
         row.Território &&
-        typeof row.Quadra === 'number' &&
-        !isNaN(row.Quadra) &&
+        row.Quadra &&
         row.Logradouro
       );
 
-      const response = await api.post('territories/bulk', { rows: validData });
+      const payload = validData.map(row => ({
+        ...row,
+        Numero: (!row.Numero || String(row.Numero).trim() === '') ? 'ghost' : row.Numero
+      }));
+
+      const response = await api.post('territories/bulk', { rows: payload });
 
       clearInterval(interval);
       setProgress(100);
