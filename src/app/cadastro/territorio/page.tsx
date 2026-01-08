@@ -19,6 +19,7 @@ import {
   ChevronRight,
   PenIcon,
   EyeIcon,
+  Trash2,
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
@@ -37,6 +38,7 @@ import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { TerritoryImage } from "./TerritoryImage";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { ImportTerritoryDialog } from "./ImportTerritoryDialog";
+import { DialogTextConfirm } from "@/components/DialogTextConfirm";
 
 const axios = new AxiosAdapter();
 
@@ -105,6 +107,8 @@ function ClientSideTerritory() {
 
   const [editMode, setEditMode] = useState<number>(0);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const router = useRouter();
 
   const totalPage = Math.ceil(pagination.total / pagination.limit);
@@ -198,6 +202,18 @@ function ClientSideTerritory() {
       return;
     }
     setParams((prev) => ({ ...prev, page: "1" }));
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    const { status, message } = await axios.delete(`territories/${deleteId}`);
+    if (status > 299) {
+      console.error(message);
+      return;
+    }
+    setIsDeleteOpen(false);
+    setDeleteId(null);
+    refresh();
   };
 
   const handleImageUpload = async (
@@ -368,6 +384,22 @@ function ClientSideTerritory() {
                         className: "text-yellow-500 hover:text-yellow-700",
                       },
                     },
+                    {
+                      toggleMode: false,
+                      setToggleMode: () => {
+                        setDeleteId(territory.id);
+                        setIsDeleteOpen(true);
+                      },
+                      submitAction: () => { },
+                      icon: {
+                        jsx: <Trash2 />,
+                        className: "text-red-500 hover:text-red-700",
+                      },
+                      secondaryIcon: {
+                        jsx: <Trash2 />,
+                        className: "text-red-500 hover:text-red-700",
+                      },
+                    },
                   ]}
                 />
               </TableRow>
@@ -375,6 +407,14 @@ function ClientSideTerritory() {
           })}
         </TableBody>
       </Table>
+      <DialogTextConfirm
+        status={isDeleteOpen}
+        onStatusChange={setIsDeleteOpen}
+        onLeafClick={confirmDelete}
+        onRightClick={() => setIsDeleteOpen(false)}
+      >
+        <span>Tem certeza que deseja excluir este território?</span>
+      </DialogTextConfirm>
     </RootModeScreen>
   );
 }
