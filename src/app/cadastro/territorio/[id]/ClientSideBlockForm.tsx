@@ -184,6 +184,7 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
                                     <Button variant="outline" className="w-9 text-green-500" onClick={handleAddAddress}><PlusIcon /></Button>
                                 </div>
                                 {addresses.map((address) => {
+                                    const isNew = address.id.startsWith("temp-");
                                     return (
                                         <div className="grid grid-cols-10 gap-3" key={address.id}>
                                             <div className="col-span-9">
