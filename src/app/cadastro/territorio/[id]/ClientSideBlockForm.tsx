@@ -91,6 +91,9 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
         }
     }
     const updateAddress = (street: Address) => {
+        if (!street.id.startsWith("temp-")) {
+            return;
+        }
         setAddresses((prev) => prev.map((item) => {
             if (street.id === item.id) {
                 return street;
@@ -184,10 +187,18 @@ export function BlockForm({ block: initialBlock, callBack, addresses: existingAd
                                     <Button variant="outline" className="w-9 text-green-500" onClick={handleAddAddress}><PlusIcon /></Button>
                                 </div>
                                 {addresses.map((address) => {
+                                    const isExistingAddress = !address.id.startsWith("temp-");
                                     return (
                                         <div className="grid grid-cols-10 gap-3" key={address.id}>
                                             <div className="col-span-9">
-                                                <Datalist options={options} placeholder="Selecione uma rua" value={address.street} onChange={(e) => updateAddress({ ...address, street: e.target.value })} />
+                                                <Datalist
+                                                    options={options}
+                                                    placeholder="Selecione uma rua"
+                                                    value={address.street}
+                                                    disabled={isExistingAddress}
+                                                    title={isExistingAddress ? "A API nao suporta editar nome de rua existente" : undefined}
+                                                    onChange={(e) => updateAddress({ ...address, street: e.target.value })}
+                                                />
                                             </div>
                                             {/* <Input type="text" placeholder="CEP" className="col-span-3" name="zip_code" value={formatZipCode(address.zip_code)} onChange={(e) => updateAddress({ ...address, [e.target.name]: e.target.value })} /> */}
                                             <Button variant="outline" className="p-2 text-red-500 col-span-1" onClick={() => removeAddress(address)}><MinusIcon /></Button>
