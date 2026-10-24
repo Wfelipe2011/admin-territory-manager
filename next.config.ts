@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [{ source: '/:path*', has: [{ type: 'host', value: 'app.territory-manager.com.br' }], destination: 'https://admin.territory-manager.com.br/:path*', permanent: true }];
+  },
   images: {
     remotePatterns: [
       {

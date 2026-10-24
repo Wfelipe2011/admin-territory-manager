@@ -1,50 +1,24 @@
-import { NextResponse } from "next/server";
-import { parseCookies } from "nookies";
-import type { NextRequest } from "next/server";
-import { jwtDecode } from "jwt-decode";
-import { DecodedToken } from "./types/auth";
+import { NextResponse, type NextRequest } from 'next/server';
+import { jwtDecode } from 'jwt-decode';
+import { DecodedToken } from './types/auth';
 
 export function middleware(req: NextRequest) {
-  const cookies = parseCookies({
-    req: {
-      headers: {
-        cookie: req.headers.get("cookie"),
-      },
-    },
-  });
-
-  const token = cookies.token;
-  const isAuthRoute = req.nextUrl.pathname.startsWith("/login");
-
-  console.log("Rota autenticada?", isAuthRoute);
-
-  if (isAuthRoute) {
-    console.log("Rota autenticada, continuando navegação");
-    return NextResponse.next();
+  const path = req.nextUrl.pathname;
+  if (req.nextUrl.hostname === 'app.territory-manager.com.br') {
+    return NextResponse.redirect(new URL(path + req.nextUrl.search, process.env.NEXT_PUBLIC_APP_URL || 'https://admin.territory-manager.com.br'), 308);
   }
-
-  if (!token) {
-    console.log("Token não encontrado, redirecionando para login");
-    return NextResponse.redirect(new URL("/login?error=missing", req.url));
-  }
-
+  // Field authorization is performed by the API using its independent session.
+  if (path === '/' || path === '/home' || path.startsWith('/acesso/') || path.startsWith('/campo/')) return NextResponse.next();
+  const token = req.cookies.get('token')?.value;
+  if (!token) return NextResponse.redirect(new URL('/login?error=missing', req.url));
   try {
-    const decoded = jwtDecode<DecodedToken>(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-
-    if (decoded.exp && decoded.exp < currentTime) {
-      console.log("Token expirado, redirecionando para login");
-      return NextResponse.redirect(new URL("/login?error=expired", req.url));
-    }
-
-    console.log(`[middleware] Usuário autenticado: ${decoded.userName} - Roles: ${decoded.roles} - Tenant: ${decoded.tenantId}`);
+    const user = jwtDecode<DecodedToken>(token);
+    if (!user.exp || user.exp <= Date.now() / 1000) return NextResponse.redirect(new URL('/login?error=expired', req.url));
+    if (!user.roles?.some(role => ['admin', 'super_admin'].includes(role))) return NextResponse.redirect(new URL('/login?error=forbidden', req.url));
     return NextResponse.next();
-  } catch (error) {
-    console.log("Erro ao decodificar o token, redirecionando para login", error);
-    return NextResponse.redirect(new URL("/login?error=invalid", req.url));
-  }
+  } catch { return NextResponse.redirect(new URL('/login?error=invalid', req.url)); }
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/gestao/:path*", "/cadastro/:path*", "/territories/:path*"],
+  matcher: ['/', '/home', '/acesso/:path*', '/campo/:path*', '/dashboard/:path*', '/gestao/:path*', '/cadastro/:path*', '/territories/:path*', '/balanco/:path*'],
 };

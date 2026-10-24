@@ -22,12 +22,12 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
   const [round, setRound] = useState<Round>({ id: 0, round_number: 0, name: "", type: "", theme: "", tenant_id: 0, color_primary: "", color_secondary: "", start_date: "", end_date: null, completed: 0, not_completed: 0 });
   const [types, setTypes] = useState<TerritoryType[]>([]);
 
-  const generateSignature = async (territoryId: number, overseer: string, expirationDate: string) => {
+  const generateSignature = async (territoryId: number, overseer: string, expirationDate: string, canEditStructure: boolean) => {
     try {
-      const { data, status } = await axios.post<{ overseer: string, expirationTime: string, round: string }, { signature: string }>(`territories/${territoryId}/signature`, {
+      const { data, status } = await axios.post<{ overseer: string, expirationTime: string, round: string, canEditStructure: boolean }, { signature: string }>(`territories/${territoryId}/signature`, {
         overseer,
         expirationTime: expirationDate,
-        round: round_number,
+        round: round_number, canEditStructure,
       });
 
       if (!data?.signature || status > 299) {
@@ -48,11 +48,9 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
       return;
     }
 
-    const queryRound = new URLSearchParams({ round: round_number });
-    const query = new URLSearchParams({ p: `territorio/${territoryId}?${queryRound.toString()}`, s: signature });
     const toShare = {
       title: `*DESIGNAÇÃO DE TERRITÓRIO*`,
-      url: `https://app.territory-manager.com.br/home?${query.toString()}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/acesso/${encodeURIComponent(signature)}`,
       text: `*DESIGNAÇÃO DE TERRITÓRIO*\n\nPrezado irmão *_${overseer}_*\nsegue o link para o território *${territory.name}* que você irá trabalhar até ${dayjs(expirationDate).format(
         "DD/MM/YYYY"
       )} \n\n\r`,
@@ -67,7 +65,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
     );
   };
 
-  const shareSubmit = async (territoryId: number, overseer: string, expirationDate: string) => {
+  const shareSubmit = async (territoryId: number, overseer: string, expirationDate: string, canEditStructure: boolean) => {
     const territory = territoriesState.find((t) => t.territoryId === territoryId);
 
     if (!territory) {
@@ -78,7 +76,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
     const existingSignature = territory.signature?.key;
     const signature = existingSignature
       ? existingSignature // Se já existe, reutiliza a assinatura
-      : await generateSignature(territoryId, overseer, expirationDate); // Caso contrário, gera uma nova.
+      : await generateSignature(territoryId, overseer, expirationDate, canEditStructure); // Caso contrário, gera uma nova.
 
     try {
       await shareTerritory(territoryId, overseer, expirationDate, signature);
@@ -127,7 +125,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
     const territories = territoriesResponse.data as Territories[];
     const round = roundResponse.data as Round;
     const types = typesResponse.data as TerritoryType[];
-    return { territories, round, types: types.filter((type) => Boolean(type.name === round.type)) };
+    return { territories, round, types: types.filter((type) => round.type_ids?.length ? round.type_ids.includes(type.id) : type.name === round.type) };
   }, [round_number]);
 
   useEffect(() => {
@@ -169,7 +167,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
                   ]}
                   colors={[round!.color_primary, round!.color_secondary]}
                   territory={territory}
-                  onShareClick={(overseer, expirationDate) => shareSubmit(territory.territoryId, overseer, expirationDate)}
+                  onShareClick={(overseer, expirationDate, canEditStructure) => shareSubmit(territory.territoryId, overseer, expirationDate, canEditStructure)}
                   onRevokeClick={() => onRevokeClick(territory.territoryId)}
                 />
               ))}

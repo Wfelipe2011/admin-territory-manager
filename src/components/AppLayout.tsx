@@ -2,10 +2,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ReportsDrawer } from "@/components/ReportsDrawer";
 
+import { RequestsProvider } from "@/features/requests/provider";
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
-    <SidebarProvider>
+    <RequestsProvider><SidebarProvider>
       <AppSidebar />
       <main className="w-full bg-gray-100">
         <div className="w-full h-10 bg-primary fixed top-0 z-10">
@@ -16,6 +18,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </main>
-    </SidebarProvider>
+    </SidebarProvider></RequestsProvider>
   );
 }

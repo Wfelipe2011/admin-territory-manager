@@ -12,6 +12,11 @@ RUN npm ci --quiet
 # Copie o código fonte para a imagem
 COPY . .
 
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Use uma imagem base mais leve para executar o aplicativo

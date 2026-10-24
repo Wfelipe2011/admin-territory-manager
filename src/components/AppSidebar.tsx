@@ -5,6 +5,7 @@ import {
   Map,
   PenBox,
   Settings,
+  ClipboardList,
   Users,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
 const items = [
+  { title: "Solicitações", url: "/gestao/solicitacoes", icon: ClipboardList },
   {
     title: "Início",
     url: "/dashboard",

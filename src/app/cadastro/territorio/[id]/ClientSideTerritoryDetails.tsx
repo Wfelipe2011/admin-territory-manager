@@ -23,6 +23,8 @@ import { MODE, RootModeScreen } from "@/components/RootModeScreen";
 import { TerritoryImage } from "../TerritoryImage";
 import { PageTitle } from "@/components/ui/PageTitle";
 
+import { CatalogLinkButton } from "@/features/requests/catalog-link";
+
 export function ClientSideTerritoryDetails() {
   const { id } = useParams();
   const {
@@ -56,7 +58,7 @@ export function ClientSideTerritoryDetails() {
       <PageTitle title="Edição Quadra, Rua e Casas" />
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <h1 className="text-2xl font-bold text-slate-700">
               {territory.name}
             </h1>
@@ -69,7 +71,7 @@ export function ClientSideTerritoryDetails() {
                 onImageUpload={(_, imageUrl) => updateImageUrl(imageUrl)}
               />
             </div>
-            <BlockForm callBack={callBack} addresses={addresses} />
+            <div className="flex flex-wrap gap-2"><CatalogLinkButton territoryId={Number(id)} /><BlockForm callBack={callBack} addresses={addresses} /></div>
           </div>
         </div>
         <div className="flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md relative">
@@ -91,7 +93,7 @@ export function ClientSideTerritoryDetails() {
               </TabsList>
             </div>
             <div className="flex flex-col gap-2 mt-4">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-wrap justify-between items-center gap-3">
                 <h1 className="text-2xl font-bold text-slate-700">
                   Endereços:
                 </h1>

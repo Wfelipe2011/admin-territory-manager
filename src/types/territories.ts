@@ -22,6 +22,8 @@ export type Territories = {
 }
 
 export type Round = {
+    type_ids?: number[];
+    status?: 'open' | 'closed' | 'uninitialized';
     id: number;
     round_number: number;
     name: string;

@@ -3,25 +3,89 @@
 import { CopyIcon, Share2, User } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import dayjs from "dayjs";
 import { Button } from "./ui/button";
 import { Territories } from "@/types/territories";
 
+import { adminRequest } from "@/features/requests/api";
+
 interface TerritoryChartProps {
   data: { name: string; value: number }[];
   colors: string[];
   territory: Territories;
-  onShareClick: (overseer: string, expirationDate: string) => void;
+  onShareClick: (
+    overseer: string,
+    expirationDate: string,
+    canEditStructure: boolean,
+  ) => void;
   onRevokeClick: () => void;
 }
 
-export function TerritoryChart({ data, colors, territory, onShareClick, onRevokeClick }: TerritoryChartProps) {
+export function TerritoryChart({
+  data,
+  colors,
+  territory,
+  onShareClick,
+  onRevokeClick,
+}: TerritoryChartProps) {
+  const [canEditStructure, setCanEditStructure] = useState(false);
+  const [permissionBusy, setPermissionBusy] = useState(false);
+  const [permissionError, setPermissionError] = useState("");
+  useEffect(() => {
+    const abort = new AbortController();
+    setCanEditStructure(false);
+    if (territory.signature?.key)
+      void adminRequest<{ access: { canEditStructure: boolean } }>(
+        `signature/${territory.signature.key}`,
+        { signal: abort.signal },
+      )
+        .then((value) => setCanEditStructure(value.access.canEditStructure))
+        .catch((e) => {
+          if (!abort.signal.aborted) setPermissionError(e.message);
+        });
+    return () => abort.abort();
+  }, [territory.signature?.key]);
+  const changePermission = async (enabled: boolean) => {
+    if (!territory.signature?.key) {
+      setCanEditStructure(enabled);
+      return;
+    }
+    const previous = canEditStructure;
+    setCanEditStructure(enabled);
+    setPermissionBusy(true);
+    setPermissionError("");
+    try {
+      await adminRequest(`signature/${territory.signature.key}/permissions`, {
+        method: "PATCH",
+        body: JSON.stringify({ canEditStructure: enabled }),
+      });
+      setCanEditStructure(enabled);
+    } catch (e) {
+      setCanEditStructure(previous);
+      setPermissionError(
+        e instanceof Error ? e.message : "Erro ao salvar permissão",
+      );
+    } finally {
+      setPermissionBusy(false);
+    }
+  };
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [overseer, setOverseer] = useState<string | null>(territory.overseer || null);
-  const [expirationDate, setExpirationDate] = useState<string | null>(territory.signature?.expirationDate ? dayjs(territory.signature.expirationDate).format("YYYY-MM-DD") : null);
+  const [overseer, setOverseer] = useState<string | null>(
+    territory.overseer || null,
+  );
+  const [expirationDate, setExpirationDate] = useState<string | null>(
+    territory.signature?.expirationDate
+      ? dayjs(territory.signature.expirationDate).format("YYYY-MM-DD")
+      : null,
+  );
 
   const onPieEnter = (_: unknown, index: number) => setActiveIndex(index);
   const onPieLeave = () => setActiveIndex(null);
@@ -29,38 +93,48 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
   const isShared = overseer !== null && expirationDate !== null;
 
   function getMostRecentDate(dates: Array<{ date: string }>) {
-    if (!dates.length) return ""
-    const sortedDates = dates.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return `${dayjs(sortedDates[0].date).format('DD/MM/YYYY')}`
+    if (!dates.length) return "";
+    const sortedDates = dates.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+    return `${dayjs(sortedDates[0].date).format("DD/MM/YYYY")}`;
   }
 
   useEffect(() => {
     setOverseer(territory.overseer || null);
-  }, [territory.overseer])
+  }, [territory.overseer]);
 
   useEffect(() => {
-    setExpirationDate(territory.signature?.expirationDate ? dayjs(territory.signature.expirationDate).format("YYYY-MM-DD") : null);
-  }, [territory.signature?.expirationDate])
+    setExpirationDate(
+      territory.signature?.expirationDate
+        ? dayjs(territory.signature.expirationDate).format("YYYY-MM-DD")
+        : null,
+    );
+  }, [territory.signature?.expirationDate]);
 
   return (
     <Card className="w-full max-w-sm px-0 md:px-2">
       <CardHeader className="flex flex-row items-center justify-between p-0 pt-2 px-2">
         <CardTitle className="text-lg font-medium">{territory.name}</CardTitle>
-        {isShared && (
-          territory?.signature?.key ? (
-            <CopyIcon
-              className="h-5 w-5 cursor-pointer"
-              style={{ stroke: colors[0] || "#ccc", color: "white" }}
-              onClick={() => onShareClick(overseer, expirationDate)} // Aqui você pode implementar a lógica de copiar
-            />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={`${
+            territory.signature?.key ? "Compartilhar link" : "Gerar link"
+          } de ${territory.name}`}
+          disabled={!isShared || !overseer?.trim()}
+          onClick={() => {
+            if (overseer && expirationDate)
+              onShareClick(overseer, expirationDate, canEditStructure);
+          }}
+        >
+          {territory.signature?.key ? (
+            <CopyIcon style={{ color: colors[0] }} />
           ) : (
-            <Share2
-              className="h-5 w-5 cursor-pointer"
-              style={{ stroke: colors[0] || "#ccc", color: "white" }}
-              onClick={() => onShareClick(overseer, expirationDate)}
-            />
-          )
-        )}
+            <Share2 style={{ color: colors[0] }} />
+          )}
+        </Button>
       </CardHeader>
       <CardContent className="p-2">
         <div className="flex items-center justify-between">
@@ -84,7 +158,11 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
                         onMouseLeave={onPieLeave}
                       >
                         {data.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={colors[index] || "#ccc"} className="cursor-pointer" />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={colors[index] || "#ccc"}
+                            className="cursor-pointer"
+                          />
                         ))}
                       </Pie>
                     </PieChart>
@@ -92,7 +170,9 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
                 </div>
               </TooltipTrigger>
               {activeIndex !== null && (
-                <TooltipContent style={{ backgroundColor: colors[0] || "#000" }}>
+                <TooltipContent
+                  style={{ backgroundColor: colors[0] || "#000" }}
+                >
                   <p className="font-medium">
                     {data[activeIndex].name}: {data[activeIndex].value}
                   </p>
@@ -104,31 +184,69 @@ export function TerritoryChart({ data, colors, territory, onShareClick, onRevoke
             <div className="flex flex-col w-full mb-2">
               <div className="relative">
                 <User className="absolute right-[14px] top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input type="text" placeholder="Dirigente" value={overseer || ""} onChange={(e) => setOverseer(e.target.value)} className="pr-8 bg-background border rounded-md" />
+                <Input
+                  type="text"
+                  placeholder="Dirigente"
+                  value={overseer || ""}
+                  onChange={(e) => setOverseer(e.target.value)}
+                  className="pr-8 bg-background border rounded-md"
+                />
               </div>
             </div>
             <div className="flex flex-col w-full mb-2">
               <div className="relative">
-                <Input type="date" placeholder="Data de início" value={expirationDate || ""} onChange={(e) => setExpirationDate(e.target.value)} className="bg-background border rounded-md" />
+                <Input
+                  type="date"
+                  placeholder="Data de início"
+                  value={expirationDate || ""}
+                  onChange={(e) => setExpirationDate(e.target.value)}
+                  className="bg-background border rounded-md"
+                />
               </div>
             </div>
             {territory.signature?.key && (
               <div className="flex flex-col w-full mb-2">
-                <Button className="p-2 h-6 bg-secondary text-primary hover:bg-primary hover:text-white" variant={"destructive"} onClick={onRevokeClick}>Revogar</Button>
+                <Button
+                  className="p-2 h-6 bg-secondary text-primary hover:bg-primary hover:text-white"
+                  variant={"destructive"}
+                  onClick={onRevokeClick}
+                >
+                  Revogar
+                </Button>
               </div>
             )}
           </div>
         </div>
+        <label className="mt-3 flex items-start gap-2 text-xs">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={canEditStructure}
+            disabled={permissionBusy}
+            onChange={(e) => void changePermission(e.target.checked)}
+          />
+          Permitir edição de quadras e ruas
+        </label>
+        {permissionError && (
+          <p role="alert" className="mt-2 text-xs text-red-700">
+            {permissionError}
+          </p>
+        )}
         <div className="mt-4 flex items-center justify-between">
           <div className="flex gap-8">
             {data.map((item, index) => (
               <div key={item.name} className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: colors[index] || "#ccc" }} />
-                <span className="text-md text-muted-foreground">{item.name}</span>
+                <div
+                  className="h-3 w-3 rounded-sm"
+                  style={{ backgroundColor: colors[index] || "#ccc" }}
+                />
+                <span className="text-md text-muted-foreground">
+                  {item.name}
+                </span>
               </div>
             ))}
           </div>
-          <div className='flex gap-1 text-gray-500'>
+          <div className="flex gap-1 text-gray-500">
             {getMostRecentDate(territory.positiveCompleted)}
           </div>
         </div>
