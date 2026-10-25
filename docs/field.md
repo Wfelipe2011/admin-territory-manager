@@ -119,7 +119,7 @@ As duas APIs existem somente no compose de carga, com banco sintético próprio.
 As quadras são ordenadas somente no frontend: sem histórico, último trabalho mais
 antigo e nome em ordem natural (Quadra 2 antes de Quadra 10). O dado usado é
 `lastWorkedAt` já recebido no snapshot. Cards usam uma coluna no celular e duas em
-telas maiores, com progresso e indicadores lado a lado.
+telas maiores, com gráfico à esquerda e indicadores à direita em duas metades de largura semelhante. A rosca segue as proporções do Admin; compartilhar fica no cabeçalho, e contador, presença e acesso às ruas ficam no rodapé.
 
 Compartilhar usa o mesmo `navigatorShare` do Admin com a mensagem de designação,
 quadra, território e link. A alternativa copia a mensagem completa. Se compartilhar
@@ -135,3 +135,6 @@ casas usam 20 px. O texto “Prazo encerrado” não ocupa espaço no cartão; o
 e a explicação ao tocar continuam indicando o bloqueio de desmarcação.
 
 Esses ajustes não mudam endpoints, regras de autorização, banco ou worker.
+
+O Início administrativo e a origem de seus indicadores estão documentados em
+[`dashboard.md`](dashboard.md).

@@ -103,11 +103,11 @@ export function LineChart({ data, baseColor = "#3b82f6", yAxisConfig }: LineChar
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>Marcações por Tipo</CardTitle>
-          <CardDescription>Mostrando as 4 principais categorias de marcações nos últimos {getSubTitle()}</CardDescription>
+          <CardTitle>Marcações por categoria</CardTitle>
+          <CardDescription>Até quatro categorias disponíveis nos últimos {getSubTitle()}</CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto" aria-label="Select a value">
+          <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto" aria-label="Período do histórico">
             <SelectValue placeholder="Últimos 3 meses" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">

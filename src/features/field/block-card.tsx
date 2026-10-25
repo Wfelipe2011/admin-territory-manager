@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, Clock3, Share2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProgressDonut } from "@/components/ProgressDonut";
 import type { Block } from "./types";
 
 const names = new Intl.Collator("pt-BR", { numeric: true, sensitivity: "base" });
@@ -41,13 +42,12 @@ export function BlockCard({ block, href, presence, busy, share, revoke }: {
     return () => clearInterval(timer);
   }, [deadline]);
   const active = !!block.signature && deadline > now;
-  const percent = block.total ? Math.round((block.completed / block.total) * 100) : 0;
 
   return (
-    <article className="flex h-full min-w-0 flex-col rounded-2xl border bg-white p-4 shadow-sm sm:p-5" aria-label={block.name}>
+    <article className="flex h-full min-w-0 flex-col rounded-xl border bg-white p-3 shadow sm:p-4" aria-label={block.name}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="break-words text-lg font-semibold">
+          <h2 className="break-words text-lg font-medium">
             <Link href={href} className="underline-offset-4 hover:underline">{block.name}</Link>
           </h2>
           <p className="mt-1 text-xs text-slate-500">
@@ -56,9 +56,10 @@ export function BlockCard({ block, href, presence, busy, share, revoke }: {
               : "Sem histórico de trabalho"}
           </p>
         </div>
-        <span className="flex shrink-0 items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-xs text-slate-500" aria-label={`${presence} pessoas ativas`}>
-          <Users size={14} aria-hidden />{presence}
-        </span>
+        <Button variant="ghost" className="h-11 w-11 shrink-0 p-0 text-[var(--field-primary)]"
+          aria-label={`Compartilhar ${block.name}`} title={active ? "Reenviar link" : "Gerar e compartilhar link"} disabled={busy} onClick={share}>
+          <Share2 size={20} />
+        </Button>
       </div>
       {block.registrationStatus === "pending" && (
         <p className="mt-2 text-xs text-amber-800">Cadastro em análise · Você já pode cadastrar ruas e casas</p>
@@ -66,13 +67,11 @@ export function BlockCard({ block, href, presence, busy, share, revoke }: {
       {block.withoutRound > 0 && (
         <p className="mt-2 text-xs text-slate-500">{block.withoutRound} casas aguardando aprovação ou rodada</p>
       )}
-      <div className="my-5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full"
-          style={{ background: `conic-gradient(var(--field-primary) ${percent}%, var(--field-secondary) 0)` }}
-          role="img" aria-label={`${percent}% da quadra concluída`}>
-          <span className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-white text-lg font-semibold">{percent}%</span>
+      <div className="flex items-center justify-between gap-2 py-3" data-testid="block-chart-and-data">
+        <div className="flex w-1/2 min-w-0 justify-start">
+          <ProgressDonut completed={block.completed} pending={block.pending} primary="var(--field-primary)" secondary="var(--field-secondary)" label={`Progresso de ${block.name}`} />
         </div>
-        <div className="min-w-0 space-y-2 text-sm">
+        <div className="flex w-1/2 min-w-0 flex-col gap-2 pl-2 text-sm text-muted-foreground" data-testid="block-indicators">
           <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--field-secondary)]" /><span><strong>{block.pending}</strong> a fazer</span></p>
           <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--field-primary)]" /><span><strong>{block.completed}</strong> concluídas</span></p>
           <p className="text-xs leading-relaxed text-slate-500">Sugestão: {block.suggestion}</p>
@@ -84,22 +83,22 @@ export function BlockCard({ block, href, presence, busy, share, revoke }: {
         </div>
       </div>
       <div className="mt-auto space-y-3 border-t pt-3">
-        <div className="flex min-h-6 items-center gap-2 text-xs text-slate-500">
-          <Clock3 size={16} aria-hidden />
-          {block.signature ? (
-            <span className="tabular-nums" aria-label={`Validade do link de ${block.name}`}>
-              {active ? "Expira em " : "Link vencido · "}<strong className="text-slate-700">{remainingTime(deadline - now)}</strong>
-            </span>
-          ) : <span>Link ainda não gerado</span>}
+        <div className="flex min-h-6 items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span className="flex min-w-0 items-center gap-1.5">
+            <Clock3 size={15} className="shrink-0" aria-hidden />
+            {block.signature ? (
+              <span className="tabular-nums" aria-label={`Validade do link de ${block.name}`}>
+                {active ? "Expira em " : "Link vencido · "}<strong className="font-medium text-slate-700">{remainingTime(deadline - now)}</strong>
+              </span>
+            ) : <span>Link ainda não gerado</span>}
+          </span>
+          <span className="flex shrink-0 items-center gap-1" aria-label={`${presence} pessoas ativas`}>
+            <Users size={14} aria-hidden />{presence}
+          </span>
         </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline" className="h-11 min-w-0 flex-1 rounded-xl">
-            <Link href={href}>Ver ruas <ChevronRight size={18} /></Link>
-          </Button>
-          <Button className="h-11 w-11 shrink-0 rounded-xl bg-[var(--field-primary)] p-0 text-white" aria-label={`Compartilhar ${block.name}`} title={active ? "Reenviar link" : "Gerar e compartilhar link"} disabled={busy} onClick={share}>
-            <Share2 size={19} />
-          </Button>
-        </div>
+        <Button asChild variant="outline" className="h-11 w-full">
+          <Link href={href}>Ver ruas <ChevronRight size={18} /></Link>
+        </Button>
       </div>
     </article>
   );

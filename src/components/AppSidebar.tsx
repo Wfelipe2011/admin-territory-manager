@@ -24,7 +24,6 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
 const items = [
-  { title: "Solicitações", url: "/gestao/solicitacoes", icon: ClipboardList },
   {
     title: "Início",
     url: "/dashboard",
@@ -35,6 +34,7 @@ const items = [
     url: "/gestao",
     icon: Map,
   },
+  { title: "Solicitações", url: "/gestao/solicitacoes", icon: ClipboardList },
   {
     title: "Cadastros",
     url: "/cadastro/territorio",

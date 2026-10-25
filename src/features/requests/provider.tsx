@@ -13,6 +13,8 @@ const RequestsContext = createContext({
   revision: "",
   pending: 0,
   connected: false,
+  hasSnapshot: false,
+  error: "",
   refresh: () => {},
 });
 export const useRequests = () => useContext(RequestsContext);
@@ -22,6 +24,8 @@ export function RequestsProvider({ children }: { children: React.ReactNode }) {
   const [revision, setRevision] = useState("");
   const [pending, setPending] = useState(0);
   const [connected, setConnected] = useState(false);
+  const [hasSnapshot, setHasSnapshot] = useState(false);
+  const [error, setError] = useState("");
   const [generation, setGeneration] = useState(0);
   const refresh = useCallback(() => setGeneration((n) => n + 1), []);
   useEffect(() => {
@@ -56,10 +60,13 @@ export function RequestsProvider({ children }: { children: React.ReactNode }) {
           setRevision(cursor);
           setPending(result.pending);
           setConnected(true);
+          setHasSnapshot(true);
+          setError("");
           retry = 1000;
         } catch {
           if (abort.signal.aborted) break;
           setConnected(false);
+          setError("Não foi possível atualizar as solicitações.");
           await new Promise<void>((resolve) => {
             const timer = setTimeout(resolve, retry);
             wake = () => {
@@ -78,7 +85,7 @@ export function RequestsProvider({ children }: { children: React.ReactNode }) {
     };
   }, [generation]);
   return (
-    <RequestsContext.Provider value={{ revision, pending, connected, refresh }}>
+    <RequestsContext.Provider value={{ revision, pending, connected, hasSnapshot, error, refresh }}>
       {children}
     </RequestsContext.Provider>
   );

@@ -186,7 +186,9 @@ test("header acompanha sincronizações sem alterações e mantém o último hor
 
 for (const theme of ["default", "campaign", "letters"] as const) {
   test(`layout responsivo, logo e ações no tema ${theme}`, async ({ page }, testInfo) => {
-    await setup(page, { theme });
+    const { data } = await setup(page, { theme });
+    data.blocks[0].signature = { key: "PREVIA", expirationDate: new Date(Date.now() + 5 * 3600000).toISOString() };
+    data.blocks.push(block(2, "Quadra 2 com identificação muito longa para conferir a leitura no celular"));
     await page.goto("/acesso/QATEST");
     await expect(card(page)).toBeVisible();
     await expect(page.getByRole("button", { name: "Ver mapa", exact: true })).toHaveCount(0);
@@ -203,12 +205,20 @@ for (const theme of ["default", "campaign", "letters"] as const) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       const columns = await page.getByRole("region", { name: "Quadras do território" }).evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
       expect(columns).toBe(width < 640 ? 1 : 2);
-      await page.screenshot({ path: testInfo.outputPath(`quadras-${width}.png`), fullPage: true });
+      const chart = await card(page).getByRole("img", { name: "Progresso de Quadra 1: 50% concluído" }).boundingBox();
+      const indicators = await card(page).getByTestId("block-indicators").boundingBox();
+      expect(chart!.x + chart!.width).toBeLessThanOrEqual(indicators!.x);
+      expect(chart!.width).toBeGreaterThan(120);
+      expect(chart!.y).toBeLessThan(indicators!.y + indicators!.height);
+      await expect(card(page).getByRole("button", { name: "Revogar acesso", exact: true })).toBeVisible();
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
+      await page.screenshot({ path: testInfo.outputPath(`quadras-${width}.png`) });
     }
     await page.getByRole("button", { name: "Mapa", exact: true }).click();
     await expect(page.getByRole("dialog").getByRole("img", { name: "Mapa de Território QA de apresentação" })).toBeVisible();
     await page.getByRole("button", { name: "Close", exact: true }).click();
-    await page.getByRole("link", { name: "Ver ruas", exact: true }).click();
+    await page.getByRole("link", { name: "Ver ruas", exact: true }).first().click();
     await street(page, 11).click();
     const houseButton = page.getByRole("button", { name: /^Casa 12345-A,/ });
     expect(await houseButton.locator("span").first().evaluate((el) => getComputedStyle(el).fontSize)).toBe("20px");
