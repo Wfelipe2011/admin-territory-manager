@@ -1,10 +1,11 @@
 "use client";
 
 import * as Collapsible from "@radix-ui/react-collapsible";
-import { ChevronDown, Compass, Pencil } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { House, Street } from "./types";
 import { HouseGrid } from "./house-grid";
+import { CarIcon, PostAddIcon } from "./legacy-icons";
 
 export function StreetAccordion({
   street,
@@ -88,7 +89,7 @@ export function StreetAccordion({
               asChild
             >
               <a href={mapUrl} target="_blank" rel="noreferrer">
-                <Compass size={16} />
+                <CarIcon className="h-6 w-6 text-[var(--field-primary)]" />
                 Como chegar
               </a>
             </Button>
@@ -97,7 +98,7 @@ export function StreetAccordion({
               className="h-11 rounded-xl px-3 text-xs"
               onClick={report}
             >
-              <Pencil size={16} />
+              <PostAddIcon className="h-6 w-6 text-[var(--field-primary)]" />
               Solicitar alteração
             </Button>
             {editStructure && (

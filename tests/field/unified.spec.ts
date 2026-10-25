@@ -1,5 +1,6 @@
 import { test, expect, Page, Request } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { captureShares, sharedUrl } from './sharing';
 
 const fixture = process.env.FIELD_DEMO_FILE ? JSON.parse(readFileSync(process.env.FIELD_DEMO_FILE, 'utf8')) as {
   tenantId: number; territoryId: number; legacyCode: string; email: string;
@@ -13,19 +14,15 @@ const streetHouses = (page: Page, name = firstStreet) => page.getByRole('region'
 
 async function enter(page: Page, url: string) {
   await page.goto(url);
-  await page.getByRole('button', { name: 'Entrar na designação' }).click();
   await expect(page).toHaveURL(/\/campo\//);
   await expect(page.locator('header')).toBeVisible();
 }
 
 test.describe.serial('Frontend unificado · ambiente QA local', () => {
+  test.beforeEach(async ({ page }) => captureShares(page));
   test.skip(!fixture, 'Execute o seed local e informe FIELD_DEMO_FILE; nunca utilizar uma congregação real.');
 
   test('administrador gera link curto e mantém sua sessão ao abrir a área de campo', async ({ page, context }) => {
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
-      Object.defineProperty(navigator, 'share', { value: async (input: ShareData) => { (window as Window & { qaShare?: ShareData }).qaShare = input; }, configurable: true });
-    });
     await page.goto('/login');
     await page.getByPlaceholder('E-mail').fill(fixture!.email);
     await page.getByPlaceholder('Senha', { exact: true }).fill('admin123');
@@ -48,33 +45,32 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
     const leader = await context.newPage();
     await enter(leader, leaderUrl);
     await expect(leader.getByRole('heading', { name: 'Território de demonstração', exact: true })).toBeVisible();
-    const links = await leader.getByRole('link', { name: 'Ver ruas' }).all();
-    otherBlockId = Number((await links[1].getAttribute('href'))!.split('/').pop());
+    const otherLink = leader.getByRole('article', { name: 'Quadra 2', exact: true }).getByRole('link', { name: 'Ver ruas' });
+    otherBlockId = Number((await otherLink.getAttribute('href'))!.split('/').pop());
     expect((await context.cookies()).find(cookie => cookie.name === 'token')?.value).toBe(before);
     await page.goto('/dashboard');
     await expect(page).toHaveURL(/\/dashboard/);
     await leader.close();
   });
 
-  test('dirigente compartilha quadra e interface funciona nas larguras mobile', async ({ page }) => {
+  test('dirigente compartilha quadra e interface funciona nas larguras mobile', async ({ page }, testInfo) => {
     await enter(page, leaderUrl);
     await page.getByRole('button', { name: 'Compartilhar Quadra 1', exact: true }).click();
-    await expect(page.getByTestId('share-link')).toBeVisible();
-    publisherUrl = (await page.getByTestId('share-link').innerText()).trim();
+    publisherUrl = await sharedUrl(page);
     expect(publisherUrl).toMatch(/\/acesso\/[A-Z0-9]{6}$/);
-    await page.getByRole('button', { name: 'Close', exact: true }).click();
     for (const width of [360, 390, 430, 1280]) {
       await page.setViewportSize({ width, height: 844 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath(`quadras-qa-${width}.png`), fullPage: true });
     }
-    await page.getByRole('button', { name: 'Ver mapa' }).click();
+    await page.getByRole('button', { name: 'Mapa', exact: true }).click();
     await expect(page.getByRole('dialog').getByRole('img', { name: 'Mapa de Território de demonstração' })).toBeVisible();
     await page.getByRole('button', { name: 'Close', exact: true }).click();
-    await page.getByRole('link', { name: 'Ver ruas' }).first().click();
+    await page.getByRole('article', { name: 'Quadra 1', exact: true }).getByRole('link', { name: 'Ver ruas' }).click();
     await expect(page).toHaveURL(/\/quadra\/\d+$/);
     await expect(page.getByRole('heading', { name: 'Quadra 1', exact: true, level: 1 })).toBeVisible();
     await page.getByRole('button', { name: 'Compartilhar', exact: true }).click();
-    await expect(page.getByTestId('share-link')).toHaveText(publisherUrl);
+    expect(await sharedUrl(page)).toBe(publisherUrl);
   });
 
   test('accordion não faz consultas extras e dois publicadores sincronizam sem perder ruas abertas', async ({ browser }) => {
@@ -100,8 +96,11 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
       await streetButton(one, firstStreet).click();
       await streetButton(one, secondStreet).click();
       await streetButton(two, firstStreet).click();
-      await expect(streetHouses(one)).toBeVisible();
+      await expect(streetHouses(one)).toHaveCount(0);
       await expect(streetHouses(one, secondStreet)).toBeVisible();
+      await streetButton(one, firstStreet).click();
+      await expect(streetHouses(one)).toBeVisible();
+      await expect(streetHouses(one, secondStreet)).toHaveCount(0);
       expect(polls).toHaveLength(2);
       expect(one.url()).toBe(initialUrl);
       const columns = await streetHouses(one).evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length);
@@ -125,13 +124,13 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
       }
       await expect(streetHouses(two).getByRole('button', { name: /^Casa 102,/ })).toHaveAttribute('aria-pressed', prior === 'true' ? 'false' : 'true');
       await expect(streetButton(one, firstStreet)).toHaveAttribute('aria-expanded', 'true');
-      await expect(streetButton(one, secondStreet)).toHaveAttribute('aria-expanded', 'true');
+      await expect(streetButton(one, secondStreet)).toHaveAttribute('aria-expanded', 'false');
       expect(sockets).toEqual([]);
       await contexts[0].setOffline(true);
       await expect(streetHouses(one).getByRole('button', { name: /^Casa 106,/ })).toBeDisabled();
       await contexts[0].setOffline(false);
       await expect(streetHouses(one).getByRole('button', { name: /^Casa 106,/ })).toBeEnabled();
-      await expect(streetHouses(one, secondStreet)).toBeVisible();
+      await expect(streetHouses(one)).toBeVisible();
       expect(maximumActive).toBe(1);
       for (const width of [360, 390, 430, 1280]) {
         await one.setViewportSize({ width, height: 844 });
@@ -166,8 +165,7 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
 
   test('preserva UUIDs, rejeita mudança de quadra e encerra acesso revogado', async ({ page, request }) => {
     await page.goto(`/home?s=${fixture!.legacyCode}&p=https://example.invalid`);
-    await expect(page).toHaveURL(new RegExp(`/acesso/${fixture!.legacyCode}$`));
-    await page.getByRole('button', { name: 'Entrar na designação' }).click();
+    await expect(page).toHaveURL(new RegExp(`/campo/${fixture!.legacyCode}$`));
     await expect(page.getByRole('heading', { name: 'Território de demonstração', exact: true })).toBeVisible();
     await enter(page, publisherUrl);
     const code = new URL(publisherUrl).pathname.split('/').pop()!;

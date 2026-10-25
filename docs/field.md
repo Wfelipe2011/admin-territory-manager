@@ -4,9 +4,9 @@ Administração e área mobile usam este único projeto Next.js. A área de camp
 utiliza os componentes Tailwind/Radix existentes, sem Bootstrap, Material Tailwind,
 Recoil, Swiper ou Socket.IO.
 
-- `/acesso/[code]`: valida o link e oferece entrada sem senha.
+- `/acesso/[code]`: valida o link e entra automaticamente, sem senha ou botão de entrada; erros permitem tentar novamente.
 - `/campo/[code]`: território do dirigente ou quadra do publicador.
-- `/campo/[code]/quadra/[id]`: ruas expansíveis com casas, marcações e solicitações na mesma tela. Todas começam recolhidas; várias podem ficar abertas.
+- `/campo/[code]/quadra/[id]`: ruas expansíveis com casas, marcações e solicitações na mesma tela. Todas começam recolhidas; abrir uma rua fecha a anterior.
 - `/campo/[code]/quadra/[id]/rua/[id]`: compatibilidade; mostra a mesma tela com a rua indicada expandida.
 - `/home?s=UUID&p=...`: compatibilidade com links antigos; `p` é ignorado.
 
@@ -29,8 +29,7 @@ envio automático de mensagens. Sem conexão, não são enfileiradas marcações
 Uma consulta a `GET /v1/field/blocks/:blockId/sync` carrega a quadra inteira em
 `streets[].houses`. Expandir/recolher ruas não navega nem consulta a API. Existe
 somente um long polling ativo; atualizações preservam ruas abertas e diálogos.
-O cabeçalho fixo resume o progresso; mapa, ajuda e compartilhamento ficam em
-“Mais opções”. Presença é contabilizada por quadra.
+O cabeçalho fixo mostra a logo transparente em círculo com a cor do tema e a data/hora da última sincronização bem-sucedida, preservada quando offline. Mapa, ajuda, atualização manual e compartilhamento do dirigente ficam na barra inferior. Presença é contabilizada por quadra.
 
 Cada casa recebe `canMark`, `canUnmark`, `blockedReason` e `canUnmarkUntil`.
 O frontend usa essas permissões para os controles, acrescidas de conexão e
@@ -92,7 +91,7 @@ para os links com rodada fixa.
 O dirigente autorizado pode cadastrar quadras e ruas e solicitar correção/exclusão
 de rua. Inclusões ficam em análise, mas já recebem cadastros filhos e links de
 publicadores. Casas continuam disponíveis para solicitações por todos os acessos.
-A ação “Solicitações” da barra inferior acompanha os pedidos do escopo recebido.
+O histórico de solicitações não aparece no menu da área de campo. Os formulários de alteração continuam nas ruas; a central administrativa permanece em `/gestao/solicitacoes`.
 
 Casas provisórias podem ser marcadas durante a análise, inclusive sob pais
 provisórios. Se não houver rodada aberta compatível, o cadastro de casa inicia
@@ -108,9 +107,31 @@ exclusão da rua com confirmação de impacto.
 
 ## Ajustes mobile e carga
 
-Logo oficial em `public/logo.png`; ações em barra inferior com área segura.
+Logo transparente do legado em `public/logo.png`; ações em barra inferior com área segura.
 Cadeados de prazo aceitam toque para explicar o bloqueio sem enviar PATCH.
 A rejeição de inclusão exige confirmação atualizada e apaga cadastro provisório e
 marcações; correções rejeitadas preservam os registros aprovados.
 O roteiro reutilizável de carga está em `../territory-manager-v2/load-tests/README.md`.
 As duas APIs existem somente no compose de carga, com banco sintético próprio.
+
+## Compartilhamento e apresentação de quadras
+
+As quadras são ordenadas somente no frontend: sem histórico, último trabalho mais
+antigo e nome em ordem natural (Quadra 2 antes de Quadra 10). O dado usado é
+`lastWorkedAt` já recebido no snapshot. Cards usam uma coluna no celular e duas em
+telas maiores, com progresso e indicadores lado a lado.
+
+Compartilhar usa o mesmo `navigatorShare` do Admin com a mensagem de designação,
+quadra, território e link. A alternativa copia a mensagem completa. Se compartilhar
+e copiar estiverem indisponíveis, um diálogo permite copiar manualmente ou tentar
+novamente. Reenviar reutiliza a assinatura ativa, inclusive após cancelar o envio.
+O resultado de geração atualiza imediatamente o estado local; `expirationDate`
+alimenta o contador de validade, atualizado a cada segundo. Link vencido para em
+zero e permite gerar outro. A revogação fica abaixo dos indicadores do card e exige
+confirmação da quadra selecionada.
+
+Nas ruas, os ícones de carro e documento com adição vêm do legado. Os números das
+casas usam 20 px. O texto “Prazo encerrado” não ocupa espaço no cartão; o cadeado
+e a explicação ao tocar continuam indicando o bloqueio de desmarcação.
+
+Esses ajustes não mudam endpoints, regras de autorização, banco ou worker.

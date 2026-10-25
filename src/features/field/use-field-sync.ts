@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FieldError, fieldApiUrl, fieldIdentity, fieldRequest } from "./api";
 import {
   BlockSnapshot,
+  Block,
   FieldSession,
   House,
   Presence,
@@ -27,9 +28,17 @@ export function useFieldSync(session: FieldSession | null, scope: ScreenScope) {
   const [generation, setGeneration] = useState(0);
   const [busy, setBusy] = useState(0);
   const [now, setNow] = useState(Date.now);
+  const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const pending = useRef(new Set<number>());
   const writeEpoch = useRef(0);
   const refresh = useCallback(() => setGeneration((value) => value + 1), []);
+  const updateBlockSignature = (id: number, signature: Block["signature"]) => {
+    setData((old) => old && ({
+      ...old,
+      blocks: old.blocks.map((block) => block.id === id ? { ...block, signature } : block),
+      block: old.block?.id === id ? { ...old.block, signature } : old.block,
+    }));
+  };
   const { scope: kind, blockId } = scope;
 
   useEffect(() => {
@@ -90,6 +99,7 @@ export function useFieldSync(session: FieldSession | null, scope: ScreenScope) {
   useEffect(() => {
     setData(null);
     setFatal("");
+    setLastSyncedAt(null);
   }, [session, kind, blockId]);
 
   useEffect(() => {
@@ -143,6 +153,7 @@ export function useFieldSync(session: FieldSession | null, scope: ScreenScope) {
             });
           cursor = result.cursor;
           setPresence(result.presence);
+          setLastSyncedAt(Date.now());
           setStatus("live");
           retry = 1000;
         } catch (error) {
@@ -254,5 +265,7 @@ export function useFieldSync(session: FieldSession | null, scope: ScreenScope) {
     mark,
     pending: pending.current,
     now,
+    lastSyncedAt,
+    updateBlockSignature,
   };
 }

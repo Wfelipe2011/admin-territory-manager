@@ -100,7 +100,7 @@ export function HouseGrid({
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <span className="max-w-full break-all text-base font-semibold">
+                <span className="max-w-full break-all text-xl font-semibold leading-tight">
                   {house.number}
                 </span>
                 {legends[house.legend || ""] && (
@@ -108,7 +108,7 @@ export function HouseGrid({
                     {legends[house.legend || ""]}
                   </span>
                 )}
-                {action.reason && (
+                {action.reason && !timeLocked && (
                   <span className="mt-1 text-[9px] leading-tight">
                     {action.reason}
                   </span>

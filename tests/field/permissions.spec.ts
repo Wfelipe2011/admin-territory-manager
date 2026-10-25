@@ -21,7 +21,6 @@ async function entry(page: Page) {
   await page.route(`${api}/signature/${code}`, route => route.fulfill({ json: { token: 'qa-only', access: { code, role: 'publisher', territoryId: 1, blockId: 1, round: 1, overseer: '', expiresAt: '2031-01-01T00:00:00Z' }, roundInfo: { name: 'Rodada QA', theme: 'default', colorPrimary: null, colorSecondary: null } } }));
   await page.route(`${api}/field/session?**`, route => route.fulfill({ json: { ok: true } }));
   await page.goto(`/acesso/${code}`);
-  await page.getByRole('button', { name: 'Entrar na designação' }).click();
   await page.getByRole('button', { name: /^Rua QA / }).click();
 }
 
@@ -64,7 +63,8 @@ test('prazo para desmarcar vence com a tela aberta e atualiza permissões sem al
   await button.click();
   await expect(page.getByText(/O prazo para desmarcar esta casa encerrou/)).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByText('Prazo encerrado', { exact: true })).toBeVisible();
+  await expect(page.getByText('Prazo encerrado', { exact: true })).toHaveCount(0);
+  await expect(button.getByLabel('Prazo para desmarcar encerrado')).toBeVisible();
   await expect.poll(() => snapshots).toBe(2);
   await expect(page.getByRole('button', { name: /^Rua QA / })).toHaveAttribute('aria-expanded', 'true');
 });

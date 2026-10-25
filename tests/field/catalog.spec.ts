@@ -1,5 +1,6 @@
 import { test, expect, Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { captureShares, sharedUrl } from "./sharing";
 
 const fixture = process.env.FIELD_DEMO_FILE
   ? (JSON.parse(readFileSync(process.env.FIELD_DEMO_FILE, "utf8")) as {
@@ -14,7 +15,6 @@ test.use({ actionTimeout: 10000 });
 const api = process.env.FIELD_API_URL || "http://localhost:3001/v1";
 const enter = async (page: Page, url: string) => {
   await page.goto(url);
-  await page.getByRole("button", { name: "Entrar na designação" }).click();
   await expect(page.locator("header")).toBeVisible();
 };
 async function login(page: Page) {
@@ -55,6 +55,7 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
     hasTouch: true,
   });
   const field = await mobile.newPage();
+  await captureShares(field);
   field.on("pageerror", (e) => errors.push(e.message));
   const publisherContext = await browser.newContext({
     viewport: { width: 360, height: 800 },
@@ -100,10 +101,7 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
     await field
       .getByRole("button", { name: "Compartilhar", exact: true })
       .click();
-    const publisherUrl = (
-      await field.getByTestId("share-link").innerText()
-    ).trim();
-    await field.getByRole("button", { name: "Close", exact: true }).click();
+    const publisherUrl = await sharedUrl(field);
     const publisher = await publisherContext.newPage();
     await enter(publisher, publisherUrl);
     await expect(

@@ -3,16 +3,13 @@
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  ChevronRight,
   Copy,
   HelpCircle,
   Link2,
   Loader2,
   MapPin,
-  ClipboardList,
   RefreshCw,
   Share2,
   Users,
@@ -29,14 +26,15 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { navigatorShare } from "@/lib/share";
 import { fieldLink, fieldRequest, normalizeCode, sessionKey } from "./api";
-import { FieldSession, House, ScreenScope } from "./types";
+import { Block, FieldSession, House, ScreenScope } from "./types";
 import { useFieldSync } from "./use-field-sync";
 import { ReportDialog } from "./report-dialog";
 import { StreetAccordion } from "./street-accordion";
 import { houseAction } from "./house-permissions";
 import { legends } from "./house-grid";
 import { StructureAction, StructureDialog } from "./structure-dialog";
-import { RequestHistory } from "./request-history";
+import { FieldEntry } from "./entry";
+import { BlockCard, compareBlocks } from "./block-card";
 
 const color = (value: string | null, fallback: string) =>
   value && /^#[a-f0-9]{3}([a-f0-9]{3})?$/i.test(value) ? value : fallback;
@@ -51,14 +49,14 @@ export function FieldScreen({
   addressId?: number;
 }) {
   const code = normalizeCode(rawCode);
-  const router = useRouter();
   const [session, setSession] = useState<FieldSession | null>(null);
+  const [needsEntry, setNeedsEntry] = useState(false);
   const [storageError, setStorageError] = useState("");
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem(sessionKey(code));
       if (!stored) {
-        router.replace(`/acesso/${encodeURIComponent(code)}`);
+        setNeedsEntry(true);
         return;
       }
       const value = JSON.parse(stored) as FieldSession;
@@ -67,7 +65,7 @@ export function FieldScreen({
         new Date(value.access.expiresAt).getTime() <= Date.now()
       ) {
         sessionStorage.removeItem(sessionKey(code));
-        router.replace(`/acesso/${encodeURIComponent(code)}`);
+        setNeedsEntry(true);
         return;
       }
       setSession(value);
@@ -76,7 +74,7 @@ export function FieldScreen({
         "Não foi possível recuperar seu acesso. Abra novamente o link recebido.",
       );
     }
-  }, [code, router]);
+  }, [code]);
   const leader = session?.access.role === "overseer";
   const blockId = selectedBlockId ?? session?.access.blockId ?? undefined;
   const scope: ScreenScope = {
@@ -91,11 +89,10 @@ export function FieldScreen({
   const [reportStreetId, setReportStreetId] = useState<number | null>(null);
   const [openStreets, setOpenStreets] = useState<Set<number>>(() => new Set());
   const [structure, setStructure] = useState<StructureAction | null>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const initialStreetOpened = useRef(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [revokeOpen, setRevokeOpen] = useState(false);
+  const [revokeBlock, setRevokeBlock] = useState<Pick<Block, "id" | "name"> | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [actionError, setActionError] = useState("");
@@ -131,7 +128,7 @@ export function FieldScreen({
     if (street) {
       initialStreetOpened.current = true;
       setOpenStreets(
-        (old) => new Set([...old, street.mappingId ?? -street.id]),
+        new Set([street.mappingId ?? -street.id]),
       );
     }
   }, [data, initialAddressId]);
@@ -148,33 +145,38 @@ export function FieldScreen({
   }, [data, initialAddressId]);
 
   const share = async (id: number) => {
-    if (!session || !data || actionBusy) return;
+    if (!session || !leader || !data || actionBusy) return;
     const block = data.blocks.find((block) => block.id === id);
     if (!block) return;
     setActionBusy(true);
     setActionError("");
     setNotice("");
     try {
-      const key =
-        (block.signature &&
-        new Date(block.signature.expirationDate).getTime() > Date.now()
-          ? block.signature.key
-          : null) ||
-        (
-          await fieldRequest<{ signature: string }>(
+      let signature = block.signature;
+      if (!signature || Date.parse(signature.expirationDate) <= Date.now()) {
+        const generated = await fieldRequest<{ signature: string; expirationDate: string }>(
             `territories/${session.access.territoryId}/blocks/${id}/signature${
               session.access.round == null ? "" : `/${session.access.round}`
             }`,
             session,
             { method: "POST", body: "{}", timeoutMs: 30000 },
-          )
-        ).signature;
-      setSharing({
-        title: "Designação de território",
-        text: `Segue o link para ${block.name}, no território ${data.territory.name}.`,
-        url: fieldLink(key),
-      });
-      sync.refresh();
+          );
+        signature = { key: generated.signature, expirationDate: generated.expirationDate };
+        sync.updateBlockSignature(id, signature);
+        sync.refresh();
+      }
+      const message = {
+        title: "*DESIGNAÇÃO DE TERRITÓRIO*",
+        text: `*DESIGNAÇÃO DE TERRITÓRIO*\n\nPrezado(a) publicador(a),\nsegue o link para a *${block.name}*, no território *${data.territory.name}*, que você está designado(a) para trabalhar:`,
+        url: fieldLink(signature.key),
+      };
+      try {
+        await navigatorShare(message);
+      } catch {
+        // Also lets the user retry sharing from a fresh tap if the browser
+        // requires user activation after the signature request.
+        setSharing(message);
+      }
     } catch (error) {
       setActionError(
         error instanceof Error
@@ -186,16 +188,18 @@ export function FieldScreen({
     }
   };
   const revoke = async () => {
-    if (!session || !blockId || actionBusy) return;
+    if (!session || !leader || !revokeBlock || actionBusy) return;
     setActionBusy(true);
     setActionError("");
     try {
       await fieldRequest(
-        `territories/${session.access.territoryId}/blocks/${blockId}/signature`,
+        `territories/${session.access.territoryId}/blocks/${revokeBlock.id}/signature`,
         session,
         { method: "DELETE", timeoutMs: 30000 },
       );
-      setRevokeOpen(false);
+      sync.updateBlockSignature(revokeBlock.id, null);
+      setRevokeBlock(null);
+      setSharing(null);
       toast.success("Acesso da quadra revogado.");
       sync.refresh();
     } catch (error) {
@@ -210,10 +214,10 @@ export function FieldScreen({
     if (!sharing) return;
     try {
       if (!navigator.clipboard) throw new Error("Clipboard indisponível");
-      await navigator.clipboard.writeText(sharing.url);
-      setNotice("Link copiado.");
+      await navigator.clipboard.writeText(`${sharing.text}\n${sharing.url}`);
+      setNotice("Mensagem e link copiados.");
     } catch {
-      setActionError("Selecione e copie o link exibido acima.");
+      setActionError("Selecione e copie a mensagem exibida acima.");
     }
   };
   const mark = async () => {
@@ -242,6 +246,8 @@ export function FieldScreen({
       );
     }
   };
+  if (needsEntry && !session)
+    return <FieldEntry code={code} blockId={selectedBlockId} addressId={initialAddressId} onReady={setSession} />;
   if (fatal)
     return (
       <main className="flex min-h-dvh items-center justify-center bg-slate-50 p-6">
@@ -296,12 +302,7 @@ export function FieldScreen({
     houseAction(currentConfirmation, sync.now).allowed &&
     sync.status === "live";
   const toggleStreet = (id: number) =>
-    setOpenStreets((old) => {
-      const next = new Set(old);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    setOpenStreets((old) => old.has(id) ? new Set() : new Set([id]));
 
   return (
     <main style={theme} className="min-h-dvh bg-slate-50 pb-[calc(6rem_+_env(safe-area-inset-bottom))] text-slate-900">
@@ -319,11 +320,10 @@ export function FieldScreen({
                 <ArrowLeft size={20} />
               </Link>
             </Button>
-          ) : (
-            <span className="shrink-0 rounded-lg bg-emerald-950 p-1">
-              <Image src="/logo.png" alt="Território Digital" width={52} height={52} priority />
-            </span>
-          )}
+          ) : null}
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--field-primary)] p-0.5">
+            <Image src="/logo.png" alt="Território Digital" width={48} height={48} priority />
+          </span>
           <div className="min-w-0 flex-1">
             {blockId ? (
               <>
@@ -339,7 +339,7 @@ export function FieldScreen({
             )}
           </div>
           <span
-            className="flex shrink-0 items-center gap-1 text-[11px] text-slate-500"
+            className="flex shrink-0 items-center gap-1 text-[10px] text-slate-500"
             role="status"
           >
             {sync.status === "live" ? (
@@ -347,12 +347,14 @@ export function FieldScreen({
             ) : (
               <WifiOff size={14} />
             )}
-            <span className="hidden min-[380px]:inline">
-              {sync.status === "live"
-                ? "Atualizado"
-                : sync.status === "offline"
-                ? "Sem conexão"
-                : "Reconectando…"}
+            <span className="flex flex-col items-end leading-snug">
+              {sync.lastSyncedAt && (
+                <time dateTime={new Date(sync.lastSyncedAt).toISOString()} aria-label="Última sincronização">
+                  <span className="block">{new Date(sync.lastSyncedAt).toLocaleDateString("pt-BR")}</span>
+                  <span className="block text-right tabular-nums">{new Date(sync.lastSyncedAt).toLocaleTimeString("pt-BR", { hour12: false })}</span>
+                </time>
+              )}
+              {sync.status !== "live" && <span>{sync.status === "offline" ? "Sem conexão" : "Reconectando…"}</span>}
             </span>
           </span>
 
@@ -451,17 +453,6 @@ export function FieldScreen({
             {notice}
           </p>
         )}
-        {!blockId && data.territory.imageUrl && (
-          <Button
-            variant="outline"
-            className="h-11 rounded-xl"
-            onClick={() => setMapOpen(true)}
-          >
-            <MapPin />
-            Ver mapa
-          </Button>
-        )}
-
         {leader && data.capabilities.canEditStructure && (
           <Button
             variant="outline"
@@ -481,95 +472,17 @@ export function FieldScreen({
             className="grid gap-4 sm:grid-cols-2"
             aria-label="Quadras do território"
           >
-            {data.blocks.map((block) => {
-              const percent = block.total
-                ? Math.round((block.completed / block.total) * 100)
-                : 0;
-              return (
-                <article
-                  className="rounded-2xl border bg-white p-5"
-                  key={block.id}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="break-words text-lg font-semibold">
-                      <Link
-                        href={blockPath(block.id)}
-                        className="underline-offset-4 hover:underline"
-                      >
-                        {block.name}
-                      </Link>
-                    </h2>
-                    <span
-                      className="flex items-center gap-1 text-xs text-slate-500"
-                      aria-label={`${
-                        sync.presence.blocks[block.id] ?? 0
-                      } pessoas ativas`}
-                    >
-                      <Users size={14} />
-                      {sync.presence.blocks[block.id] ?? 0}
-                    </span>
-                  </div>
-                  {block.registrationStatus === "pending" && (
-                    <p className="mt-2 text-xs text-amber-800">
-                      Cadastro em análise · Você já pode cadastrar ruas e casas
-                    </p>
-                  )}
-                  {block.withoutRound > 0 && (
-                    <p className="mt-2 text-xs text-slate-500">
-                      {block.withoutRound} casas aguardando aprovação ou rodada
-                    </p>
-                  )}
-                  <div className="my-5 flex items-center gap-4">
-                    <div
-                      className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full"
-                      style={{
-                        background: `conic-gradient(${primary} ${percent}%, ${secondary} 0)`,
-                      }}
-                    >
-                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-sm font-semibold">
-                        {percent}%
-                      </span>
-                    </div>
-                    <div className="space-y-1 text-sm">
-                      <p>
-                        <strong>{block.pending}</strong> a fazer
-                      </p>
-                      <p className="text-slate-500">
-                        {block.completed} concluídas
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Sugestão: {block.suggestion}
-                      </p>
-                    </div>
-                  </div>
-                  {block.lastWorkedAt && (
-                    <p className="mb-3 text-xs text-slate-500">
-                      Último trabalho:{" "}
-                      {new Date(block.lastWorkedAt).toLocaleDateString("pt-BR")}
-                    </p>
-                  )}
-                  <div className="flex gap-2">
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="h-11 flex-1 rounded-xl"
-                    >
-                      <Link href={blockPath(block.id)}>
-                        Ver ruas <ChevronRight />
-                      </Link>
-                    </Button>
-                    <Button
-                      className="h-11 w-11 rounded-xl bg-[var(--field-primary)] p-0 text-white"
-                      aria-label={`Compartilhar ${block.name}`}
-                      disabled={actionBusy}
-                      onClick={() => void share(block.id)}
-                    >
-                      <Share2 />
-                    </Button>
-                  </div>
-                </article>
-              );
-            })}
+            {[...data.blocks].sort(compareBlocks).map((block) => (
+              <BlockCard
+                key={block.id}
+                block={block}
+                href={blockPath(block.id)}
+                presence={sync.presence.blocks[block.id] ?? 0}
+                busy={actionBusy}
+                share={() => void share(block.id)}
+                revoke={() => { setActionError(""); setRevokeBlock(block); }}
+              />
+            ))}
             {!data.blocks.length && (
               <p className="text-sm text-slate-500">
                 Nenhuma quadra cadastrada neste território.
@@ -707,14 +620,10 @@ export function FieldScreen({
           }}
         />
       )}
-      {historyOpen && (
-        <RequestHistory session={session} close={() => setHistoryOpen(false)} />
-      )}
       <nav aria-label="Ações da área de campo" className="fixed inset-x-0 bottom-0 z-20 border-t bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_#00000008]">
         <div className="mx-auto flex max-w-3xl items-stretch px-1">
           {[
             { label: "Mapa", Icon: MapPin, action: () => data.territory.imageUrl ? setMapOpen(true) : toast("Mapa indisponível para este território.") },
-            { label: "Solicitações", Icon: ClipboardList, action: () => setHistoryOpen(true) },
             ...(blockId && leader ? [{ label: "Compartilhar", Icon: Share2, action: () => void share(blockId) }] : []),
             { label: "Atualizar", Icon: RefreshCw, action: () => sync.refresh() },
             { label: "Ajuda", Icon: HelpCircle, action: () => setHelpOpen(true) },
@@ -748,8 +657,9 @@ export function FieldScreen({
         <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] overflow-auto rounded-2xl">
           <DialogTitle>Como usar sua designação</DialogTitle>
           <DialogDescription>
-            Expanda uma rua para ver as casas. Você pode manter várias ruas
-            abertas e confirmar cada marcação sem sair da lista.
+            Abra o link recebido para entrar diretamente na sua designação.
+            Expanda uma rua para ver as casas. Ao abrir outra rua, a anterior
+            se fecha. Confirme cada marcação sem sair da lista.
           </DialogDescription>
           <p className="text-sm text-slate-600">
             Casas em cinza são novas ou estão sem rodada. Cadastros novos com rodada já podem ser marcados durante a análise. Correções em
@@ -772,13 +682,13 @@ export function FieldScreen({
           </div>
         </DialogContent>
       </Dialog>
-      <Dialog open={revokeOpen} onOpenChange={setRevokeOpen}>
+      <Dialog open={!!revokeBlock} onOpenChange={(open) => { if (!open && !actionBusy) setRevokeBlock(null); }}>
         <DialogContent className="w-[calc(100%_-_2rem)] max-w-sm rounded-2xl">
           <DialogTitle>Revogar acesso da quadra?</DialogTitle>
           <DialogDescription>
-            O link compartilhado deixará de funcionar. Você poderá gerar um
-            novo.
+            O link de {revokeBlock?.name} deixará de funcionar. Você poderá gerar um novo.
           </DialogDescription>
+          {actionError && <p role="alert" className="text-sm text-red-700">{actionError}</p>}
           <Button
             variant="destructive"
             className="h-12"
@@ -798,8 +708,9 @@ export function FieldScreen({
         <DialogContent className="w-[calc(100%_-_2rem)] max-w-sm rounded-2xl">
           <DialogTitle>Link da quadra pronto</DialogTitle>
           <DialogDescription>
-            Envie este acesso aos publicadores designados.
+            Compartilhe ou copie a mensagem para os publicadores designados.
           </DialogDescription>
+          <p className="whitespace-pre-wrap text-sm">{sharing?.text}</p>
           <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3">
             <Link2 size={18} className="shrink-0" />
             <p className="break-all text-sm" data-testid="share-link">
@@ -824,13 +735,8 @@ export function FieldScreen({
             onClick={() => void copyLink()}
           >
             <Copy />
-            Copiar link
+            Copiar mensagem e link
           </Button>
-          {blockId && leader && data.block?.signature && (
-            <Button variant="ghost" className="h-12 text-red-700" onClick={() => { setSharing(null); setRevokeOpen(true); }}>
-              Revogar acesso
-            </Button>
-          )}
           {actionError && (
             <p role="alert" className="text-sm text-red-700">
               {actionError}
