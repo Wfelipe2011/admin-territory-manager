@@ -82,10 +82,12 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
     const contexts = await Promise.all([browser.newContext(mobile), browser.newContext(mobile)]);
     const pages = await Promise.all(contexts.map(ctx => ctx.newPage()));
     const polls: string[] = [], active = new Set<Request>(); let maximumActive = 0;
+    const syncUpstreams: (string | undefined)[] = [];
     const isPoll = (url: string) => /\/field\/blocks\/\d+\/sync/.test(url);
     pages[0].on('request', req => { if (isPoll(req.url())) { polls.push(req.url()); active.add(req); maximumActive = Math.max(maximumActive, active.size); } });
     pages[0].on('requestfinished', req => active.delete(req));
     pages[0].on('requestfailed', req => active.delete(req));
+    pages[0].on('response', response => { if (isPoll(response.url())) syncUpstreams.push(response.headers()['x-territory-upstream']); });
     try {
       await Promise.all(pages.map(async page => {
         await enter(page, publisherUrl);
@@ -110,7 +112,17 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
       await expect(streetHouses(one).getByLabel('Deixar carta')).toBeVisible();
       const sockets: string[] = [];
       one.on('websocket', socket => { if (socket.url().includes('/socket.io')) sockets.push(socket.url()); });
+      const markResponse = one.waitForResponse(response => response.request().method() === 'PATCH' && /\/houses\/\d+$/.test(new URL(response.url()).pathname));
       await house.click(); await one.getByRole('button', { name: 'Confirmar', exact: true }).click();
+      // With the local proxy enabled, prove that mutations still reach NestJS.
+      // Optional so the same suite remains usable against a direct API endpoint.
+      if (process.env.FIELD_EXPECT_PROXY === '1') {
+        expect((await markResponse).headers()['x-territory-upstream']).toBe('api');
+        expect(syncUpstreams.length).toBeGreaterThan(0);
+        expect(syncUpstreams.every(upstream => upstream === 'field-worker')).toBe(true);
+      } else {
+        await markResponse;
+      }
       await expect(streetHouses(two).getByRole('button', { name: /^Casa 102,/ })).toHaveAttribute('aria-pressed', prior === 'true' ? 'false' : 'true');
       await expect(streetButton(one, firstStreet)).toHaveAttribute('aria-expanded', 'true');
       await expect(streetButton(one, secondStreet)).toHaveAttribute('aria-expanded', 'true');
