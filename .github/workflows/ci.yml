@@ -3,7 +3,7 @@ name: Publish Docker image Prod
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   push_to_registry:
@@ -13,6 +13,8 @@ jobs:
       packages: write
       contents: read
       attestations: write
+    env:
+      ADMIN_IMAGE_REPOSITORY: wfelipe2011/admin-territory-manager
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -27,7 +29,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: wfelipe2011/admin-territory-manager
+          images: ${{ env.ADMIN_IMAGE_REPOSITORY }}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=sha-${{ github.sha }}
 
       - name: Build and push Docker image
         id: push
@@ -38,3 +43,32 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'https://api.territory-manager.com.br' }}
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL || 'https://admin.territory-manager.com.br' }}
+
+      - name: Record Admin release digest
+        env:
+          ADMIN_DIGEST: ${{ steps.push.outputs.digest }}
+          RELEASE_DIR: ${{ runner.temp }}/territory-admin-release
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          digest = os.environ['ADMIN_DIGEST']
+          if not re.fullmatch(r'sha256:[0-9a-f]{64}', digest):
+              raise ValueError('Missing or invalid Admin image digest')
+          image = os.environ['ADMIN_IMAGE_REPOSITORY'] + '@' + digest
+          directory = pathlib.Path(os.environ['RELEASE_DIR'])
+          directory.mkdir(parents=True, exist_ok=True)
+          (directory / 'admin-image.env').write_text('ADMIN_IMAGE=' + image + '\n')
+          (directory / 'admin-image.json').write_text(json.dumps({'revision': os.environ['GITHUB_SHA'], 'ADMIN_IMAGE': image}, indent=2) + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('### Admin release\n\n```dotenv\nADMIN_IMAGE=' + image + '\n```\n')
+          PY
+
+      - name: Upload immutable Admin release
+        uses: actions/upload-artifact@v4
+        with:
+          name: territory-admin-release-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/territory-admin-release/
+          if-no-files-found: error
