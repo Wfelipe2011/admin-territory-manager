@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Heart, Loader2, Mail, LockKeyhole } from "lucide-react";
+import { Check, Star, Loader2, Mail, LockKeyhole } from "lucide-react";
 import type { House } from "./types";
 
 export const legends: Record<string, string> = {
@@ -54,7 +54,7 @@ export function HouseTile({ house, reason = "", timeLocked = false, busy = false
         />
       )}
       {timeLocked && <LockKeyhole className="absolute right-1 top-1 h-3.5 w-3.5" aria-label="Prazo para desmarcar encerrado" />}
-      {hasPersonalRecord && <span className="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/95 text-rose-600 shadow-sm" aria-label="Registro pessoal neste aparelho" title="Registro pessoal neste aparelho"><Heart size={13} fill="currentColor" aria-hidden /></span>}
+      {hasPersonalRecord && <span className="absolute bottom-1 left-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/95 text-rose-600 shadow-sm" aria-label="Registro pessoal neste aparelho" title="Registro pessoal neste aparelho"><Star size={13} fill="currentColor" aria-hidden /></span>}
       {house.leaveLetter && !house.dontVisit && !timeLocked && (
         <Mail className="absolute right-1 top-1 h-3.5 w-3.5" aria-label="Deixar carta" />
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ComponentType } from "react";
-import { ChartPie, ChevronDown, Clock3, FolderHeart, Heart, ListCollapse, MessageSquarePlus, Share2, Users } from "lucide-react";
+import { ChartPie, ChevronDown, Clock3, FolderHeart, Star, ListCollapse, MessageSquarePlus, Share2, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { HouseTile, legends, type HouseAppearance } from "./house-tile";
 import { CarIcon, PostAddIcon } from "./legacy-icons";
@@ -50,7 +50,7 @@ export function FieldHelp({ open, onOpenChange, block, theme }: {
             ))}
           </div>
           <p className="flex items-center gap-2 text-xs text-slate-600"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />Cadastro em análise</p>
-          <p className="flex items-center gap-2 text-xs text-slate-600"><Heart size={15} fill="currentColor" className="shrink-0 text-rose-600" aria-hidden />Registro pessoal salvo neste aparelho</p>
+          <p className="flex items-center gap-2 text-xs text-slate-600"><Star size={15} fill="currentColor" className="shrink-0 text-rose-600" aria-hidden />Registro pessoal salvo neste aparelho</p>
           <details className="group rounded-xl border px-3">
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium">Siglas das casas <ChevronDown size={16} className="group-open:rotate-180" /></summary>
             <dl className="grid grid-cols-2 gap-3 pb-3 text-xs text-slate-600">
