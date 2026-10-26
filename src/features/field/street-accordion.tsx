@@ -16,6 +16,7 @@ export function StreetAccordion({
   select,
   editStructure,
   removeStreet,
+  personalHouseIds,
 }: {
   street: Street;
   open: boolean;
@@ -26,6 +27,7 @@ export function StreetAccordion({
   select: (house: House) => void;
   editStructure?: () => void;
   removeStreet?: () => void;
+  personalHouseIds?: ReadonlySet<number>;
 }) {
   const total = street.total;
   return (
@@ -76,6 +78,7 @@ export function StreetAccordion({
             connected={connected}
             now={now}
             select={select}
+            personalHouseIds={personalHouseIds}
           />
           {(editStructure || removeStreet || street.pendingRequest || street.withoutRound > 0) && <div className="flex flex-wrap gap-2 border-t pt-3">
             {editStructure && (

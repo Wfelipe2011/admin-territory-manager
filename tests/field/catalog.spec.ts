@@ -98,6 +98,7 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
     await field
       .getByRole("button", { name: "Enviar solicitação", exact: true })
       .click();
+    await field.getByRole("button", { name: "Mais", exact: true }).click();
     await field
       .getByRole("button", { name: "Compartilhar", exact: true })
       .click();
@@ -108,6 +109,7 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
       publisher.getByRole("button", { name: "+ Cadastrar rua", exact: true }),
     ).toHaveCount(0);
     await publisher.getByRole("button", { name: /^Rua nova QA / }).click();
+    await publisher.getByRole("button", { name: "Mais", exact: true }).click();
     await publisher
       .getByRole("button", { name: "Solicitar alteração", exact: true })
       .click();
@@ -163,6 +165,7 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
       path: "../dev/screenshots/catalog-approved-mobile.png",
       fullPage: true,
     });
+    await publisher.getByRole("button", { name: "Mais", exact: true }).click();
     await publisher
       .getByRole("button", { name: "Solicitar alteração", exact: true })
       .click();

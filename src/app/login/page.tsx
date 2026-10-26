@@ -42,19 +42,19 @@ export default function Login({ searchParams }: { searchParams: Promise<{ error:
   }, [router, searchParams]);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-white" onKeyDownCapture={(e) => e.key === "Enter" && handleLogin()}>
+    <div className="min-h-screen w-full flex items-center justify-center bg-white">
       {/* Left Side - Logo and Dashboard Preview */}
       <div className="hidden md:flex justify-center items-center relative z-10 w-full min-h-screen md:w-1/3">
-        <Image priority={true} src="/rectangle_2.png" alt="Laptop" width={400} height={300} className="absolute w-full h-full" />
-        <Image priority={true} src="/rectangle_1.png" alt="Laptop" width={400} height={300} className="absolute w-full h-full" />
-        <Image priority={true} src="/login.png" alt="Laptop" width={500} height={400} className="w-full scale-125 ml-10" />
+        <Image unoptimized priority={true} src="/rectangle_2.png" alt="Laptop" width={400} height={300} className="absolute w-full h-full" />
+        <Image unoptimized priority={true} src="/rectangle_1.png" alt="Laptop" width={400} height={300} className="absolute w-full h-full" />
+        <Image unoptimized priority={true} src="/login.png" alt="Laptop" width={500} height={400} className="w-full scale-125 ml-10" />
       </div>
 
       {/* Right Side - Login Form */}
       <div className="relative z-10 w-full md:w-2/3 p-8">
         <div className="w-full max-w-md mx-auto space-y-6">
-          <Image priority={true} src="/logo.png" alt="Logo Território Digital" width={500} height={400} className="m-auto -mt-16 mb-8 w-[200px] bg-primary rounded-full" />
-          <div className="space-y-4">
+          <Image unoptimized priority={true} src="/logo.png" alt="Logo Território Digital" width={500} height={400} className="m-auto -mt-16 mb-8 w-[200px] bg-primary rounded-full" />
+          <div className="space-y-4" onKeyDown={(event) => { if (event.key === "Enter") void handleLogin(); }}>
             <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="E-mail" className="h-12 px-4 rounded-md border border-gray-200" />
             <div className="space-y-1">
               <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" className="h-12 px-4 rounded-md border border-gray-200" />
@@ -69,6 +69,10 @@ export default function Login({ searchParams }: { searchParams: Promise<{ error:
             loading={loading}
             handleLogin={handleLogin}
           />
+          <div className="pt-1 text-center">
+            <Button asChild variant="outline" className="h-12 w-full rounded-full border-primary bg-white font-medium uppercase text-primary shadow-none hover:border-[#69a75d] hover:bg-[#f1f7ec] hover:text-[#5d8c42] focus-visible:ring-primary"><a href="/publicador">Área do publicador</a></Button>
+            <p className="mt-2 text-xs text-gray-500">Seus interessados e conversas, salvos neste aparelho.</p>
+          </div>
         </div>
       </div>
     </div>

@@ -6,10 +6,8 @@ import Image from "next/image";
 import {
   ArrowLeft,
   Copy,
-  HelpCircle,
   Link2,
   Loader2,
-  MapPin,
   Share2,
   Users,
   Wifi,
@@ -34,8 +32,10 @@ import { StructureAction, StructureDialog } from "./structure-dialog";
 import { FieldEntry } from "./entry";
 import { BlockCard, compareBlocks } from "./block-card";
 import { FieldHelp } from "./help-dialog";
-import { CarIcon, PostAddIcon } from "./legacy-icons";
+import { FieldFooter } from "./footer";
 import { StreetAction, StreetPicker } from "./street-picker";
+import { FieldRecordPicker } from "@/features/publisher/field-record-picker";
+import { usePersonalHouses } from "@/features/publisher/use-personal-houses";
 
 const color = (value: string | null, fallback: string) =>
   value && /^#[a-f0-9]{3}([a-f0-9]{3})?$/i.test(value) ? value : fallback;
@@ -83,6 +83,7 @@ export function FieldScreen({
     blockId,
   };
   const sync = useFieldSync(session, scope);
+  const personalHouseIds = usePersonalHouses(session, blockId);
   const [confirmHouse, setConfirmHouse] = useState<{
     house: House;
     streetId: number;
@@ -93,6 +94,7 @@ export function FieldScreen({
   const initialStreetOpened = useRef(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [recordOpen, setRecordOpen] = useState(false);
   const [streetAction, setStreetAction] = useState<StreetAction | null>(null);
   const [revokeBlock, setRevokeBlock] = useState<Pick<Block, "id" | "name"> | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
@@ -499,6 +501,7 @@ export function FieldScreen({
               <StreetAccordion
                 key={street.mappingId ?? -street.id}
                 street={street}
+                personalHouseIds={personalHouseIds}
                 open={openStreets.has(street.mappingId ?? -street.id)}
                 toggle={() => toggleStreet(street.mappingId ?? -street.id)}
                 pending={sync.pending}
@@ -620,22 +623,19 @@ export function FieldScreen({
           }}
         />
       )}
-      <nav aria-label="Ações da área de campo" className="fixed inset-x-0 bottom-0 z-20 border-t bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_#00000008]">
-        <div className="mx-auto flex max-w-3xl items-stretch px-1">
-          {[
-            { label: "Mapa", Icon: MapPin, action: () => data.territory.imageUrl ? setMapOpen(true) : toast("Mapa indisponível para este território.") },
-            ...(blockId ? [{ label: "Como chegar", Icon: CarIcon, action: () => setStreetAction("directions") }] : []),
-            ...(blockId && data.capabilities.canReportHouses ? [{ label: "Solicitar alteração", Icon: PostAddIcon, action: () => setStreetAction("report") }] : []),
-            ...(blockId && leader ? [{ label: "Compartilhar", Icon: Share2, action: () => void share(blockId) }] : []),
-            { label: "Ajuda", Icon: HelpCircle, action: () => setHelpOpen(true) },
-          ].map(({ label, Icon, action }) => (
-            <button key={label} type="button" onClick={action} disabled={label === "Compartilhar" && actionBusy}
-              className="flex min-h-16 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 text-[10px] text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800 disabled:opacity-50">
-              <Icon className="h-[21px] w-[21px] shrink-0" aria-hidden="true" /><span className="leading-tight">{label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
+      <FieldFooter
+        block={!!blockId}
+        theme={theme}
+        onMap={() => data.territory.imageUrl ? setMapOpen(true) : toast("Mapa indisponível para este território.")}
+        onDirections={() => setStreetAction("directions")}
+        onRecord={() => setRecordOpen(true)}
+        onReport={data.capabilities.canReportHouses ? () => setStreetAction("report") : undefined}
+        onShare={blockId && leader ? () => void share(blockId) : undefined}
+        onHelp={() => setHelpOpen(true)}
+        sharing={actionBusy}
+      />
+      {recordOpen && blockId && <FieldRecordPicker snapshot={data} session={session} blockId={blockId} theme={theme}
+        close={() => setRecordOpen(false)} saved={() => { setRecordOpen(false); toast.success("Conversa salva neste aparelho. Acesse Registros → Meus registros."); }} />}
       <Dialog open={mapOpen} onOpenChange={setMapOpen}>
         <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] overflow-auto rounded-2xl">
           <DialogTitle>Mapa · {data.territory.name}</DialogTitle>

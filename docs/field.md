@@ -4,6 +4,10 @@ Administração e área mobile usam este único projeto Next.js. A área de camp
 utiliza os componentes Tailwind/Radix existentes, sem Bootstrap, Material Tailwind,
 Recoil, Swiper ou Socket.IO.
 
+A tela de ruas e casas também oferece **Registrar conversa**, com interessados
+salvos somente no aparelho. O acesso independente pelo login, arquivos e uso
+offline estão documentados em [`publicador.md`](publicador.md).
+
 - `/acesso/[code]`: valida o link e entra automaticamente, sem senha ou botão de entrada; erros permitem tentar novamente.
 - `/campo/[code]`: território do dirigente ou quadra do publicador.
 - `/campo/[code]/quadra/[id]`: ruas expansíveis com casas, marcações e solicitações na mesma tela. Todas começam recolhidas; abrir uma rua fecha a anterior.
@@ -144,10 +148,20 @@ O Início administrativo e a origem de seus indicadores estão documentados em
 
 ## Ajuda visual e ações por rua
 
-O rodapé da quadra segue a ordem Mapa → Como chegar → Solicitar alteração →
-Compartilhar (dirigente) → Ajuda. Solicitar alteração depende da permissão existente
+O rodapé de ruas e casas tem quatro itens: Mapa → Como chegar → Registros → Mais.
+Registros agrupa Meus registros e Registrar conversa. Mais agrupa Solicitar
+alteração, Compartilhar (somente dirigente) e Ajuda. Os grupos abrem acima da
+barra, respeitam o tema e fecham ao escolher uma opção, tocar fora ou pressionar
+Escape. Solicitar alteração depende da permissão existente
 para relatar casas. A lista do território mantém Mapa e Ajuda. Os controles de edição
 estrutural continuam nas ruas e respeitam as permissões atuais.
+
+O coração no canto inferior esquerdo de uma casa indica que há um interessado
+ativo salvo neste aparelho. O indicador usa somente o IndexedDB local, respeita
+a origem da API, congregação, território e quadra e se atualiza após cadastro,
+importação ou exclusão, inclusive em outra aba. Não altera marcações nem aparece
+para outros publicadores. A cor da casa, carta, cadeado e cadastro em análise
+continuam com seus significados próprios.
 
 Como chegar e Solicitar alteração sempre pedem a escolha de uma rua, inclusive
 quando há somente uma. A seleção usa o catálogo carregado, incluindo ruas recolhidas,

@@ -47,6 +47,13 @@ async function setup(page: Page, options: { role?: "overseer" | "publisher"; the
 }
 const card = (page: Page, name = "Quadra 1") => page.getByRole("article", { name, exact: true });
 const street = (page: Page, id: number) => page.getByRole("button", { name: new RegExp(`^Rua QA ${id} `) });
+async function openFieldHelp(page: Page) {
+  await expect(page.getByRole("navigation")).toBeVisible();
+  const more = page.getByRole("button", { name: "Mais", exact: true });
+  if (await more.count()) await more.click();
+  await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+}
+
 
 test("entrada automática e sessões de campo preservam cookie administrativo", async ({ page, context }) => {
   await context.addCookies([{ name: "token", value: "admin-session-qa", url: "http://localhost:4800" }]);
@@ -193,10 +200,18 @@ test("rodapé escolhe rua recolhida e envia o formulário existente para essa ru
   });
   await page.goto("/acesso/QATEST");
   const nav = page.getByRole("navigation");
-  await expect(nav.getByRole("button")).toHaveText(["Mapa", "Como chegar", "Solicitar alteração", "Ajuda"]);
+  await expect(nav.getByRole("button")).toHaveText(["Mapa", "Como chegar", "Registros", "Mais"]);
+  await nav.getByRole("button", { name: "Registros", exact: true }).click();
+  const records = page.getByRole("dialog", { name: "Registros", exact: true });
+  await expect(records.getByRole("link", { name: "Meus registros", exact: true })).toHaveAttribute("href", "/publicador");
+  await expect(records.getByRole("link", { name: "Meus registros", exact: true })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(nav.getByRole("button", { name: "Registros", exact: true })).toBeFocused();
   await expect(street(page, 12)).toHaveAttribute("aria-expanded", "false");
   const before = reads();
-  await nav.getByRole("button", { name: "Solicitar alteração", exact: true }).click();
+  await nav.getByRole("button", { name: "Mais", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Mais opções" }).getByRole("button")).toHaveText(["Solicitar alteração", "Ajuda"]);
+  await page.getByRole("button", { name: "Solicitar alteração", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Solicitar alteração", exact: true });
   await expect(dialog.getByRole("button", { name: /^Rua QA / })).toHaveCount(2);
   await dialog.getByRole("button", { name: "Rua QA 12", exact: true }).click();
@@ -238,6 +253,7 @@ test("como chegar pede seleção mesmo com uma rua e abre seu endereço no mapa"
 test("seleção acompanha remoção de ruas pela sincronização e explica quadra vazia", async ({ page }) => {
   const { data, waiting } = await setup(page, { role: "publisher" });
   await page.goto("/acesso/QATEST");
+  await page.getByRole("button", { name: "Mais", exact: true }).click();
   await page.getByRole("button", { name: "Solicitar alteração", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Solicitar alteração", exact: true });
   await expect(dialog.getByRole("button", { name: "Rua QA 12", exact: true })).toBeVisible();
@@ -256,7 +272,7 @@ test("ajuda demonstra casas sem marcações e recolhe as oito siglas", async ({ 
   const writes: string[] = [];
   page.on("request", (request) => { if (["POST", "PATCH", "PUT"].includes(request.method())) writes.push(request.url()); });
   await page.goto("/acesso/QATEST");
-  await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+  await openFieldHelp(page);
   const dialog = page.getByRole("dialog", { name: "Entenda as casas" });
   await expect(dialog.getByRole("figure")).toHaveCount(6);
   await expect(dialog.getByRole("button")).toHaveCount(1); // Only close; examples are inert.
@@ -280,7 +296,10 @@ test("ajuda do dirigente explica indicadores e rodapé preserva compartilhamento
   for (const text of ["Gráfico", "Compartilhar", "Pessoas ativas", "Validade"]) await expect(dialog.getByText(text, { exact: true })).toBeVisible();
   await dialog.getByRole("button", { name: "Close", exact: true }).click();
   await page.getByRole("link", { name: "Ver ruas", exact: true }).click();
-  await expect(nav.getByRole("button")).toHaveText(["Mapa", "Como chegar", "Solicitar alteração", "Compartilhar", "Ajuda"]);
+  await expect(nav.getByRole("button")).toHaveText(["Mapa", "Como chegar", "Registros", "Mais"]);
+  await nav.getByRole("button", { name: "Mais", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Mais opções" }).getByRole("button")).toHaveText(["Solicitar alteração", "Compartilhar", "Ajuda"]);
+  await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: /^Atualizar/ })).toHaveCount(0);
 });
 
@@ -326,7 +345,7 @@ for (const theme of ["default", "campaign", "letters"] as const) {
     await page.getByRole("button", { name: "Mapa", exact: true }).click();
     await expect(page.getByRole("dialog").getByRole("img", { name: "Mapa de Território QA de apresentação" })).toBeVisible();
     await page.getByRole("button", { name: "Close", exact: true }).click();
-    await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+    await openFieldHelp(page);
     await page.screenshot({ path: testInfo.outputPath("ajuda-quadras.png") });
     await page.getByRole("button", { name: "Close", exact: true }).click();
     await page.getByRole("link", { name: "Ver ruas", exact: true }).first().click();
@@ -334,12 +353,24 @@ for (const theme of ["default", "campaign", "letters"] as const) {
     const houseButton = page.getByRole("button", { name: /^Casa 12345-A,/ });
     expect(await houseButton.getByText("12345-A", { exact: true }).evaluate((el) => getComputedStyle(el).fontSize)).toBe("20px");
     await expect(page.getByRole("button", { name: "Como chegar", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Solicitar alteração", exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation").getByRole("button")).toHaveText(["Mapa", "Como chegar", "Registros", "Mais"]);
     for (const width of [360, 390, 430, 1280]) {
       await page.setViewportSize({ width, height: 844 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.screenshot({ path: testInfo.outputPath(`casas-${width}.png`) });
-      await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+      for (const button of await page.getByRole("navigation").getByRole("button").all()) {
+        const bounds = (await button.boundingBox())!;
+        expect(bounds.width).toBeGreaterThanOrEqual(44);
+        expect(bounds.height).toBeGreaterThanOrEqual(44);
+      }
+      await page.getByRole("button", { name: "Registros", exact: true }).click();
+      const records = page.getByRole("dialog", { name: "Registros", exact: true });
+      const recordsBounds = (await records.boundingBox())!;
+      expect(recordsBounds.x).toBeGreaterThanOrEqual(0);
+      expect(recordsBounds.x + recordsBounds.width).toBeLessThanOrEqual(width);
+      await page.screenshot({ path: testInfo.outputPath(`registros-${width}.png`) });
+      await page.keyboard.press("Escape");
+      await openFieldHelp(page);
       const help = page.getByRole("dialog", { name: "Entenda as casas" });
       await expect(help.getByRole("figure")).toHaveCount(6);
       expect(await help.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
@@ -352,7 +383,7 @@ for (const theme of ["default", "campaign", "letters"] as const) {
       await page.screenshot({ path: testInfo.outputPath(`escolher-rua-${width}.png`) });
       await picker.getByRole("button", { name: "Close", exact: true }).click();
     }
-    await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+    await openFieldHelp(page);
     await expect(page.getByRole("dialog")).not.toContainText("Abra uma rua por vez");
     await expect(page.getByRole("dialog")).not.toContainText("Toque na casa e confirme");
   });
