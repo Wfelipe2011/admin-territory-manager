@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ReportsDrawer } from "@/components/ReportsDrawer";
 
 import { RequestsProvider } from "@/features/requests/provider";
+import { AdminContextBanner } from "@/features/superadmin/admin-context-banner";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
 
@@ -15,6 +16,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <ReportsDrawer />
         </div>
         <div className="w-full mt-14 bg-gray-100 px-2">
+          <AdminContextBanner />
           {children}
         </div>
       </main>

@@ -15,10 +15,11 @@ export function middleware(req: NextRequest) {
     const user = jwtDecode<DecodedToken>(token);
     if (!user.exp || user.exp <= Date.now() / 1000) return NextResponse.redirect(new URL('/login?error=expired', req.url));
     if (!user.roles?.some(role => ['admin', 'super_admin'].includes(role))) return NextResponse.redirect(new URL('/login?error=forbidden', req.url));
+    if (path.startsWith('/superadmin') && !user.roles.includes('super_admin')) return NextResponse.redirect(new URL('/dashboard?error=forbidden', req.url));
     return NextResponse.next();
   } catch { return NextResponse.redirect(new URL('/login?error=invalid', req.url)); }
 }
 
 export const config = {
-  matcher: ['/', '/home', '/acesso/:path*', '/campo/:path*', '/dashboard/:path*', '/gestao/:path*', '/cadastro/:path*', '/territories/:path*', '/balanco/:path*'],
+  matcher: ['/', '/home', '/acesso/:path*', '/campo/:path*', '/dashboard/:path*', '/superadmin/:path*', '/gestao/:path*', '/cadastro/:path*', '/territories/:path*', '/balanco/:path*'],
 };

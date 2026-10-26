@@ -8,6 +8,7 @@ export interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  replaceToken: (token: string) => void;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (password: string, token: string) => Promise<void>;
 }
@@ -17,6 +18,7 @@ export interface DecodedToken {
   userName: string;
   roles: string[];
   tenantId: number;
+  tenantName?: string;
   exp: number;
   iat: number;
 }

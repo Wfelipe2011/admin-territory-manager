@@ -22,6 +22,8 @@ import {
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { jwtDecode } from "jwt-decode";
+import type { DecodedToken } from "@/types/auth";
 
 const items = [
   {
@@ -53,6 +55,9 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { user } = useAuth();
+  let superAdmin = false;
+  try { superAdmin = !!user && jwtDecode<DecodedToken>(user.token).roles?.includes("super_admin"); } catch { /* Token is checked by middleware/API. */ }
   return (
     <Sidebar collapsible="icon" className="">
       <SidebarContent>
@@ -74,6 +79,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+          {superAdmin && <SidebarMenuItem><SidebarMenuButton asChild><Link href="/superadmin" className="ml-1 mt-2"><ChartNoAxesColumn className="text-primary" /><span>Visão global</span></Link></SidebarMenuButton></SidebarMenuItem>}
         </SidebarMenu>
       </SidebarContent>
       <FooterSidebar />
