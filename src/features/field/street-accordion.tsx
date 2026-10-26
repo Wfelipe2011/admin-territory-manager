@@ -5,30 +5,25 @@ import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { House, Street } from "./types";
 import { HouseGrid } from "./house-grid";
-import { CarIcon, PostAddIcon } from "./legacy-icons";
 
 export function StreetAccordion({
   street,
   open,
   toggle,
-  mapUrl,
   pending,
   connected,
   now,
   select,
-  report,
   editStructure,
   removeStreet,
 }: {
   street: Street;
   open: boolean;
   toggle: () => void;
-  mapUrl: string;
   pending: Set<number>;
   connected: boolean;
   now: number;
   select: (house: House) => void;
-  report: () => void;
   editStructure?: () => void;
   removeStreet?: () => void;
 }) {
@@ -82,25 +77,7 @@ export function StreetAccordion({
             now={now}
             select={select}
           />
-          <div className="flex flex-wrap gap-2 border-t pt-3">
-            <Button
-              variant="ghost"
-              className="h-11 rounded-xl px-3 text-xs"
-              asChild
-            >
-              <a href={mapUrl} target="_blank" rel="noreferrer">
-                <CarIcon className="h-6 w-6 text-[var(--field-primary)]" />
-                Como chegar
-              </a>
-            </Button>
-            <Button
-              variant="ghost"
-              className="h-11 rounded-xl px-3 text-xs"
-              onClick={report}
-            >
-              <PostAddIcon className="h-6 w-6 text-[var(--field-primary)]" />
-              Solicitar alteração
-            </Button>
+          {(editStructure || removeStreet || street.pendingRequest || street.withoutRound > 0) && <div className="flex flex-wrap gap-2 border-t pt-3">
             {editStructure && (
               <Button
                 variant="ghost"
@@ -131,7 +108,7 @@ export function StreetAccordion({
                 rodada.
               </p>
             )}
-          </div>
+          </div>}
         </div>
       </Collapsible.Content>
     </Collapsible.Root>

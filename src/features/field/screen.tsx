@@ -10,7 +10,6 @@ import {
   Link2,
   Loader2,
   MapPin,
-  RefreshCw,
   Share2,
   Users,
   Wifi,
@@ -31,10 +30,12 @@ import { useFieldSync } from "./use-field-sync";
 import { ReportDialog } from "./report-dialog";
 import { StreetAccordion } from "./street-accordion";
 import { houseAction } from "./house-permissions";
-import { legends } from "./house-grid";
 import { StructureAction, StructureDialog } from "./structure-dialog";
 import { FieldEntry } from "./entry";
 import { BlockCard, compareBlocks } from "./block-card";
+import { FieldHelp } from "./help-dialog";
+import { CarIcon, PostAddIcon } from "./legacy-icons";
+import { StreetAction, StreetPicker } from "./street-picker";
 
 const color = (value: string | null, fallback: string) =>
   value && /^#[a-f0-9]{3}([a-f0-9]{3})?$/i.test(value) ? value : fallback;
@@ -92,6 +93,7 @@ export function FieldScreen({
   const initialStreetOpened = useRef(false);
   const [mapOpen, setMapOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [streetAction, setStreetAction] = useState<StreetAction | null>(null);
   const [revokeBlock, setRevokeBlock] = useState<Pick<Block, "id" | "name"> | null>(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [notice, setNotice] = useState("");
@@ -339,19 +341,19 @@ export function FieldScreen({
             )}
           </div>
           <span
-            className="flex shrink-0 items-center gap-1 text-[10px] text-slate-500"
+            className="flex shrink-0 flex-col items-center gap-0.5 text-center text-[10px] text-slate-500"
             role="status"
           >
             {sync.status === "live" ? (
-              <Wifi size={14} className="text-emerald-700" />
+              <Wifi size={14} className="text-emerald-700" aria-label="Conectado" data-testid="field-connection-icon" />
             ) : (
-              <WifiOff size={14} />
+              <WifiOff size={14} aria-label="Desconectado" data-testid="field-connection-icon" />
             )}
-            <span className="flex flex-col items-end leading-snug">
+            <span className="flex flex-col items-center leading-snug">
               {sync.lastSyncedAt && (
                 <time dateTime={new Date(sync.lastSyncedAt).toISOString()} aria-label="Última sincronização">
                   <span className="block">{new Date(sync.lastSyncedAt).toLocaleDateString("pt-BR")}</span>
-                  <span className="block text-right tabular-nums">{new Date(sync.lastSyncedAt).toLocaleTimeString("pt-BR", { hour12: false })}</span>
+                  <span className="block tabular-nums">{new Date(sync.lastSyncedAt).toLocaleTimeString("pt-BR", { hour12: false })}</span>
                 </time>
               )}
               {sync.status !== "live" && <span>{sync.status === "offline" ? "Sem conexão" : "Reconectando…"}</span>}
@@ -499,14 +501,12 @@ export function FieldScreen({
                 street={street}
                 open={openStreets.has(street.mappingId ?? -street.id)}
                 toggle={() => toggleStreet(street.mappingId ?? -street.id)}
-                mapUrl={mapUrl(street.name, street.firstNumber)}
                 pending={sync.pending}
                 connected={sync.status === "live"}
                 now={sync.now}
                 select={(house) =>
                   setConfirmHouse({ house, streetId: street.id })
                 }
-                report={() => setReportStreetId(street.id)}
                 editStructure={
                   leader &&
                   data.capabilities.canEditStructure &&
@@ -624,13 +624,14 @@ export function FieldScreen({
         <div className="mx-auto flex max-w-3xl items-stretch px-1">
           {[
             { label: "Mapa", Icon: MapPin, action: () => data.territory.imageUrl ? setMapOpen(true) : toast("Mapa indisponível para este território.") },
+            ...(blockId ? [{ label: "Como chegar", Icon: CarIcon, action: () => setStreetAction("directions") }] : []),
+            ...(blockId && data.capabilities.canReportHouses ? [{ label: "Solicitar alteração", Icon: PostAddIcon, action: () => setStreetAction("report") }] : []),
             ...(blockId && leader ? [{ label: "Compartilhar", Icon: Share2, action: () => void share(blockId) }] : []),
-            { label: "Atualizar", Icon: RefreshCw, action: () => sync.refresh() },
             { label: "Ajuda", Icon: HelpCircle, action: () => setHelpOpen(true) },
           ].map(({ label, Icon, action }) => (
             <button key={label} type="button" onClick={action} disabled={label === "Compartilhar" && actionBusy}
               className="flex min-h-16 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 text-[10px] text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-800 disabled:opacity-50">
-              <Icon size={21} aria-hidden="true" /><span>{label}</span>
+              <Icon className="h-[21px] w-[21px] shrink-0" aria-hidden="true" /><span className="leading-tight">{label}</span>
             </button>
           ))}
         </div>
@@ -653,35 +654,22 @@ export function FieldScreen({
           )}
         </DialogContent>
       </Dialog>
-      <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
-        <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] overflow-auto rounded-2xl">
-          <DialogTitle>Como usar sua designação</DialogTitle>
-          <DialogDescription>
-            Abra o link recebido para entrar diretamente na sua designação.
-            Expanda uma rua para ver as casas. Ao abrir outra rua, a anterior
-            se fecha. Confirme cada marcação sem sair da lista.
-          </DialogDescription>
-          <p className="text-sm text-slate-600">
-            Casas em cinza são novas ou estão sem rodada. Cadastros novos com rodada já podem ser marcados durante a análise. Correções em
-            análise não interrompem o trabalho. Casas em vermelho não devem ser
-            visitadas. O envelope indica onde deixar carta. Use “Solicitar
-            alteração” na rua correspondente para informar correções. A presença
-            considera atividade no último minuto.
-          </p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-xl bg-slate-50 p-4 text-xs text-slate-600">
-            <span>✓ Casa concluída</span>
-            <span>Vermelho · Não bater</span>
-            <span>Cinza · Sem rodada / em análise</span>
-            <span>✉ Deixar carta</span>
-            <span>Cadeado · Prazo para desmarcar encerrado</span>
-            {Object.entries(legends).map(([label, short]) => (
-              <span key={short}>
-                <strong>{short}</strong> · {label}
-              </span>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <FieldHelp open={helpOpen} onOpenChange={setHelpOpen} block={!!blockId} theme={theme} />
+      {streetAction && blockId && (
+        <StreetPicker
+          action={streetAction}
+          streets={data.streets}
+          theme={theme}
+          mapUrl={(street) => mapUrl(street.name, street.firstNumber)}
+          close={() => setStreetAction(null)}
+          select={(id) => {
+            if (!data.streets.some((street) => street.id === id)) return false;
+            if (streetAction === "report") setReportStreetId(id);
+            setStreetAction(null);
+            return true;
+          }}
+        />
+      )}
       <Dialog open={!!revokeBlock} onOpenChange={(open) => { if (!open && !actionBusy) setRevokeBlock(null); }}>
         <DialogContent className="w-[calc(100%_-_2rem)] max-w-sm rounded-2xl">
           <DialogTitle>Revogar acesso da quadra?</DialogTitle>

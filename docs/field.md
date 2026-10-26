@@ -29,7 +29,10 @@ envio automático de mensagens. Sem conexão, não são enfileiradas marcações
 Uma consulta a `GET /v1/field/blocks/:blockId/sync` carrega a quadra inteira em
 `streets[].houses`. Expandir/recolher ruas não navega nem consulta a API. Existe
 somente um long polling ativo; atualizações preservam ruas abertas e diálogos.
-O cabeçalho fixo mostra a logo transparente em círculo com a cor do tema e a data/hora da última sincronização bem-sucedida, preservada quando offline. Mapa, ajuda, atualização manual e compartilhamento do dirigente ficam na barra inferior. Presença é contabilizada por quadra.
+O cabeçalho fixo mostra a logo transparente em círculo com a cor do tema. O ícone
+de conexão fica acima da data/hora da última sincronização bem-sucedida, centralizados;
+o horário é preservado quando offline, acompanhado do estado da conexão. A sincronização
+é automática, sem botão de atualização manual. Presença é contabilizada por quadra.
 
 Cada casa recebe `canMark`, `canUnmark`, `blockedReason` e `canUnmarkUntil`.
 O frontend usa essas permissões para os controles, acrescidas de conexão e
@@ -91,7 +94,7 @@ para os links com rodada fixa.
 O dirigente autorizado pode cadastrar quadras e ruas e solicitar correção/exclusão
 de rua. Inclusões ficam em análise, mas já recebem cadastros filhos e links de
 publicadores. Casas continuam disponíveis para solicitações por todos os acessos.
-O histórico de solicitações não aparece no menu da área de campo. Os formulários de alteração continuam nas ruas; a central administrativa permanece em `/gestao/solicitacoes`.
+O histórico de solicitações não aparece no menu da área de campo. Os formulários de alteração são abertos pelo rodapé, após escolher a rua; a central administrativa permanece em `/gestao/solicitacoes`.
 
 Casas provisórias podem ser marcadas durante a análise, inclusive sob pais
 provisórios. Se não houver rodada aberta compatível, o cadastro de casa inicia
@@ -128,9 +131,9 @@ novamente. Reenviar reutiliza a assinatura ativa, inclusive após cancelar o env
 O resultado de geração atualiza imediatamente o estado local; `expirationDate`
 alimenta o contador de validade, atualizado a cada segundo. Link vencido para em
 zero e permite gerar outro. A revogação fica abaixo dos indicadores do card e exige
-confirmação da quadra selecionada.
+confirmação da quadra selecionada. O botão tem fonte de 12 px, contorno de 32 px e área de toque de 44 px.
 
-Nas ruas, os ícones de carro e documento com adição vêm do legado. Os números das
+No rodapé, os ícones de carro e documento com adição vêm do legado. Os números das
 casas usam 20 px. O texto “Prazo encerrado” não ocupa espaço no cartão; o cadeado
 e a explicação ao tocar continuam indicando o bloqueio de desmarcação.
 
@@ -138,3 +141,29 @@ Esses ajustes não mudam endpoints, regras de autorização, banco ou worker.
 
 O Início administrativo e a origem de seus indicadores estão documentados em
 [`dashboard.md`](dashboard.md).
+
+## Ajuda visual e ações por rua
+
+O rodapé da quadra segue a ordem Mapa → Como chegar → Solicitar alteração →
+Compartilhar (dirigente) → Ajuda. Solicitar alteração depende da permissão existente
+para relatar casas. A lista do território mantém Mapa e Ajuda. Os controles de edição
+estrutural continuam nas ruas e respeitam as permissões atuais.
+
+Como chegar e Solicitar alteração sempre pedem a escolha de uma rua, inclusive
+quando há somente uma. A seleção usa o catálogo carregado, incluindo ruas recolhidas,
+sem nova consulta. Como chegar abre o Google Maps com rua, primeiro número e cidade;
+Solicitar alteração abre o formulário existente para a rua selecionada. Se uma rua
+for removida durante a sincronização, ela deixa de aparecer na seleção. Uma quadra
+vazia informa que não há ruas disponíveis.
+
+A ajuda mostra seis exemplos com números fictícios, em duas colunas: A fazer,
+Concluída, Deixar carta, Não bater, Sem rodada e Desmarcação encerrada. Os exemplos
+reutilizam o mesmo componente visual das casas e o tema atual, sem botões ou efeitos
+no banco. Instruções curtas explicam a confirmação, a abertura de uma rua por vez e
+as ações do rodapé. O ponto amarelo indica cadastro em análise; as oito siglas ficam
+em uma seção recolhível. Na lista de quadras, a ajuda explica gráfico, compartilhamento,
+presença e validade com ícones e legendas curtas.
+
+Os testes de apresentação cobrem os três temas e as larguras 360/390/430/1280,
+a ajuda sem marcações, a ordem do rodapé, escolha de ruas recolhidas, navegação,
+envio do formulário, seleção vazia e remoção de rua durante a escolha.

@@ -184,6 +184,106 @@ test("header acompanha sincronizações sem alterações e mantém o último hor
   await context.setOffline(false);
 });
 
+test("rodapé escolhe rua recolhida e envia o formulário existente para essa rua", async ({ page }) => {
+  const { reads } = await setup(page, { role: "publisher" });
+  let payload: Record<string, unknown> | undefined;
+  await page.route(`${api}/change-requests`, (route) => {
+    payload = route.request().postDataJSON();
+    return route.fulfill({ json: { id: 1 } });
+  });
+  await page.goto("/acesso/QATEST");
+  const nav = page.getByRole("navigation");
+  await expect(nav.getByRole("button")).toHaveText(["Mapa", "Como chegar", "Solicitar alteração", "Ajuda"]);
+  await expect(street(page, 12)).toHaveAttribute("aria-expanded", "false");
+  const before = reads();
+  await nav.getByRole("button", { name: "Solicitar alteração", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Solicitar alteração", exact: true });
+  await expect(dialog.getByRole("button", { name: /^Rua QA / })).toHaveCount(2);
+  await dialog.getByRole("button", { name: "Rua QA 12", exact: true }).click();
+  await expect(dialog).toContainText("Rua QA 12 ·");
+  await expect(dialog.getByLabel("Tipo de solicitação")).toBeFocused();
+  expect(reads()).toBe(before);
+  expect(payload).toBeUndefined();
+  await dialog.getByLabel("Número", { exact: true }).fill("150");
+  await dialog.getByLabel("Observações", { exact: true }).fill("Exemplo QA");
+  await dialog.getByRole("button", { name: "Enviar solicitação", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(payload).toMatchObject({ entity: "house", action: "create", territoryId: 1, blockId: 1, addressId: 12, data: { number: "150" } });
+});
+
+test("como chegar pede seleção mesmo com uma rua e abre seu endereço no mapa", async ({ page, context }) => {
+  const { data, reads, waiting } = await setup(page, { role: "publisher" });
+  data.streets = [data.streets[1]];
+  await context.route("https://www.google.com/maps/**", (route) => route.fulfill({ contentType: "text/html", body: "<title>Mapa QA</title>" }));
+  await page.goto("/acesso/QATEST");
+  await expect(street(page, 12)).toBeVisible();
+  await expect.poll(() => waiting.length).toBe(1);
+  const before = reads();
+  await page.getByRole("button", { name: "Como chegar", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Como chegar", exact: true });
+  const choice = dialog.getByRole("link", { name: "Rua QA 12", exact: true });
+  await expect(choice).toBeVisible();
+  expect(new URL((await choice.getAttribute("href"))!).searchParams.get("destination")).toContain("Rua QA 12");
+  const popupPromise = page.waitForEvent("popup");
+  await choice.click();
+  const popup = await popupPromise;
+  await expect(popup).toHaveURL(/google\.com\/maps\/dir/);
+  expect(new URL(popup.url()).searchParams.get("destination")).toBe("Rua QA 12 12345-A, Sorocaba, SP");
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Como chegar", exact: true })).toBeFocused();
+  expect(reads()).toBe(before);
+  await popup.close();
+});
+
+test("seleção acompanha remoção de ruas pela sincronização e explica quadra vazia", async ({ page }) => {
+  const { data, waiting } = await setup(page, { role: "publisher" });
+  await page.goto("/acesso/QATEST");
+  await page.getByRole("button", { name: "Solicitar alteração", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Solicitar alteração", exact: true });
+  await expect(dialog.getByRole("button", { name: "Rua QA 12", exact: true })).toBeVisible();
+  await expect.poll(() => waiting.length).toBe(1);
+  data.streets = [];
+  await waiting.shift()!.fulfill({ json: { changed: true, cursor: "qa:removed", data, presence: { total: 1, blocks: { 1: 1 }, streets: {} } } });
+  await expect(dialog.getByRole("button", { name: /^Rua QA / })).toHaveCount(0);
+  await expect(dialog.getByRole("status")).toHaveText("Nenhuma rua disponível nesta quadra.");
+  await dialog.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("button", { name: "Como chegar", exact: true }).click();
+  await expect(page.getByRole("dialog").getByRole("status")).toHaveText("Nenhuma rua disponível nesta quadra.");
+});
+
+test("ajuda demonstra casas sem marcações e recolhe as oito siglas", async ({ page }) => {
+  await setup(page, { role: "publisher", theme: "campaign" });
+  const writes: string[] = [];
+  page.on("request", (request) => { if (["POST", "PATCH", "PUT"].includes(request.method())) writes.push(request.url()); });
+  await page.goto("/acesso/QATEST");
+  await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Entenda as casas" });
+  await expect(dialog.getByRole("figure")).toHaveCount(6);
+  await expect(dialog.getByRole("button")).toHaveCount(1); // Only close; examples are inert.
+  await dialog.getByRole("figure", { name: "Concluída", exact: true }).click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("Cadastro em análise", { exact: true })).toBeVisible();
+  await expect(dialog.getByText("Comércio", { exact: true })).toBeHidden();
+  await dialog.locator("summary").click();
+  await expect(dialog.locator("dt")).toHaveCount(8);
+  await expect(dialog.getByText("Comércio", { exact: true })).toBeVisible();
+  expect(writes).toEqual([]);
+});
+
+test("ajuda do dirigente explica indicadores e rodapé preserva compartilhamento só na quadra", async ({ page }) => {
+  await setup(page);
+  await page.goto("/acesso/QATEST");
+  const nav = page.getByRole("navigation");
+  await expect(nav.getByRole("button")).toHaveText(["Mapa", "Ajuda"]);
+  await nav.getByRole("button", { name: "Ajuda", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Ajuda das quadras" });
+  for (const text of ["Gráfico", "Compartilhar", "Pessoas ativas", "Validade"]) await expect(dialog.getByText(text, { exact: true })).toBeVisible();
+  await dialog.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByRole("link", { name: "Ver ruas", exact: true }).click();
+  await expect(nav.getByRole("button")).toHaveText(["Mapa", "Como chegar", "Solicitar alteração", "Compartilhar", "Ajuda"]);
+  await expect(page.getByRole("button", { name: /^Atualizar/ })).toHaveCount(0);
+});
+
 for (const theme of ["default", "campaign", "letters"] as const) {
   test(`layout responsivo, logo e ações no tema ${theme}`, async ({ page }, testInfo) => {
     const { data } = await setup(page, { theme });
@@ -210,7 +310,15 @@ for (const theme of ["default", "campaign", "letters"] as const) {
       expect(chart!.x + chart!.width).toBeLessThanOrEqual(indicators!.x);
       expect(chart!.width).toBeGreaterThan(120);
       expect(chart!.y).toBeLessThan(indicators!.y + indicators!.height);
-      await expect(card(page).getByRole("button", { name: "Revogar acesso", exact: true })).toBeVisible();
+      const revoke = card(page).getByRole("button", { name: "Revogar acesso", exact: true });
+      await expect(revoke).toBeVisible();
+      expect((await revoke.boundingBox())!.height).toBe(44);
+      expect((await revoke.locator("span").boundingBox())!.height).toBe(32);
+      expect(await revoke.evaluate(el => getComputedStyle(el).fontSize)).toBe("12px");
+      const connection = await page.getByTestId("field-connection-icon").boundingBox();
+      const date = await page.getByLabel("Última sincronização").boundingBox();
+      expect(connection!.y + connection!.height).toBeLessThanOrEqual(date!.y);
+      expect(Math.abs(connection!.x + connection!.width / 2 - date!.x - date!.width / 2)).toBeLessThan(2);
       await page.evaluate(() => scrollTo(0, 0));
       await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
       await page.screenshot({ path: testInfo.outputPath(`quadras-${width}.png`) });
@@ -218,18 +326,33 @@ for (const theme of ["default", "campaign", "letters"] as const) {
     await page.getByRole("button", { name: "Mapa", exact: true }).click();
     await expect(page.getByRole("dialog").getByRole("img", { name: "Mapa de Território QA de apresentação" })).toBeVisible();
     await page.getByRole("button", { name: "Close", exact: true }).click();
+    await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+    await page.screenshot({ path: testInfo.outputPath("ajuda-quadras.png") });
+    await page.getByRole("button", { name: "Close", exact: true }).click();
     await page.getByRole("link", { name: "Ver ruas", exact: true }).first().click();
     await street(page, 11).click();
     const houseButton = page.getByRole("button", { name: /^Casa 12345-A,/ });
-    expect(await houseButton.locator("span").first().evaluate((el) => getComputedStyle(el).fontSize)).toBe("20px");
-    await expect(page.getByRole("link", { name: "Como chegar" })).toBeVisible();
+    expect(await houseButton.getByText("12345-A", { exact: true }).evaluate((el) => getComputedStyle(el).fontSize)).toBe("20px");
+    await expect(page.getByRole("button", { name: "Como chegar", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Solicitar alteração", exact: true })).toBeVisible();
     for (const width of [360, 390, 430, 1280]) {
       await page.setViewportSize({ width, height: 844 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      await page.screenshot({ path: testInfo.outputPath(`casas-${width}.png`), fullPage: true });
+      await page.screenshot({ path: testInfo.outputPath(`casas-${width}.png`) });
+      await page.getByRole("button", { name: "Ajuda", exact: true }).click();
+      const help = page.getByRole("dialog", { name: "Entenda as casas" });
+      await expect(help.getByRole("figure")).toHaveCount(6);
+      expect(await help.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath(`ajuda-${width}.png`) });
+      await help.getByRole("button", { name: "Close", exact: true }).click();
+      await page.getByRole("button", { name: "Como chegar", exact: true }).click();
+      const picker = page.getByRole("dialog", { name: "Como chegar", exact: true });
+      await expect(picker.getByRole("link")).toHaveCount(2);
+      expect(await picker.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath(`escolher-rua-${width}.png`) });
+      await picker.getByRole("button", { name: "Close", exact: true }).click();
     }
     await page.getByRole("button", { name: "Ajuda", exact: true }).click();
-    await expect(page.getByRole("dialog")).toContainText("Ao abrir outra rua, a anterior se fecha");
+    await expect(page.getByRole("dialog")).toContainText("Abra uma rua por vez");
   });
 }

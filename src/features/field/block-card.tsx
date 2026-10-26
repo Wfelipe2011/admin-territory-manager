@@ -76,8 +76,8 @@ export function BlockCard({ block, href, presence, busy, share, revoke }: {
           <p className="flex items-center gap-2"><span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--field-primary)]" /><span><strong>{block.completed}</strong> concluídas</span></p>
           <p className="text-xs leading-relaxed text-slate-500">Sugestão: {block.suggestion}</p>
           {active && (
-            <Button variant="outline" className="h-11 w-full rounded-xl border-red-200 px-2 text-xs text-red-700 hover:bg-red-50 hover:text-red-800" disabled={busy} onClick={revoke}>
-              Revogar acesso
+            <Button variant="ghost" className="h-11 w-fit max-w-full self-start p-0 text-xs font-normal text-red-700 hover:bg-transparent hover:text-red-800" disabled={busy} onClick={revoke}>
+              <span className="flex h-8 items-center rounded-md border border-red-200 px-2 hover:bg-red-50">Revogar acesso</span>
             </Button>
           )}
         </div>

@@ -111,6 +111,8 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
     await publisher
       .getByRole("button", { name: "Solicitar alteração", exact: true })
       .click();
+    await publisher.getByRole("dialog", { name: "Solicitar alteração", exact: true })
+      .getByRole("button", { name: "Rua nova QA", exact: true }).click();
     await publisher.getByLabel("Número", { exact: true }).fill("10");
     await publisher
       .getByLabel("Observações", { exact: true })
@@ -125,10 +127,18 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
     await publisher.getByRole("button", { name: "Confirmar", exact: true }).click();
     await expect(house).toHaveAttribute("aria-pressed", "true");
     await page.goto("/gestao/solicitacoes");
+    const filteredRequests = page.waitForResponse((response) =>
+      response.url().includes("/change-requests?") &&
+      new URL(response.url()).searchParams.get("territoryId") === String(fixture!.blankTerritoryId) &&
+      response.ok(),
+    );
     await page
       .getByLabel("Território (ID)", { exact: true })
       .fill(String(fixture!.blankTerritoryId));
-    await page.getByRole("heading", { name: "Casa 10", exact: true }).click();
+    await filteredRequests;
+    const pendingHouse = page.getByRole("heading", { name: "Casa 10", exact: true });
+    await expect(pendingHouse).toHaveCount(1); // Wait until the territory filter replaces the previous list.
+    await pendingHouse.click();
     await page
       .getByRole("button", { name: "Aprovar esta", exact: true })
       .click();
@@ -156,6 +166,8 @@ test("território vazio: link editável, árvore provisória, revisão no Admin,
     await publisher
       .getByRole("button", { name: "Solicitar alteração", exact: true })
       .click();
+    await publisher.getByRole("dialog", { name: "Solicitar alteração", exact: true })
+      .getByRole("button", { name: "Rua nova QA", exact: true }).click();
     await publisher.getByLabel("Tipo de solicitação").selectOption("update");
     await publisher
       .getByLabel("Casa", { exact: true })

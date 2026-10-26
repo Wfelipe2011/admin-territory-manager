@@ -141,13 +141,14 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
 
   test('publicador solicita inclusão e aprovação administrativa atualiza a rua', async ({ page, request }) => {
     await enter(page, publisherUrl);
-    await streetButton(page, firstStreet).click();
     await page.getByRole('button', { name: 'Solicitar alteração' }).click();
+    await page.getByRole('dialog', { name: 'Solicitar alteração', exact: true }).getByRole('button', { name: firstStreet, exact: true }).click();
     const number = `QA${Date.now()}`;
     await page.getByLabel('Número', { exact: true }).fill(number);
     await page.getByLabel('Observações', { exact: true }).fill('QA: solicitação automatizada isolada');
     await page.getByRole('button', { name: 'Enviar solicitação', exact: true }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
+    await streetButton(page, firstStreet).click();
     const house = page.getByRole('button', { name: new RegExp(`^Casa ${number},`) });
     await expect(house).toBeEnabled();
     await expect(house.getByLabel('Cadastro em análise')).toBeVisible();

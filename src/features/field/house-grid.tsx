@@ -1,20 +1,11 @@
 "use client";
 
-import { Check, Loader2, Mail, LockKeyhole } from "lucide-react";
 import toast from "react-hot-toast";
 import { houseAction } from "./house-permissions";
 import { House } from "./types";
 
-export const legends: Record<string, string> = {
-  Comércio: "CM",
-  Terreno: "TR",
-  Fundos: "FD",
-  "Testemunha de Jeová": "TJ",
-  Igreja: "IG",
-  Escola: "ES",
-  Hospital: "HP",
-  Apartamento: "AP",
-};
+import { HouseTile } from "./house-tile";
+export { legends } from "./house-tile";
 
 export function HouseGrid({
   houses,
@@ -62,62 +53,9 @@ export function HouseGrid({
             disabled={(!action.allowed && !timeLocked) || pending.has(house.id) || !connected}
             aria-disabled={(!action.allowed && !timeLocked) || pending.has(house.id) || !connected}
             onClick={() => timeLocked ? toast("O prazo para desmarcar esta casa encerrou. Solicite uma correção ao responsável.", { icon: "🔒" }) : select(house)}
-            className="relative flex min-h-[80px] flex-col items-center justify-center rounded-xl border-2 px-1 py-3 shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: !house.hasRound || (house.registrationStatus === "pending" && !house.status)
-                ? "#E2E8F0"
-                : house.dontVisit
-                ? "#FEE2E2"
-                : house.status
-                ? "var(--field-primary)"
-                : "#FFFFFF",
-              color:
-                house.status && !house.dontVisit && !!house.hasRound
-                  ? "#FFFFFF"
-                  : "#334155",
-              borderColor: house.dontVisit
-                ? "#FECACA"
-                : house.status
-                ? "var(--field-primary)"
-                : "#E2E8F0",
-            }}
+            className="min-w-0 rounded-xl transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800 disabled:cursor-not-allowed"
           >
-            {(house.pendingRequest || house.registrationStatus === "pending") && (
-                <span
-                  className="absolute left-1 top-1 h-1.5 w-1.5 rounded-full bg-amber-500"
-                  title="Cadastro em análise"
-                  aria-label="Cadastro em análise"
-                />
-              )}
-            {timeLocked && <LockKeyhole className="absolute right-1 top-1 h-3.5 w-3.5" aria-label="Prazo para desmarcar encerrado" />}
-            {house.leaveLetter && !house.dontVisit && !timeLocked && (
-              <Mail
-                className="absolute right-1 top-1 h-3.5 w-3.5"
-                aria-label="Deixar carta"
-              />
-            )}
-            {pending.has(house.id) ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <span className="max-w-full break-all text-xl font-semibold leading-tight">
-                  {house.number}
-                </span>
-                {legends[house.legend || ""] && (
-                  <span className="text-[10px]">
-                    {legends[house.legend || ""]}
-                  </span>
-                )}
-                {action.reason && !timeLocked && (
-                  <span className="mt-1 text-[9px] leading-tight">
-                    {action.reason}
-                  </span>
-                )}
-                {house.status && !house.dontVisit && (
-                  <Check size={12} className="absolute bottom-1 right-1" />
-                )}
-              </>
-            )}
+            <HouseTile house={house} reason={action.reason} timeLocked={timeLocked} busy={pending.has(house.id)} />
           </button>
         );
       })}
