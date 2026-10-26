@@ -1,3 +1,19 @@
+# Território Digital — Admin unificado
+
+Administração e área de campo em `http://localhost:4800`.
+
+- [Área de campo e designações](docs/field.md)
+- [Área local do publicador, arquivos e PWA](docs/publicador.md)
+
+`/publicador` também está disponível pelo login, sem conta administrativa. Seus
+interessados e conversas ficam no aparelho. O uso offline exige o build de
+produção (`npm run build`); `npm run dev` não instala o service worker.
+
+Validação do módulo: `npm run typecheck`, `npm run build` e
+`npm run test:publisher` (Chromium e WebKit; dependências em `docs/publicador.md`).
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

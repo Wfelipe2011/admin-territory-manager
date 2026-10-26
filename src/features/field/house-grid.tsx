@@ -14,6 +14,7 @@ export function HouseGrid({
   connected,
   now,
   select,
+  personalHouseIds,
 }: {
   houses: House[];
   streetName: string;
@@ -21,6 +22,7 @@ export function HouseGrid({
   connected: boolean;
   now: number;
   select: (house: House) => void;
+  personalHouseIds?: ReadonlySet<number>;
 }) {
   if (!houses.length)
     return (
@@ -37,6 +39,7 @@ export function HouseGrid({
       {houses.map((house) => {
         const action = houseAction(house, now);
         const timeLocked = action.reason === "Prazo encerrado";
+        const hasPersonalRecord = personalHouseIds?.has(house.id) ?? false;
         return (
           <button
             key={house.id}
@@ -45,7 +48,7 @@ export function HouseGrid({
               house.legend ? `, ${house.legend}` : ""
             }, ${house.status ? "concluída" : "pendente"}${
               action.reason ? `, ${action.reason.toLowerCase()}` : ""
-            }`}
+            }${hasPersonalRecord ? ", com registro pessoal" : ""}`}
             aria-pressed={house.status}
             title={
               action.reason || (house.status ? "Desmarcar casa" : "Marcar casa")
@@ -55,7 +58,7 @@ export function HouseGrid({
             onClick={() => timeLocked ? toast("O prazo para desmarcar esta casa encerrou. Solicite uma correção ao responsável.", { icon: "🔒" }) : select(house)}
             className="min-w-0 rounded-xl transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800 disabled:cursor-not-allowed"
           >
-            <HouseTile house={house} reason={action.reason} timeLocked={timeLocked} busy={pending.has(house.id)} />
+            <HouseTile house={house} reason={action.reason} timeLocked={timeLocked} busy={pending.has(house.id)} hasPersonalRecord={hasPersonalRecord} />
           </button>
         );
       })}

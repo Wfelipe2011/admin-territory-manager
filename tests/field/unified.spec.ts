@@ -69,6 +69,7 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
     await page.getByRole('article', { name: 'Quadra 1', exact: true }).getByRole('link', { name: 'Ver ruas' }).click();
     await expect(page).toHaveURL(/\/quadra\/\d+$/);
     await expect(page.getByRole('heading', { name: 'Quadra 1', exact: true, level: 1 })).toBeVisible();
+    await page.getByRole('button', { name: 'Mais', exact: true }).click();
     await page.getByRole('button', { name: 'Compartilhar', exact: true }).click();
     expect(await sharedUrl(page)).toBe(publisherUrl);
   });
@@ -141,6 +142,7 @@ test.describe.serial('Frontend unificado · ambiente QA local', () => {
 
   test('publicador solicita inclusão e aprovação administrativa atualiza a rua', async ({ page, request }) => {
     await enter(page, publisherUrl);
+    await page.getByRole('button', { name: 'Mais', exact: true }).click();
     await page.getByRole('button', { name: 'Solicitar alteração' }).click();
     await page.getByRole('dialog', { name: 'Solicitar alteração', exact: true }).getByRole('button', { name: firstStreet, exact: true }).click();
     const number = `QA${Date.now()}`;
