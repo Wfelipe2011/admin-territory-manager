@@ -353,6 +353,7 @@ for (const theme of ["default", "campaign", "letters"] as const) {
       await picker.getByRole("button", { name: "Close", exact: true }).click();
     }
     await page.getByRole("button", { name: "Ajuda", exact: true }).click();
-    await expect(page.getByRole("dialog")).toContainText("Abra uma rua por vez");
+    await expect(page.getByRole("dialog")).not.toContainText("Abra uma rua por vez");
+    await expect(page.getByRole("dialog")).not.toContainText("Toque na casa e confirme");
   });
 }

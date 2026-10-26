@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ComponentType } from "react";
-import { ChartPie, ChevronDown, Clock3, Hand, ListCollapse, Share2, Users } from "lucide-react";
+import { ChartPie, ChevronDown, Clock3, ListCollapse, Share2, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { HouseTile, legends, type HouseAppearance } from "./house-tile";
 import { CarIcon, PostAddIcon } from "./legacy-icons";
@@ -37,17 +37,13 @@ export function FieldHelp({ open, onOpenChange, block, theme }: {
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={theme} className="max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-md overflow-y-auto rounded-2xl">
+      <DialogContent style={theme} className="max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-md gap-3 overflow-y-auto rounded-2xl">
         <DialogTitle>{block ? "Entenda as casas" : "Ajuda das quadras"}</DialogTitle>
         <DialogDescription className="text-xs">{block ? "Reconheça as cores e os ícones." : "Acompanhe e compartilhe o trabalho."}</DialogDescription>
         {block ? <>
-          <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3">
-            <Hint Icon={Hand}>Toque na casa e confirme</Hint>
-            <Hint Icon={ListCollapse}>Abra uma rua por vez</Hint>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3" aria-label="Exemplos de casas">
+          <div className="mx-auto grid w-full max-w-xs grid-cols-3 gap-x-2 gap-y-3" aria-label="Exemplos de casas">
             {examples.map((example) => (
-              <figure key={example.label} className="flex min-w-0 flex-col items-center gap-1.5" aria-label={example.label}>
+              <figure key={example.label} className="flex min-w-0 flex-col items-center gap-1" aria-label={example.label}>
                 <div className="w-16" aria-hidden="true"><HouseTile house={example.house} reason={example.reason} timeLocked={example.timeLocked} /></div>
                 <figcaption className="text-center text-xs font-medium leading-tight text-slate-700">{example.label}</figcaption>
               </figure>

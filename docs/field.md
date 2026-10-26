@@ -156,11 +156,11 @@ Solicitar alteração abre o formulário existente para a rua selecionada. Se um
 for removida durante a sincronização, ela deixa de aparecer na seleção. Uma quadra
 vazia informa que não há ruas disponíveis.
 
-A ajuda mostra seis exemplos com números fictícios, em duas colunas: A fazer,
+A ajuda mostra seis exemplos com números fictícios, em três colunas e duas linhas: A fazer,
 Concluída, Deixar carta, Não bater, Sem rodada e Desmarcação encerrada. Os exemplos
 reutilizam o mesmo componente visual das casas e o tema atual, sem botões ou efeitos
-no banco. Instruções curtas explicam a confirmação, a abertura de uma rua por vez e
-as ações do rodapé. O ponto amarelo indica cadastro em análise; as oito siglas ficam
+no banco. As orientações abaixo dos exemplos explicam as ações do rodapé.
+O ponto amarelo indica cadastro em análise; as oito siglas ficam
 em uma seção recolhível. Na lista de quadras, a ajuda explica gráfico, compartilhamento,
 presença e validade com ícones e legendas curtas.
 
