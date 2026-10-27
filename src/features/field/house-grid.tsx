@@ -31,7 +31,7 @@ export function HouseGrid({
     );
   return (
     <section
-      className="grid grid-cols-4 gap-2 min-[420px]:grid-cols-5 sm:grid-cols-8"
+      className="flex flex-wrap gap-2"
       aria-label={`Casas de ${streetName}`}
     >
       {houses.map((house) => {
@@ -53,7 +53,7 @@ export function HouseGrid({
             disabled={(!action.allowed && !timeLocked) || pending.has(house.id) || !connected}
             aria-disabled={(!action.allowed && !timeLocked) || pending.has(house.id) || !connected}
             onClick={() => timeLocked ? toast("O prazo para desmarcar esta casa encerrou. Solicite uma correção ao responsável.", { icon: "🔒" }) : select(house)}
-            className="min-w-0 rounded-xl transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800 disabled:cursor-not-allowed"
+            className="w-max min-w-[calc((100%-1.5rem)/4)] max-w-full flex-none rounded-xl transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-800 disabled:cursor-not-allowed min-[420px]:min-w-[calc((100%-2rem)/5)] sm:min-w-[calc((100%-3.5rem)/8)]"
           >
             <HouseTile house={house} reason={action.reason} timeLocked={timeLocked} busy={pending.has(house.id)} />
           </button>

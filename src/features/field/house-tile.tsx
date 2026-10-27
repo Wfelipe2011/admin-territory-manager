@@ -58,18 +58,15 @@ export function HouseTile({ house, reason = "", timeLocked = false, busy = false
       {house.leaveLetter && !house.dontVisit && !timeLocked && (
         <Mail className="absolute right-1 top-1 h-3.5 w-3.5" aria-label="Deixar carta" />
       )}
-      {busy ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <>
-          <span className="max-w-full break-all text-xl font-semibold leading-tight">
-            {house.number}
-          </span>
-          {legends[house.legend || ""] && <span className="text-[10px]">{legends[house.legend || ""]}</span>}
-          {reason && !timeLocked && <span className="mt-1 text-[9px] leading-tight">{reason}</span>}
-          {house.status && !house.dontVisit && <Check size={12} className="absolute bottom-1 right-1" />}
-        </>
-      )}
+      {busy && <Loader2 className="absolute h-4 w-4 animate-spin" />}
+      <span className={`flex max-w-full flex-col items-center [overflow-wrap:anywhere] ${busy ? "invisible" : ""}`} aria-hidden={busy || undefined}>
+        <span className="max-w-full text-xl font-semibold leading-tight">
+          {house.number}
+        </span>
+        {legends[house.legend || ""] && <span className="text-[10px]">{legends[house.legend || ""]}</span>}
+        {reason && !timeLocked && <span className="mt-1 max-w-full text-[9px] leading-tight">{reason}</span>}
+      </span>
+      {!busy && house.status && !house.dontVisit && <Check size={12} className="absolute bottom-1 right-1" />}
     </span>
   );
 }
