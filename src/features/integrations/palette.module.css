@@ -1,0 +1,14 @@
+.palette {
+  --background: 100 25% 97%;
+  --foreground: 132 20% 18%;
+  --card: 0 0% 100%;
+  --card-foreground: 132 20% 18%;
+  --primary: 112 33% 35%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 98 45% 91%;
+  --secondary-foreground: 132 20% 18%;
+  --muted-foreground: 130 10% 35%;
+  --border: 105 23% 81%;
+  --ring: 112 33% 35%;
+  color-scheme: light;
+}

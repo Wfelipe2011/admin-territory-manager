@@ -7,6 +7,7 @@ import {
   Settings,
   ClipboardList,
   Users,
+  Plug,
 } from "lucide-react";
 
 import {
@@ -37,6 +38,7 @@ const items = [
     icon: Map,
   },
   { title: "Solicitações", url: "/gestao/solicitacoes", icon: ClipboardList },
+  { title: "Integrações", url: "/gestao/integracoes", icon: Plug },
   {
     title: "Cadastros",
     url: "/cadastro/territorio",
