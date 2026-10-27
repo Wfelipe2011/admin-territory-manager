@@ -72,8 +72,8 @@ test("Início separa totais da congregação e progresso da rodada mais recente,
   expect(state.historyReads).toBe(0);
   await page.setViewportSize({ width: 1280, height: 1000 });
   const links = page.locator('[data-sidebar="content"]').getByRole("link");
-  await expect(links).toHaveCount(6);
-  expect(await links.evaluateAll(els => els.map(el => el.textContent?.trim()))).toEqual(["Início", "Gestão de Territórios", "Solicitações", "Cadastros", "Usuários", "Configurações"]);
+  await expect(links).toHaveCount(7);
+  expect(await links.evaluateAll(els => els.map(el => el.textContent?.trim()))).toEqual(["Início", "Gestão de Territórios", "Solicitações", "Integrações", "Cadastros", "Usuários", "Configurações"]);
   for (const width of [360, 390, 430, 1280]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

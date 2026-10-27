@@ -36,6 +36,18 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Integrações com agentes
+
+As páginas `/integracoes`, `/integracoes/privacidade`, `/integracoes/termos` e
+`/integracoes/suporte` são públicas. `/gestao/integracoes` exige a sessão
+administrativa e permite consultar e revogar as próprias conexões OAuth.
+
+Configuração do MCP, permissões, pacotes e operação estão em
+[`agents-mcp.md`](../territory-manager-v2/docs/agents-mcp.md).
+Verificação de navegador: `npx playwright test -c playwright.integrations.config.ts`.
+Para incluir a conexão real local, informe `AGENT_DEMO_FILE` com a fixture privada
+gerada pelo seed da API. Os testes não devem utilizar credenciais de produção.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
