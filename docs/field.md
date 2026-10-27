@@ -181,3 +181,10 @@ presença e validade com ícones e legendas curtas.
 Os testes de apresentação cobrem os três temas e as larguras 360/390/430/1280,
 a ajuda sem marcações, a ordem do rodapé, escolha de ruas recolhidas, navegação,
 envio do formulário, seleção vazia e remoção de rua durante a escolha.
+
+Os links de publicador são separados por quadra e rodada. Compartilhar novamente
+reutiliza o link válido daquele escopo, sem renovar o prazo. Um UUID de rodada
+anterior continua válido até expirar ou ser revogado e não bloqueia novas rodadas.
+O cadastro sem rodada mantém um escopo próprio. Revogar na área de campo afeta
+somente o escopo do dirigente; a ação na listagem administrativa de uma rodada
+também fica limitada à rodada selecionada.

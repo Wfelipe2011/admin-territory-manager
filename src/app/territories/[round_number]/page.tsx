@@ -91,7 +91,7 @@ const ClientTerritories = ({ params }: { params: Promise<{ round_number: string 
       toast.error("Território não encontrado");
       return;
     }
-    const data = await axios.delete(`territories/${territoryId}/signature`);
+    const data = await axios.delete(`territories/${territoryId}/signature/${round_number}`);
     if (data.status > 299) {
       toast.error("Erro ao revogar a designação");
       return;
